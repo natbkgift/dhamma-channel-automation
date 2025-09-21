@@ -71,9 +71,13 @@ class TestTrendScoutAgent:
         assert agent.score_weights["evergreen"] == 0.25
         assert agent.score_weights["brand_fit"] == 0.20
 
-        # ตรวจสอบ content pillars
+        # ตรวจสอบ content pillars (ตาม v1 specification)
         assert "ธรรมะประยุกต์" in agent.content_pillars
-        assert "การทำสมาธิ" in agent.content_pillars
+        assert "ชาดก/นิทานสอนใจ" in agent.content_pillars
+        assert "ธรรมะสั้น" in agent.content_pillars
+        assert "เจาะลึก/ซีรีส์" in agent.content_pillars
+        assert "Q&A/ตอบคำถาม" in agent.content_pillars
+        assert "สรุปพระสูตร/หนังสือ" in agent.content_pillars
 
     def test_run_basic_functionality(self, agent, sample_input):
         """ทดสอบการรัน Agent พื้นฐาน"""

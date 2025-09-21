@@ -142,8 +142,8 @@ class TopicEntry(BaseModel):
 
     @validator("title")
     def validate_title_length(cls, v):
-        if len(v) > 60:
-            raise ValueError("ชื่อหัวข้อยาวเกิน 60 ตัวอักษร")
+        if len(v) > 34:
+            raise ValueError("ชื่อหัวข้อยาวเกิน 34 ตัวอักษร")
         return v
 
 
@@ -163,6 +163,13 @@ class MetaInfo(BaseModel):
     self_check: SelfCheck = Field(description="การตรวจสอบผลลัพธ์")
 
 
+class DiscardedDuplicate(BaseModel):
+    """หัวข้อที่ถูกตัดออกเพราะซ้ำ"""
+    
+    title: str = Field(description="ชื่อหัวข้อที่ถูกตัด")
+    reason: str = Field(description="เหตุผลที่ถูกตัด")
+
+
 class TrendScoutOutput(BaseModel):
     """Output สำหรับ TrendScoutAgent"""
 
@@ -170,7 +177,7 @@ class TrendScoutOutput(BaseModel):
         default_factory=datetime.now, description="เวลาที่สร้างผลลัพธ์"
     )
     topics: list[TopicEntry] = Field(description="หัวข้อที่แนะนำ")
-    discarded_duplicates: list[str] = Field(
+    discarded_duplicates: list[DiscardedDuplicate] = Field(
         default_factory=list, description="หัวข้อที่ถูกตัดออกเพราะซ้ำ"
     )
     meta: MetaInfo = Field(description="ข้อมูล Meta")
