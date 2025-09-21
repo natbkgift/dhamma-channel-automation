@@ -20,12 +20,12 @@ def setup_logging(
 ) -> logging.Logger:
     """
     ตั้งค่าระบบ logging สำหรับแอปพลิเคชัน
-    
+
     Args:
         log_level: ระดับการ log (DEBUG, INFO, WARNING, ERROR)
         log_file: ไฟล์สำหรับบันทึก log
         enable_rich_traceback: เปิดใช้ Rich traceback
-        
+
     Returns:
         Logger object ที่ตั้งค่าแล้ว
     """
@@ -87,10 +87,10 @@ def setup_logging(
 def get_logger(name: str) -> logging.Logger:
     """
     สร้าง logger สำหรับโมดูลเฉพาะ
-    
+
     Args:
         name: ชื่อ logger (ปกติใช้ __name__)
-        
+
     Returns:
         Logger object
     """

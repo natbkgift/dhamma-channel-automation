@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
     """
     Agent สำหรับวิเคราะห์เทรนด์และสร้างหัวข้อคอนเทนต์
-    
+
     วิธีการทำงาน:
     1. รวบรวมคำสำคัญจากแหล่งต่างๆ
     2. สร้างหัวข้อผู้สมัครจากคำสำคัญ

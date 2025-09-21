@@ -108,7 +108,7 @@ class TestPromptLoader:
     def test_load_prompt_thai_content(self):
         """ทดสอบการโหลดเนื้อหาภาษาไทย"""
         thai_content = """คุณคือ AI ผู้ช่วยสำหรับช่อง YouTube ธรรมะดีดี
-        
+
 กรุณาช่วยวิเคราะห์เทรนด์และสร้างหัวข้อคอนเทนต์ที่เข้ากับแบรนด์
 
 เป้าหมาย:

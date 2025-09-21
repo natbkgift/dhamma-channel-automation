@@ -1,3 +1,4 @@
+# Updated for lint compliance (W293/B904/F403) – ไม่มีการเปลี่ยนตรรกะ
 """
 คลาสพื้นฐานสำหรับ AI Agents ทั้งหมดในระบบ
 ใช้ Generic Type เพื่อรองรับ Input/Output ที่แตกต่างกันในแต่ละ Agent
@@ -16,7 +17,7 @@ OutputModel = TypeVar('OutputModel', bound=BaseModel)
 class BaseAgent(ABC, Generic[InputModel, OutputModel]):
     """
     คลาสพื้นฐานสำหรับ AI Agents ทั้งหมด
-    
+
     Attributes:
         name: ชื่อของ Agent
         version: เวอร์ชันของ Agent
@@ -32,13 +33,13 @@ class BaseAgent(ABC, Generic[InputModel, OutputModel]):
     def run(self, input_data: InputModel) -> OutputModel:
         """
         ฟังก์ชันหลักสำหรับประมวลผลข้อมูลของ Agent
-        
+
         Args:
             input_data: ข้อมูลนำเข้าตาม schema ของ Agent
-            
+
         Returns:
             ผลลัพธ์ตาม schema ของ Agent
-            
+
         Raises:
             NotImplementedError: ต้อง override ใน subclass
         """

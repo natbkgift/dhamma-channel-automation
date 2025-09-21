@@ -1,3 +1,4 @@
+# Updated for lint compliance (W293/B904/F403) – ไม่มีการเปลี่ยนตรรกะ
 """
 CLI หลักสำหรับระบบ Dhamma Automation
 รองรับคำสั่งต่างๆ สำหรับการรัน AI Agents
@@ -63,9 +64,9 @@ def trend_scout(
 ):
     """
     🔍 รัน TrendScoutAgent เพื่อวิเคราะห์เทรนด์และสร้างหัวข้อคอนเทนต์
-    
+
     ตัวอย่างการใช้งาน:
-    
+
     dhamma-automation trend-scout --input mock_input.json --out result.json
     """
 
@@ -98,10 +99,10 @@ def trend_scout(
 
             except json.JSONDecodeError as e:
                 console.print(f"❌ [red]ข้อผิดพลาดในไฟล์ JSON: {e}[/red]")
-                raise typer.Exit(1)
+                raise typer.Exit(1) from e
             except Exception as e:
                 console.print(f"❌ [red]ไม่สามารถโหลดข้อมูลได้: {e}[/red]")
-                raise typer.Exit(1)
+                raise typer.Exit(1) from e
 
             # สร้าง Agent และรัน
             task2 = progress.add_task("🤖 กำลังวิเคราะห์เทรนด์...", total=100)
@@ -120,7 +121,7 @@ def trend_scout(
                 console.print(f"❌ [red]เกิดข้อผิดพลาดในการวิเคราะห์: {e}[/red]")
                 if verbose:
                     console.print_exception()
-                raise typer.Exit(1)
+                raise typer.Exit(1) from e
 
             # บันทึกผลลัพธ์
             task3 = progress.add_task("💾 กำลังบันทึกผลลัพธ์...", total=100)
@@ -148,7 +149,7 @@ def trend_scout(
 
             except Exception as e:
                 console.print(f"❌ [red]ไม่สามารถบันทึกผลลัพธ์ได้: {e}[/red]")
-                raise typer.Exit(1)
+                raise typer.Exit(1) from e
 
         # แสดงตารางผลลัพธ์
         if show_table and result.topics:
@@ -169,11 +170,11 @@ def trend_scout(
 
     except KeyboardInterrupt:
         console.print("\n⏹️  หยุดการทำงานโดยผู้ใช้")
-        raise typer.Exit(0)
+        raise typer.Exit(0) from None
     except Exception as e:
         logger.error(f"เกิดข้อผิดพลาดไม่คาดคิด: {e}")
         console.print(f"❌ [red]เกิดข้อผิดพลาดไม่คาดคิด: {e}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 def _display_topics_table(topics):

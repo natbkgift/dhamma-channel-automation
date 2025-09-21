@@ -8,10 +8,10 @@ import re
 def clean_text(text: str) -> str:
     """
     ทำความสะอาดข้อความ - ลบช่องว่างเกิน, ตัวอักษรพิเศษ
-    
+
     Args:
         text: ข้อความที่ต้องการทำความสะอาด
-        
+
     Returns:
         ข้อความที่ทำความสะอาดแล้ว
     """
@@ -31,12 +31,12 @@ def clean_text(text: str) -> str:
 def truncate_text(text: str, max_length: int, suffix: str = "...") -> str:
     """
     ตัดข้อความให้มีความยาวไม่เกินที่กำหนด
-    
+
     Args:
         text: ข้อความต้นฉบับ
         max_length: ความยาวสูงสุด
         suffix: ข้อความต่อท้าย (ถ้าตัด)
-        
+
     Returns:
         ข้อความที่ตัดแล้ว
     """
@@ -58,10 +58,10 @@ def truncate_text(text: str, max_length: int, suffix: str = "...") -> str:
 def extract_keywords(text: str) -> list[str]:
     """
     แยกคำสำคัญจากข้อความ (ง่ายๆ ด้วยการแยกคำ)
-    
+
     Args:
         text: ข้อความที่ต้องการแยกคำ
-        
+
     Returns:
         รายการคำสำคัญ
     """
@@ -92,11 +92,11 @@ def extract_keywords(text: str) -> list[str]:
 def is_thai_text(text: str, threshold: float = 0.5) -> bool:
     """
     ตรวจสอบว่าข้อความเป็นภาษาไทยหรือไม่
-    
+
     Args:
         text: ข้อความที่ต้องการตรวจสอบ
         threshold: สัดส่วนต่ำสุดของอักขระไทย (0.0 - 1.0)
-        
+
     Returns:
         True ถ้าเป็นภาษาไทย
     """
@@ -126,12 +126,12 @@ def create_youtube_title(
 ) -> str:
     """
     สร้างชื่อวิดีโอ YouTube ที่เหมาะสม
-    
+
     Args:
         base_text: ข้อความพื้นฐาน
         max_length: ความยาวสูงสุด (YouTube แนะนำ 60 ตัวอักษร)
         keywords: คำสำคัญที่ต้องการใส่
-        
+
     Returns:
         ชื่อวิดีโอที่ปรับแต่งแล้ว
     """
