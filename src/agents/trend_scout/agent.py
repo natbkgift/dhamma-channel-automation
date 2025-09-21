@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
     """
     Agent สำหรับวิเคราะห์เทรนด์และสร้างหัวข้อคอนเทนต์
-    
+
     วิธีการทำงาน:
     1. รวบรวมคำสำคัญจากแหล่งต่างๆ
     2. สร้างหัวข้อผู้สมัครจากคำสำคัญ
@@ -48,7 +48,7 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
         super().__init__(
             name="TrendScoutAgent",
             version="1.0.0",
-            description="วิเคราะห์เทรนด์และสร้างหัวข้อคอนเทนต์สำหรับช่อง YouTube ธรรมะดีดี"
+            description="วิเคราะห์เทรนด์และสร้างหัวข้อคอนเทนต์สำหรับช่อง YouTube ธรรมะดีดี",
         )
 
         # น้ำหนักสำหรับการคำนวณคะแนนรวม
@@ -56,7 +56,7 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
             "search_intent": 0.30,
             "freshness": 0.25,
             "evergreen": 0.25,
-            "brand_fit": 0.20
+            "brand_fit": 0.20,
         }
 
         # เสาหลักเนื้อหาของช่อง
@@ -66,7 +66,7 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
             "จิตใจและความสุข",
             "วิธีรับมือความเครียด",
             "การปล่อยวาง",
-            "พุทธธรรมในชีวิตประจำวัน"
+            "พุทธธรรมในชีวิตประจำวัน",
         ]
 
     def run(self, input_data: TrendScoutInput) -> TrendScoutOutput:
@@ -101,7 +101,7 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
                 generated_at=datetime.now(),
                 topics=final_topics,
                 discarded_duplicates=[],  # สำหรับอนาคต
-                meta=meta_info
+                meta=meta_info,
             )
 
             logger.info(f"สร้างหัวข้อสำเร็จ {len(final_topics)} หัวข้อ")
@@ -149,21 +149,21 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
         # สร้างหัวข้อจากคำสำคัญเดี่ยว
         for keyword in keywords:
             title = self._create_title_from_keyword(keyword)
-            candidates.append({
-                "title": title,
-                "raw_keywords": [keyword],
-                "source": "single_keyword"
-            })
+            candidates.append(
+                {"title": title, "raw_keywords": [keyword], "source": "single_keyword"}
+            )
 
         # สร้างหัวข้อจากการรวมคำสำคัญ
         for i, kw1 in enumerate(keywords):
-            for kw2 in keywords[i+1:]:
+            for kw2 in keywords[i + 1 :]:
                 combined_title = self._create_title_from_keywords([kw1, kw2])
-                candidates.append({
-                    "title": combined_title,
-                    "raw_keywords": [kw1, kw2],
-                    "source": "combined_keywords"
-                })
+                candidates.append(
+                    {
+                        "title": combined_title,
+                        "raw_keywords": [kw1, kw2],
+                        "source": "combined_keywords",
+                    }
+                )
 
         # ลบหัวข้อซ้ำและปรับความยาว
         unique_candidates = []
@@ -192,7 +192,7 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
             f"การ{keyword}แบบพุทธ",
             f"{keyword}ใจให้เบา",
             f"พ้น{keyword}ด้วยธรรม",
-            f"{keyword}อย่างสมดุล"
+            f"{keyword}อย่างสมดุล",
         ]
 
         # เลือกรูปแบบตาม hash ของคำสำคัญ (deterministic)
@@ -225,9 +225,7 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
         return " ".join(keywords[:3])  # ใช้แค่ 3 คำแรก
 
     def _score_and_rank_topics(
-        self,
-        candidates: list[dict[str, Any]],
-        input_data: TrendScoutInput
+        self, candidates: list[dict[str, Any]], input_data: TrendScoutInput
     ) -> list[TopicEntry]:
         """คำนวณคะแนนและจัดอันดับหัวข้อ"""
 
@@ -242,9 +240,9 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
                     "search_intent": scores["search_intent"],
                     "freshness": scores["freshness"],
                     "evergreen": scores["evergreen"],
-                    "brand_fit": scores["brand_fit"]
+                    "brand_fit": scores["brand_fit"],
                 },
-                self.score_weights
+                self.score_weights,
             )
 
             scores["composite"] = composite_score
@@ -264,16 +262,14 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
                 "reason": self._generate_reason(scores, candidate),
                 "raw_keywords": candidate["raw_keywords"],
                 "similar_to": [],
-                "risk_flags": []
+                "risk_flags": [],
             }
 
             scored_topics.append(topic_data)
 
         # จัดอันดับตามคะแนนรวม
         sorted_topics_data = sorted(
-            scored_topics,
-            key=lambda t: t["scores"]["composite"],
-            reverse=True
+            scored_topics, key=lambda t: t["scores"]["composite"], reverse=True
         )
 
         # สร้าง TopicEntry พร้อมอันดับ
@@ -288,16 +284,14 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
                 reason=topic_data["reason"],
                 raw_keywords=topic_data["raw_keywords"],
                 similar_to=topic_data["similar_to"],
-                risk_flags=topic_data["risk_flags"]
+                risk_flags=topic_data["risk_flags"],
             )
             final_topics.append(topic)
 
         return final_topics
 
     def _calculate_topic_scores(
-        self,
-        candidate: dict[str, Any],
-        input_data: TrendScoutInput
+        self, candidate: dict[str, Any], input_data: TrendScoutInput
     ) -> dict[str, float]:
         """คำนวณคะแนนในแต่ละมิติ"""
 
@@ -308,7 +302,9 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
         title_hash = int(hashlib.md5(title.encode()).hexdigest(), 16)
 
         # Search Intent Score (ความตั้งใจค้นหา)
-        search_intent = self._calculate_search_intent_score(keywords, input_data, title_hash)
+        search_intent = self._calculate_search_intent_score(
+            keywords, input_data, title_hash
+        )
 
         # Freshness Score (ความใหม่)
         freshness = self._calculate_freshness_score(keywords, input_data, title_hash)
@@ -323,14 +319,11 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
             "search_intent": search_intent,
             "freshness": freshness,
             "evergreen": evergreen,
-            "brand_fit": brand_fit
+            "brand_fit": brand_fit,
         }
 
     def _calculate_search_intent_score(
-        self,
-        keywords: list[str],
-        input_data: TrendScoutInput,
-        seed: int
+        self, keywords: list[str], input_data: TrendScoutInput, seed: int
     ) -> float:
         """คำนวณคะแนนความตั้งใจค้นหา"""
 
@@ -354,10 +347,7 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
         return min(base_score, 1.0)
 
     def _calculate_freshness_score(
-        self,
-        keywords: list[str],
-        input_data: TrendScoutInput,
-        seed: int
+        self, keywords: list[str], input_data: TrendScoutInput, seed: int
     ) -> float:
         """คำนวณคะแนนความใหม่"""
 
@@ -379,8 +369,17 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
 
         # คำที่ทำให้เนื้อหาคงทน
         evergreen_words = [
-            "วิธี", "การ", "หลัก", "ธรรม", "สติ", "สมาธิ",
-            "ใจ", "จิตใจ", "ความสุข", "ปล่อยวาง", "เครียด"
+            "วิธี",
+            "การ",
+            "หลัก",
+            "ธรรม",
+            "สติ",
+            "สมาธิ",
+            "ใจ",
+            "จิตใจ",
+            "ความสุข",
+            "ปล่อยวาง",
+            "เครียด",
         ]
 
         base_score = random.uniform(0.4, 0.7)
@@ -393,10 +392,7 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
         return min(base_score, 1.0)
 
     def _calculate_brand_fit_score(
-        self,
-        title: str,
-        keywords: list[str],
-        seed: int
+        self, title: str, keywords: list[str], seed: int
     ) -> float:
         """คำนวณคะแนนความเข้ากับแบรนด์"""
 
@@ -404,8 +400,18 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
 
         # คำที่เข้ากับแบรนด์ธรรมะดีดี
         brand_words = [
-            "ธรรม", "ธรรมะ", "พุทธ", "สมาธิ", "สติ", "วิปัสสนา",
-            "ใจ", "จิตใจ", "ความสุข", "สงบ", "สมดุล", "ปล่อยวาง"
+            "ธรรม",
+            "ธรรมะ",
+            "พุทธ",
+            "สมาธิ",
+            "สติ",
+            "วิปัสสนา",
+            "ใจ",
+            "จิตใจ",
+            "ความสุข",
+            "สงบ",
+            "สมดุล",
+            "ปล่อยวาง",
         ]
 
         base_score = random.uniform(0.5, 0.8)
@@ -428,7 +434,7 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
             "จิตใจและความสุข": ["ใจ", "จิตใจ", "ความสุข", "ดีใจ", "เศร้า"],
             "วิธีรับมือความเครียด": ["เครียด", "กังวล", "ความกดดัน", "รับมือ"],
             "การปล่อยวาง": ["ปล่อยวาง", "ยึดติด", "มอบหมาย", "ยอมรับ"],
-            "พุทธธรรมในชีวิตประจำวัน": ["พุทธ", "ธรรม", "ธรรมะ", "ประจำวัน"]
+            "พุทธธรรมในชีวิตประจำวัน": ["พุทธ", "ธรรม", "ธรรมะ", "ประจำวัน"],
         }
 
         for pillar, keywords in pillar_keywords.items():
@@ -439,9 +445,7 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
         return "ธรรมะประยุกต์"
 
     def _predict_views(
-        self,
-        scores: dict[str, float],
-        candidate: dict[str, Any]
+        self, scores: dict[str, float], candidate: dict[str, Any]
     ) -> int:
         """คาดการณ์จำนวนการดู 14 วัน"""
 
@@ -463,9 +467,7 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
         return max(int(base_views * noise), 1000)
 
     def _generate_reason(
-        self,
-        scores: dict[str, float],
-        candidate: dict[str, Any]
+        self, scores: dict[str, float], candidate: dict[str, Any]
     ) -> str:
         """สร้างเหตุผลที่แนะนำหัวข้อ"""
 
@@ -489,22 +491,22 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
         return " + ".join(reasons)
 
     def _create_meta_info(
-        self,
-        candidates: list[dict[str, Any]],
-        final_topics: list[TopicEntry]
+        self, candidates: list[dict[str, Any]], final_topics: list[TopicEntry]
     ) -> MetaInfo:
         """สร้างข้อมูล metadata"""
 
         # ตรวจสอบความถูกต้องของผลลัพธ์
         all_scores = {}
         for topic in final_topics:
-            all_scores.update({
-                f"{topic.title}_search_intent": topic.scores.search_intent,
-                f"{topic.title}_freshness": topic.scores.freshness,
-                f"{topic.title}_evergreen": topic.scores.evergreen,
-                f"{topic.title}_brand_fit": topic.scores.brand_fit,
-                f"{topic.title}_composite": topic.scores.composite,
-            })
+            all_scores.update(
+                {
+                    f"{topic.title}_search_intent": topic.scores.search_intent,
+                    f"{topic.title}_freshness": topic.scores.freshness,
+                    f"{topic.title}_evergreen": topic.scores.evergreen,
+                    f"{topic.title}_brand_fit": topic.scores.brand_fit,
+                    f"{topic.title}_composite": topic.scores.composite,
+                }
+            )
 
         score_range_valid = validate_score_range(all_scores, 0.0, 1.0)
 
@@ -517,7 +519,6 @@ class TrendScoutAgent(BaseAgent[TrendScoutInput, TrendScoutOutput]):
             prediction_method="median_trending * scaling_ratio",
             adjustment_notes="ปรับคะแนนตาม brand fit และ evergreen score",
             self_check=SelfCheck(
-                duplicate_ok=duplicate_ok,
-                score_range_valid=score_range_valid
-            )
+                duplicate_ok=duplicate_ok, score_range_valid=score_range_valid
+            ),
         )

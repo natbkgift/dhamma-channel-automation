@@ -16,7 +16,7 @@ class GoogleTrendItem(BaseModel):
     score_series: list[int] = Field(description="คะแนนเทรนด์ในแต่ละช่วงเวลา")
     region: str = Field(default="TH", description="ภูมิภาค")
 
-    @validator('score_series')
+    @validator("score_series")
     def validate_scores(cls, v):
         if not v:
             return v
@@ -34,13 +34,13 @@ class YTTrendingItem(BaseModel):
     age_days: int = Field(description="อายุของวิดีโอ (วัน)")
     keywords: list[str] = Field(default_factory=list, description="คำสำคัญที่สกัดได้")
 
-    @validator('views_est')
+    @validator("views_est")
     def validate_views(cls, v):
         if v < 0:
             raise ValueError("จำนวนการดูต้องไม่เป็นลบ")
         return v
 
-    @validator('age_days')
+    @validator("age_days")
     def validate_age(cls, v):
         if v < 0:
             raise ValueError("อายุวิดีโอต้องไม่เป็นลบ")
@@ -54,7 +54,7 @@ class CompetitorComment(BaseModel):
     comment: str = Field(description="ความคิดเห็น")
     likes: int = Field(default=0, description="จำนวน likes")
 
-    @validator('likes')
+    @validator("likes")
     def validate_likes(cls, v):
         if v < 0:
             raise ValueError("จำนวน likes ต้องไม่เป็นลบ")
@@ -68,7 +68,7 @@ class EmbeddingSimilarGroup(BaseModel):
     keywords: list[str] = Field(description="คำในกลุ่ม")
     similarity_score: float = Field(description="คะแนนความคล้าย")
 
-    @validator('similarity_score')
+    @validator("similarity_score")
     def validate_similarity(cls, v):
         if not 0 <= v <= 1:
             raise ValueError("Similarity score ต้องอยู่ระหว่าง 0-1")
@@ -80,23 +80,19 @@ class TrendScoutInput(BaseModel):
 
     keywords: list[str] = Field(description="คำสำคัญที่ต้องการวิเคราะห์")
     google_trends: list[GoogleTrendItem] = Field(
-        default_factory=list,
-        description="ข้อมูลเทรนด์จาก Google"
+        default_factory=list, description="ข้อมูลเทรนด์จาก Google"
     )
     youtube_trending_raw: list[YTTrendingItem] = Field(
-        default_factory=list,
-        description="ข้อมูลวิดีโอเทรนด์ใน YouTube"
+        default_factory=list, description="ข้อมูลวิดีโอเทรนด์ใน YouTube"
     )
     competitor_comments: list[CompetitorComment] = Field(
-        default_factory=list,
-        description="ความคิดเห็นจากคู่แข่ง"
+        default_factory=list, description="ความคิดเห็นจากคู่แข่ง"
     )
     embeddings_similar_groups: list[EmbeddingSimilarGroup] = Field(
-        default_factory=list,
-        description="กลุ่มคำที่คล้ายกัน"
+        default_factory=list, description="กลุ่มคำที่คล้ายกัน"
     )
 
-    @validator('keywords')
+    @validator("keywords")
     def validate_keywords(cls, v):
         if not v:
             raise ValueError("ต้องมีคำสำคัญอย่างน้อย 1 คำ")
@@ -112,7 +108,7 @@ class TopicScore(BaseModel):
     brand_fit: float = Field(description="ความเข้ากับแบรนด์")
     composite: float = Field(description="คะแนนรวม")
 
-    @validator('search_intent', 'freshness', 'evergreen', 'brand_fit', 'composite')
+    @validator("search_intent", "freshness", "evergreen", "brand_fit", "composite")
     def validate_score_range(cls, v):
         if not 0 <= v <= 1:
             raise ValueError("คะแนนต้องอยู่ระหว่าง 0-1")
@@ -132,19 +128,19 @@ class TopicEntry(BaseModel):
     similar_to: list[str] = Field(default_factory=list, description="คล้ายกับหัวข้ือื่น")
     risk_flags: list[str] = Field(default_factory=list, description="ธงเตือนความเสี่ยง")
 
-    @validator('rank')
+    @validator("rank")
     def validate_rank(cls, v):
         if v < 1:
             raise ValueError("อันดับต้องเป็นจำนวนเต็มบวก")
         return v
 
-    @validator('predicted_14d_views')
+    @validator("predicted_14d_views")
     def validate_predicted_views(cls, v):
         if v < 0:
             raise ValueError("การดูคาดการณ์ต้องไม่เป็นลบ")
         return v
 
-    @validator('title')
+    @validator("title")
     def validate_title_length(cls, v):
         if len(v) > 60:
             raise ValueError("ชื่อหัวข้อยาวเกิน 60 ตัวอักษร")
@@ -170,21 +166,22 @@ class MetaInfo(BaseModel):
 class TrendScoutOutput(BaseModel):
     """Output สำหรับ TrendScoutAgent"""
 
-    generated_at: datetime = Field(default_factory=datetime.now, description="เวลาที่สร้างผลลัพธ์")
+    generated_at: datetime = Field(
+        default_factory=datetime.now, description="เวลาที่สร้างผลลัพธ์"
+    )
     topics: list[TopicEntry] = Field(description="หัวข้อที่แนะนำ")
     discarded_duplicates: list[str] = Field(
-        default_factory=list,
-        description="หัวข้อที่ถูกตัดออกเพราะซ้ำ"
+        default_factory=list, description="หัวข้อที่ถูกตัดออกเพราะซ้ำ"
     )
     meta: MetaInfo = Field(description="ข้อมูล Meta")
 
-    @validator('topics')
+    @validator("topics")
     def validate_topics_limit(cls, v):
         if len(v) > 15:
             raise ValueError("จำนวนหัวข้อต้องไม่เกิน 15 หัวข้อ")
         return v
 
-    @validator('topics')
+    @validator("topics")
     def validate_topics_sorted(cls, v):
         if len(v) > 1:
             scores = [topic.scores.composite for topic in v]

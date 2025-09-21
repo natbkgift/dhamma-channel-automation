@@ -8,19 +8,18 @@ import numpy as np
 
 
 def calculate_composite_score(
-    scores: dict[str, float],
-    weights: dict[str, float]
+    scores: dict[str, float], weights: dict[str, float]
 ) -> float:
     """
     คำนวณคะแนนรวม (composite score) จากคะแนนย่อยและน้ำหนัก
-    
+
     Args:
         scores: Dictionary ของคะแนนย่อย
         weights: Dictionary ของน้ำหนักสำหรับแต่ละคะแนน
-        
+
     Returns:
         คะแนนรวมที่คำนวณได้
-        
+
     Example:
         >>> scores = {"search_intent": 0.8, "freshness": 0.6}
         >>> weights = {"search_intent": 0.5, "freshness": 0.5}
@@ -43,15 +42,17 @@ def calculate_composite_score(
     return total_weighted_score / total_weights
 
 
-def normalize_scores(scores: list[float], min_val: float = 0.0, max_val: float = 1.0) -> list[float]:
+def normalize_scores(
+    scores: list[float], min_val: float = 0.0, max_val: float = 1.0
+) -> list[float]:
     """
     ปรับคะแนนให้อยู่ในช่วงที่กำหนด (normalization)
-    
+
     Args:
         scores: รายการคะแนนที่ต้องการปรับ
         min_val: ค่าต่ำสุดที่ต้องการ
         max_val: ค่าสูงสุดที่ต้องการ
-        
+
     Returns:
         รายการคะแนนที่ปรับแล้ว
     """
@@ -77,18 +78,16 @@ def normalize_scores(scores: list[float], min_val: float = 0.0, max_val: float =
 
 
 def rank_items_by_score(
-    items: list[dict[str, Any]],
-    score_key: str = "composite",
-    reverse: bool = True
+    items: list[dict[str, Any]], score_key: str = "composite", reverse: bool = True
 ) -> list[dict[str, Any]]:
     """
     จัดอันดับรายการตามคะแนน
-    
+
     Args:
         items: รายการที่ต้องการจัดอันดับ
         score_key: key ของคะแนนที่ใช้จัดอันดับ
         reverse: True = สูงไปต่ำ, False = ต่ำไปสูง
-        
+
     Returns:
         รายการที่จัดอันดับแล้ว พร้อมเพิ่ม rank
     """
@@ -97,11 +96,7 @@ def rank_items_by_score(
         return []
 
     # จัดเรียงตามคะแนน
-    sorted_items = sorted(
-        items,
-        key=lambda x: x.get(score_key, 0),
-        reverse=reverse
-    )
+    sorted_items = sorted(items, key=lambda x: x.get(score_key, 0), reverse=reverse)
 
     # เพิ่ม rank
     for i, item in enumerate(sorted_items, 1):
@@ -111,18 +106,16 @@ def rank_items_by_score(
 
 
 def validate_score_range(
-    scores: dict[str, float],
-    min_val: float = 0.0,
-    max_val: float = 1.0
+    scores: dict[str, float], min_val: float = 0.0, max_val: float = 1.0
 ) -> bool:
     """
     ตรวจสอบว่าคะแนนทั้งหมดอยู่ในช่วงที่ถูกต้อง
-    
+
     Args:
         scores: Dictionary ของคะแนน
         min_val: ค่าต่ำสุดที่ยอมรับได้
         max_val: ค่าสูงสุดที่ยอมรับได้
-        
+
     Returns:
         True ถ้าคะแนนทั้งหมดอยู่ในช่วงที่ถูกต้อง
     """

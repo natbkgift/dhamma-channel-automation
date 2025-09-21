@@ -26,19 +26,19 @@ class TestCalculateCompositeScore:
             "search_intent": 0.8,
             "freshness": 0.6,
             "evergreen": 0.7,
-            "brand_fit": 0.9
+            "brand_fit": 0.9,
         }
         weights = {
             "search_intent": 0.3,
             "freshness": 0.25,
             "evergreen": 0.25,
-            "brand_fit": 0.2
+            "brand_fit": 0.2,
         }
 
         result = calculate_composite_score(scores, weights)
 
         # คำนวณค่าที่คาดหวัง
-        expected = (0.8 * 0.3 + 0.6 * 0.25 + 0.7 * 0.25 + 0.9 * 0.2)
+        expected = 0.8 * 0.3 + 0.6 * 0.25 + 0.7 * 0.25 + 0.9 * 0.2
 
         assert abs(result - expected) < 0.001
         assert 0 <= result <= 1
@@ -77,13 +77,13 @@ class TestCalculateCompositeScore:
             "search_intent": 0.82,
             "freshness": 0.74,
             "evergreen": 0.65,
-            "brand_fit": 0.93
+            "brand_fit": 0.93,
         }
         weights = {
             "search_intent": 0.30,
             "freshness": 0.25,
             "evergreen": 0.25,
-            "brand_fit": 0.20
+            "brand_fit": 0.20,
         }
 
         result = calculate_composite_score(scores, weights)
@@ -153,7 +153,7 @@ class TestRankItemsByScore:
         items = [
             {"name": "A", "score": 0.7},
             {"name": "B", "score": 0.9},
-            {"name": "C", "score": 0.5}
+            {"name": "C", "score": 0.5},
         ]
 
         result = rank_items_by_score(items, "score")
@@ -173,7 +173,7 @@ class TestRankItemsByScore:
         items = [
             {"name": "A", "value": 100},
             {"name": "B", "value": 50},
-            {"name": "C", "value": 200}
+            {"name": "C", "value": 200},
         ]
 
         result = rank_items_by_score(items, "value", reverse=False)
@@ -193,7 +193,7 @@ class TestRankItemsByScore:
         items = [
             {"name": "A", "score": 0.8},
             {"name": "B"},  # ไม่มี score
-            {"name": "C", "score": 0.6}
+            {"name": "C", "score": 0.6},
         ]
 
         result = rank_items_by_score(items, "score")
@@ -207,7 +207,7 @@ class TestRankItemsByScore:
         items = [
             {"title": "หัวข้อ A", "composite": 0.785},
             {"title": "หัวข้อ B", "composite": 0.892},
-            {"title": "หัวข้อ C", "composite": 0.634}
+            {"title": "หัวข้อ C", "composite": 0.634},
         ]
 
         result = rank_items_by_score(items, "composite")
@@ -231,7 +231,7 @@ class TestValidateScoreRange:
             "search_intent": 0.8,
             "freshness": 0.0,
             "evergreen": 1.0,
-            "brand_fit": 0.5
+            "brand_fit": 0.5,
         }
 
         result = validate_score_range(scores, 0.0, 1.0)
@@ -242,7 +242,7 @@ class TestValidateScoreRange:
         scores = {
             "search_intent": 0.8,
             "freshness": 1.2,  # เกิน 1.0
-            "evergreen": 0.5
+            "evergreen": 0.5,
         }
 
         result = validate_score_range(scores, 0.0, 1.0)
@@ -253,7 +253,7 @@ class TestValidateScoreRange:
         scores = {
             "search_intent": 0.8,
             "freshness": -0.1,  # ต่ำกว่า 0.0
-            "evergreen": 0.5
+            "evergreen": 0.5,
         }
 
         result = validate_score_range(scores, 0.0, 1.0)
@@ -264,7 +264,7 @@ class TestValidateScoreRange:
         scores = {
             "search_intent": 0.8,
             "freshness": "high",  # ไม่ใช่ตัวเลข
-            "evergreen": 0.5
+            "evergreen": 0.5,
         }
 
         result = validate_score_range(scores, 0.0, 1.0)
@@ -272,11 +272,7 @@ class TestValidateScoreRange:
 
     def test_custom_range(self):
         """ทดสอบการใช้ช่วงค่าที่กำหนดเอง"""
-        scores = {
-            "score1": 5,
-            "score2": 10,
-            "score3": 7
-        }
+        scores = {"score1": 5, "score2": 10, "score3": 7}
 
         result = validate_score_range(scores, 0, 10)
         assert result is True
@@ -299,7 +295,7 @@ class TestScoringIntegration:
         raw_scores = [
             {"search": 0.8, "fresh": 0.6, "evergreen": 0.7, "brand": 0.9},
             {"search": 0.6, "fresh": 0.9, "evergreen": 0.5, "brand": 0.7},
-            {"search": 0.9, "fresh": 0.4, "evergreen": 0.8, "brand": 0.8}
+            {"search": 0.9, "fresh": 0.4, "evergreen": 0.8, "brand": 0.8},
         ]
 
         weights = {"search": 0.3, "fresh": 0.25, "evergreen": 0.25, "brand": 0.2}
@@ -308,12 +304,14 @@ class TestScoringIntegration:
         items = []
         for i, scores in enumerate(raw_scores):
             composite = calculate_composite_score(scores, weights)
-            items.append({
-                "id": i,
-                "title": f"หัวข้อ {i+1}",
-                "composite": composite,
-                "scores": scores
-            })
+            items.append(
+                {
+                    "id": i,
+                    "title": f"หัวข้อ {i + 1}",
+                    "composite": composite,
+                    "scores": scores,
+                }
+            )
 
         # จัดอันดับ
         ranked_items = rank_items_by_score(items, "composite")

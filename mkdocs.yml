@@ -96,8 +96,6 @@ markdown_extensions:
 plugins:
   - search:
       lang: th
-  - minify:
-      minify_html: true
 
 # Extra
 extra:

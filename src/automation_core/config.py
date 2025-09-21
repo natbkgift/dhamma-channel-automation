@@ -3,7 +3,6 @@
 รองรับการโหลดจากไฟล์ .env และ environment variables
 """
 
-
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
@@ -23,7 +22,9 @@ class AppConfig(BaseSettings):
     # API Keys (สำหรับอนาคต)
     openai_api_key: str | None = Field(default=None, description="OpenAI API Key")
     youtube_api_key: str | None = Field(default=None, description="YouTube API Key")
-    google_trends_api_key: str | None = Field(default=None, description="Google Trends API Key")
+    google_trends_api_key: str | None = Field(
+        default=None, description="Google Trends API Key"
+    )
 
     # Database (สำหรับอนาคต)
     database_url: str | None = Field(default=None, description="Database URL")

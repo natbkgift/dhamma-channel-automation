@@ -27,37 +27,31 @@ class TestTrendScoutAgent:
             keywords=["ปล่อยวาง", "นอนไม่หลับ", "เครียด"],
             google_trends=[
                 GoogleTrendItem(
-                    term="ปล่อยวาง",
-                    score_series=[54, 60, 67, 72, 75],
-                    region="TH"
+                    term="ปล่อยวาง", score_series=[54, 60, 67, 72, 75], region="TH"
                 ),
                 GoogleTrendItem(
-                    term="เครียด",
-                    score_series=[78, 82, 79, 85, 88],
-                    region="TH"
-                )
+                    term="เครียด", score_series=[78, 82, 79, 85, 88], region="TH"
+                ),
             ],
             youtube_trending_raw=[
                 YTTrendingItem(
                     title="นอนยังไงให้ใจหยุดฟุ้ง",
                     views_est=230000,
                     age_days=2,
-                    keywords=["นอน", "ฟุ้งซ่าน"]
+                    keywords=["นอน", "ฟุ้งซ่าน"],
                 ),
                 YTTrendingItem(
                     title="วิธีรับมือความเครียด",
                     views_est=180000,
                     age_days=5,
-                    keywords=["เครียด", "รับมือ"]
-                )
+                    keywords=["เครียด", "รับมือ"],
+                ),
             ],
             competitor_comments=[
                 CompetitorComment(
-                    channel="คู่เทียบA",
-                    comment="เครียดนอนไม่หลับทำยังไง",
-                    likes=12
+                    channel="คู่เทียบA", comment="เครียดนอนไม่หลับทำยังไง", likes=12
                 )
-            ]
+            ],
         )
 
     @pytest.fixture
@@ -89,9 +83,9 @@ class TestTrendScoutAgent:
         assert isinstance(result, TrendScoutOutput)
 
         # ตรวจสอบ fields หลัก
-        assert hasattr(result, 'generated_at')
-        assert hasattr(result, 'topics')
-        assert hasattr(result, 'meta')
+        assert hasattr(result, "generated_at")
+        assert hasattr(result, "topics")
+        assert hasattr(result, "meta")
 
         # ตรวจสอบเวลาที่สร้าง
         assert isinstance(result.generated_at, datetime)
@@ -106,13 +100,13 @@ class TestTrendScoutAgent:
 
         for topic in result.topics:
             # ตรวจสอบ fields หลัก
-            assert hasattr(topic, 'rank')
-            assert hasattr(topic, 'title')
-            assert hasattr(topic, 'pillar')
-            assert hasattr(topic, 'predicted_14d_views')
-            assert hasattr(topic, 'scores')
-            assert hasattr(topic, 'reason')
-            assert hasattr(topic, 'raw_keywords')
+            assert hasattr(topic, "rank")
+            assert hasattr(topic, "title")
+            assert hasattr(topic, "pillar")
+            assert hasattr(topic, "predicted_14d_views")
+            assert hasattr(topic, "scores")
+            assert hasattr(topic, "reason")
+            assert hasattr(topic, "raw_keywords")
 
             # ตรวจสอบประเภทข้อมูล
             assert isinstance(topic.rank, int)
@@ -160,9 +154,9 @@ class TestTrendScoutAgent:
         meta = result.meta
 
         # ตรวจสอบ fields หลัก
-        assert hasattr(meta, 'total_candidates_considered')
-        assert hasattr(meta, 'prediction_method')
-        assert hasattr(meta, 'self_check')
+        assert hasattr(meta, "total_candidates_considered")
+        assert hasattr(meta, "prediction_method")
+        assert hasattr(meta, "self_check")
 
         # ตรวจสอบค่า
         assert meta.total_candidates_considered > 0
@@ -170,8 +164,8 @@ class TestTrendScoutAgent:
         assert len(meta.prediction_method) > 0
 
         # ตรวจสอบ self_check
-        assert hasattr(meta.self_check, 'duplicate_ok')
-        assert hasattr(meta.self_check, 'score_range_valid')
+        assert hasattr(meta.self_check, "duplicate_ok")
+        assert hasattr(meta.self_check, "score_range_valid")
         assert isinstance(meta.self_check.duplicate_ok, bool)
         assert isinstance(meta.self_check.score_range_valid, bool)
 
@@ -231,7 +225,7 @@ class TestTrendScoutWithMockData:
 
         if mock_file.exists():
             # โหลดข้อมูล
-            with open(mock_file, encoding='utf-8') as f:
+            with open(mock_file, encoding="utf-8") as f:
                 mock_data = json.load(f)
 
             # แปลงเป็น Input model
