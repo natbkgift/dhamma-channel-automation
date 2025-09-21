@@ -25,7 +25,7 @@ app = typer.Typer(
     name="dhamma-automation",
     help="🙏 ระบบอัตโนมัติสำหรับการผลิตคอนเทนต์ช่อง YouTube ธรรมะดีดี",
     add_completion=False,
-    rich_markup_mode="rich"
+    rich_markup_mode="rich",
 )
 
 # Console สำหรับแสดงผล
@@ -41,31 +41,19 @@ def trend_scout(
         "-i",
         help="📁 ไฟล์ JSON ข้อมูลนำเข้าสำหรับ TrendScoutAgent",
         exists=True,
-        readable=True
+        readable=True,
     ),
     output_file: Path = typer.Option(
-        "output/trend_scout_result.json",
-        "--out",
-        "-o",
-        help="📄 ไฟล์ผลลัพธ์ (JSON)"
+        "output/trend_scout_result.json", "--out", "-o", help="📄 ไฟล์ผลลัพธ์ (JSON)"
     ),
-    show_table: bool = typer.Option(
-        True,
-        "--table/--no-table",
-        help="แสดงตารางผลลัพธ์"
-    ),
-    verbose: bool = typer.Option(
-        False,
-        "--verbose",
-        "-v",
-        help="แสดงข้อมูลละเอียด"
-    )
+    show_table: bool = typer.Option(True, "--table/--no-table", help="แสดงตารางผลลัพธ์"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="แสดงข้อมูลละเอียด"),
 ):
     """
     🔍 รัน TrendScoutAgent เพื่อวิเคราะห์เทรนด์และสร้างหัวข้อคอนเทนต์
-    
+
     ตัวอย่างการใช้งาน:
-    
+
     dhamma-automation trend-scout --input mock_input.json --out result.json
     """
 
@@ -77,15 +65,14 @@ def trend_scout(
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
-            console=console
+            console=console,
         ) as progress:
-
             # โหลดไฟล์ input
             task1 = progress.add_task("📖 กำลังโหลดข้อมูล...", total=100)
             progress.update(task1, advance=30)
 
             try:
-                with open(input_file, encoding='utf-8') as f:
+                with open(input_file, encoding="utf-8") as f:
                     input_data_dict = json.load(f)
                 progress.update(task1, advance=30)
 
@@ -94,7 +81,9 @@ def trend_scout(
                 progress.update(task1, advance=40)
 
                 if verbose:
-                    console.print(f"✅ โหลดข้อมูลสำเร็จ: {len(input_data.keywords)} คำสำคัญ")
+                    console.print(
+                        f"✅ โหลดข้อมูลสำเร็จ: {len(input_data.keywords)} คำสำคัญ"
+                    )
 
             except json.JSONDecodeError as e:
                 console.print(f"❌ [red]ข้อผิดพลาดในไฟล์ JSON: {e}[/red]")
@@ -133,13 +122,13 @@ def trend_scout(
                 progress.update(task3, advance=30)
 
                 # บันทึกเป็น JSON
-                with open(output_file, 'w', encoding='utf-8') as f:
+                with open(output_file, "w", encoding="utf-8") as f:
                     json.dump(
                         result.model_dump(),
                         f,
                         ensure_ascii=False,
                         indent=2,
-                        default=str  # สำหรับ datetime
+                        default=str,  # สำหรับ datetime
                     )
 
                 progress.update(task3, advance=40)
@@ -158,12 +147,18 @@ def trend_scout(
         # แสดงสรุปผลลัพธ์
         console.print("\n📈 [bold]สรุปผลลัพธ์[/bold]")
         console.print(f"• จำนวนหัวข้อ: [cyan]{len(result.topics)}[/cyan]")
-        console.print(f"• หัวข้อที่พิจารณา: [cyan]{result.meta.total_candidates_considered}[/cyan]")
-        console.print(f"• คะแนนเฉลี่ย: [cyan]{_calculate_average_score(result.topics):.3f}[/cyan]")
+        console.print(
+            f"• หัวข้อที่พิจารณา: [cyan]{result.meta.total_candidates_considered}[/cyan]"
+        )
+        console.print(
+            f"• คะแนนเฉลี่ย: [cyan]{_calculate_average_score(result.topics):.3f}[/cyan]"
+        )
 
         if result.topics:
             best_topic = result.topics[0]
-            console.print(f"• หัวข้อแนะนำ: [green]{best_topic.title}[/green] (คะแนน: {best_topic.scores.composite:.3f})")
+            console.print(
+                f"• หัวข้อแนะนำ: [green]{best_topic.title}[/green] (คะแนน: {best_topic.scores.composite:.3f})"
+            )
 
         console.print("\n🎉 [bold green]เสร็จสิ้น![/bold green] ผลลัพธ์พร้อมใช้งาน")
 
@@ -183,7 +178,7 @@ def _display_topics_table(topics):
         title="🏆 หัวข้อคอนเทนต์ที่แนะนำ",
         box=box.ROUNDED,
         show_header=True,
-        header_style="bold magenta"
+        header_style="bold magenta",
     )
 
     table.add_column("อันดับ", style="cyan", width=6, justify="center")
@@ -200,7 +195,7 @@ def _display_topics_table(topics):
             topic.pillar,
             f"{topic.scores.composite:.3f}",
             f"{topic.predicted_14d_views:,}",
-            topic.reason
+            topic.reason,
         )
 
     console.print(table)

@@ -8,20 +8,21 @@ from pathlib import Path
 
 class PromptLoadError(Exception):
     """Exception สำหรับปัญหาการโหลด prompt"""
+
     pass
 
 
 def load_prompt(path: str | Path, encoding: str = "utf-8") -> str:
     """
     โหลด prompt template จากไฟล์
-    
+
     Args:
         path: path ไปยังไฟล์ prompt
         encoding: encoding ของไฟล์ (default: utf-8)
-        
+
     Returns:
         เนื้อหา prompt เป็น string
-        
+
     Raises:
         PromptLoadError: เมื่อไฟล์ไม่พบ หรือมีปัญหาในการอ่าน
     """
@@ -57,11 +58,11 @@ def load_prompt(path: str | Path, encoding: str = "utf-8") -> str:
 def get_prompt_path(prompt_name: str, prompts_dir: str = "prompts") -> Path:
     """
     สร้าง path สำหรับไฟล์ prompt
-    
+
     Args:
         prompt_name: ชื่อไฟล์ prompt (เช่น "trend_scout_v1.txt")
         prompts_dir: โฟลเดอร์ที่เก็บ prompts
-        
+
     Returns:
         Path object ไปยังไฟล์ prompt
     """

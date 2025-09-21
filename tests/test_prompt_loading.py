@@ -21,7 +21,9 @@ class TestPromptLoader:
     def test_load_prompt_success(self):
         """ทดสอบการโหลด prompt สำเร็จ"""
         # สร้างไฟล์ชั่วคราว
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False, encoding='utf-8') as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".txt", delete=False, encoding="utf-8"
+        ) as f:
             test_content = "คุณคือ AI Assistant ที่ช่วยเหลือผู้ใช้\nตอบคำถามด้วยความสุภาพ"
             f.write(test_content)
             temp_path = f.name
@@ -51,7 +53,9 @@ class TestPromptLoader:
     def test_load_prompt_empty_file(self):
         """ทดสอบเมื่อไฟล์ว่าง"""
         # สร้างไฟล์ว่าง
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False, encoding='utf-8') as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".txt", delete=False, encoding="utf-8"
+        ) as f:
             f.write("")  # ไฟล์ว่าง
             temp_path = f.name
 
@@ -67,7 +71,9 @@ class TestPromptLoader:
     def test_load_prompt_whitespace_only(self):
         """ทดสอบเมื่อไฟล์มีแต่ช่องว่าง"""
         # สร้างไฟล์ที่มีแต่ช่องว่าง
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False, encoding='utf-8') as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".txt", delete=False, encoding="utf-8"
+        ) as f:
             f.write("   \n   \t   \n   ")  # มีแต่ whitespace
             temp_path = f.name
 
@@ -91,7 +97,9 @@ class TestPromptLoader:
     def test_load_prompt_with_path_object(self):
         """ทดสอบการใช้ Path object"""
         # สร้างไฟล์ชั่วคราว
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False, encoding='utf-8') as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".txt", delete=False, encoding="utf-8"
+        ) as f:
             test_content = "ทดสอบการใช้ Path object"
             f.write(test_content)
             temp_path = Path(f.name)
@@ -108,7 +116,7 @@ class TestPromptLoader:
     def test_load_prompt_thai_content(self):
         """ทดสอบการโหลดเนื้อหาภาษาไทย"""
         thai_content = """คุณคือ AI ผู้ช่วยสำหรับช่อง YouTube ธรรมะดีดี
-        
+
 กรุณาช่วยวิเคราะห์เทรนด์และสร้างหัวข้อคอนเทนต์ที่เข้ากับแบรนด์
 
 เป้าหมาย:
@@ -117,7 +125,9 @@ class TestPromptLoader:
 - นำหลักธรรมมาประยุกต์ในชีวิตประจำวัน"""
 
         # สร้างไฟล์ชั่วคราว
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False, encoding='utf-8') as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".txt", delete=False, encoding="utf-8"
+        ) as f:
             f.write(thai_content)
             temp_path = f.name
 
@@ -139,13 +149,15 @@ class TestPromptLoader:
         # สร้างไฟล์ด้วย encoding ที่แตกต่าง
         test_content = "ทดสอบ encoding ภาษาไทย"
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False, encoding='utf-8') as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".txt", delete=False, encoding="utf-8"
+        ) as f:
             f.write(test_content)
             temp_path = f.name
 
         try:
             # โหลดด้วย encoding ที่ถูกต้อง
-            content = load_prompt(temp_path, encoding='utf-8')
+            content = load_prompt(temp_path, encoding="utf-8")
             assert content == test_content
 
         finally:

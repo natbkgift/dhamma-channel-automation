@@ -9,14 +9,14 @@ from typing import Generic, TypeVar
 from pydantic import BaseModel
 
 # Type variables สำหรับ Input และ Output models
-InputModel = TypeVar('InputModel', bound=BaseModel)
-OutputModel = TypeVar('OutputModel', bound=BaseModel)
+InputModel = TypeVar("InputModel", bound=BaseModel)
+OutputModel = TypeVar("OutputModel", bound=BaseModel)
 
 
 class BaseAgent(ABC, Generic[InputModel, OutputModel]):
     """
     คลาสพื้นฐานสำหรับ AI Agents ทั้งหมด
-    
+
     Attributes:
         name: ชื่อของ Agent
         version: เวอร์ชันของ Agent
@@ -32,13 +32,13 @@ class BaseAgent(ABC, Generic[InputModel, OutputModel]):
     def run(self, input_data: InputModel) -> OutputModel:
         """
         ฟังก์ชันหลักสำหรับประมวลผลข้อมูลของ Agent
-        
+
         Args:
             input_data: ข้อมูลนำเข้าตาม schema ของ Agent
-            
+
         Returns:
             ผลลัพธ์ตาม schema ของ Agent
-            
+
         Raises:
             NotImplementedError: ต้อง override ใน subclass
         """
@@ -50,11 +50,13 @@ class BaseAgent(ABC, Generic[InputModel, OutputModel]):
             "name": self.name,
             "version": self.version,
             "description": self.description,
-            "type": self.__class__.__name__
+            "type": self.__class__.__name__,
         }
 
     def __str__(self) -> str:
         return f"{self.name} v{self.version}"
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(name='{self.name}', version='{self.version}')"
+        return (
+            f"{self.__class__.__name__}(name='{self.name}', version='{self.version}')"
+        )

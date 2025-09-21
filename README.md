@@ -1,6 +1,6 @@
 # 🙏 ระบบอัตโนมัติ ธรรมะดีดี (Dhamma Channel Automation)
 
-[![CI/CD Status](https://github.com/natbkgift/dhamma-channel-automation/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/natbkgift/dhamma-channel-automation/actions)
+[![CI](https://github.com/natbkgift/dhamma-channel-automation/actions/workflows/ci.yml/badge.svg)](https://github.com/natbkgift/dhamma-channel-automation/actions/workflows/ci.yml)
 [![Documentation](https://img.shields.io/badge/docs-MkDocs-blue)](https://natbkgift.github.io/dhamma-channel-automation)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -182,6 +182,84 @@ mkdocs serve
 
 # Build เอกสารสำหรับ production
 mkdocs build
+```
+
+## 🔧 การตรวจคุณภาพ (Preflight & CI)
+
+### 🚀 Preflight Checks
+
+ระบบตรวจสอบคุณภาพโค้ดก่อนเปิด PR:
+
+```bash
+# Preflight เต็ม (ใช้ก่อนเปิด PR)
+bash scripts/preflight.sh
+
+# หรือใช้ Makefile
+make preflight
+```
+
+**ขั้นตอนที่ตรวจสอบ:**
+1. ✅ Python version (≥3.11)
+2. ✅ Ruff linting
+3. ✅ Code formatting
+4. ✅ Pytest ทั้งหมด (พร้อม coverage)
+5. ✅ MkDocs documentation build
+6. ✅ CLI Agent execution test
+7. ✅ Output validation
+8. ✅ MyPy type checking (non-strict)
+
+### ⚡ Quick Check
+
+สำหรับการตรวจสอบรวดเร็ว (pre-commit):
+
+```bash
+# Quick preflight
+bash scripts/preflight_quick.sh
+
+# หรือใช้ Makefile
+make quick
+```
+
+### 🎯 Pre-commit Hooks (Optional)
+
+ตั้งค่า pre-commit hooks เพื่อตรวจสอบอัตโนมัติ:
+
+```bash
+# ติดตั้ง pre-commit
+pip install pre-commit
+
+# เปิดใช้งาน hooks
+pre-commit install
+
+# ทดสอบ (รันกับไฟล์ทั้งหมด)
+pre-commit run --all-files
+```
+
+### 📊 CI Pipeline
+
+CI จะรันอัตโนมัติเมื่อ push หรือเปิด PR:
+
+- **Lint**: ตรวจสอบ code style (Python 3.11, 3.12)
+- **Test**: รัน unit tests พร้อม coverage
+- **Docs**: Build documentation (skip ด้วย `[skip-docs]`)
+- **Preflight**: ตรวจสอบระบบครบถ้วน
+
+### 🛠️ Commands รวดเร็ว
+
+```bash
+# การตรวจสอบพื้นฐาน
+make lint          # Ruff linting
+make format        # Code formatting
+make test          # Unit tests
+make test-cov      # Tests + coverage
+
+# Agent & Documentation
+make agent         # รัน TrendScout
+make docs          # Build docs
+make serve-docs    # Serve docs locally
+
+# ทำความสะอาด
+make clean         # ลบ cache files
 ```
 
 ## 🗺️ แผนงานโครงการ

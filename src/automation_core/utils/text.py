@@ -8,10 +8,10 @@ import re
 def clean_text(text: str) -> str:
     """
     ทำความสะอาดข้อความ - ลบช่องว่างเกิน, ตัวอักษรพิเศษ
-    
+
     Args:
         text: ข้อความที่ต้องการทำความสะอาด
-        
+
     Returns:
         ข้อความที่ทำความสะอาดแล้ว
     """
@@ -20,10 +20,10 @@ def clean_text(text: str) -> str:
         return ""
 
     # ลบช่องว่างเกินและขึ้นบรรทัดใหม่เกิน
-    text = re.sub(r'\s+', ' ', text.strip())
+    text = re.sub(r"\s+", " ", text.strip())
 
     # ลบอักขระควบคุมที่ไม่ต้องการ
-    text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x84\x86-\x9f]', '', text)
+    text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x84\x86-\x9f]", "", text)
 
     return text
 
@@ -31,12 +31,12 @@ def clean_text(text: str) -> str:
 def truncate_text(text: str, max_length: int, suffix: str = "...") -> str:
     """
     ตัดข้อความให้มีความยาวไม่เกินที่กำหนด
-    
+
     Args:
         text: ข้อความต้นฉบับ
         max_length: ความยาวสูงสุด
         suffix: ข้อความต่อท้าย (ถ้าตัด)
-        
+
     Returns:
         ข้อความที่ตัดแล้ว
     """
@@ -58,10 +58,10 @@ def truncate_text(text: str, max_length: int, suffix: str = "...") -> str:
 def extract_keywords(text: str) -> list[str]:
     """
     แยกคำสำคัญจากข้อความ (ง่ายๆ ด้วยการแยกคำ)
-    
+
     Args:
         text: ข้อความที่ต้องการแยกคำ
-        
+
     Returns:
         รายการคำสำคัญ
     """
@@ -73,7 +73,7 @@ def extract_keywords(text: str) -> list[str]:
     clean = clean_text(text.lower())
 
     # แยกคำด้วย whitespace และเครื่องหมายวรรคตอน
-    words = re.findall(r'\b\w+\b', clean)
+    words = re.findall(r"\b\w+\b", clean)
 
     # กรองคำที่สั้นเกินไป
     keywords = [word for word in words if len(word) >= 2]
@@ -92,11 +92,11 @@ def extract_keywords(text: str) -> list[str]:
 def is_thai_text(text: str, threshold: float = 0.5) -> bool:
     """
     ตรวจสอบว่าข้อความเป็นภาษาไทยหรือไม่
-    
+
     Args:
         text: ข้อความที่ต้องการตรวจสอบ
         threshold: สัดส่วนต่ำสุดของอักขระไทย (0.0 - 1.0)
-        
+
     Returns:
         True ถ้าเป็นภาษาไทย
     """
@@ -105,7 +105,7 @@ def is_thai_text(text: str, threshold: float = 0.5) -> bool:
         return False
 
     # นับอักขระไทย (U+0E00 - U+0E7F)
-    thai_chars = sum(1 for char in text if '\u0E00' <= char <= '\u0E7F')
+    thai_chars = sum(1 for char in text if "\u0e00" <= char <= "\u0e7f")
 
     # นับอักขระที่ไม่ใช่ whitespace
     non_space_chars = sum(1 for char in text if not char.isspace())
@@ -120,18 +120,16 @@ def is_thai_text(text: str, threshold: float = 0.5) -> bool:
 
 
 def create_youtube_title(
-    base_text: str,
-    max_length: int = 60,
-    keywords: list[str] | None = None
+    base_text: str, max_length: int = 60, keywords: list[str] | None = None
 ) -> str:
     """
     สร้างชื่อวิดีโอ YouTube ที่เหมาะสม
-    
+
     Args:
         base_text: ข้อความพื้นฐาน
         max_length: ความยาวสูงสุด (YouTube แนะนำ 60 ตัวอักษร)
         keywords: คำสำคัญที่ต้องการใส่
-        
+
     Returns:
         ชื่อวิดีโอที่ปรับแต่งแล้ว
     """
