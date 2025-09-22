@@ -3,7 +3,6 @@ Research Retrieval Agent - ดึงและวิเคราะห์ข้�
 """
 
 import random
-import re
 from datetime import datetime
 from typing import Any
 
@@ -22,7 +21,9 @@ from .model import (
 )
 
 
-class ResearchRetrievalAgent(BaseAgent[ResearchRetrievalInput, ResearchRetrievalOutput]):
+class ResearchRetrievalAgent(
+    BaseAgent[ResearchRetrievalInput, ResearchRetrievalOutput]
+):
     """Agent สำหรับค้นหาและดึงข้อความอ้างอิงจากคลังธรรมะ"""
 
     def __init__(self):
@@ -42,9 +43,24 @@ class ResearchRetrievalAgent(BaseAgent[ResearchRetrievalInput, ResearchRetrieval
 
         # คำธรรมะสำคัญที่ไม่ควรตัดออก
         self.dhamma_keywords = [
-            "สติ", "ปล่อยวาง", "อนิจจัง", "อนัตตา", "ทุกข์", "นิพพาน",
-            "อานาปานสติ", "วิปัสสนา", "สมาธิ", "เวทนา", "อุปาทาน", "กรรม",
-            "พุทธ", "ธรรม", "สงฆ์", "กุศล", "อกุศล", "มงคล"
+            "สติ",
+            "ปล่อยวาง",
+            "อนิจจัง",
+            "อนัตตา",
+            "ทุกข์",
+            "นิพพาน",
+            "อานาปานสติ",
+            "วิปัสสนา",
+            "สมาธิ",
+            "เวทนา",
+            "อุปาทาน",
+            "กรรม",
+            "พุทธ",
+            "ธรรม",
+            "สงฆ์",
+            "กุศล",
+            "อกุศล",
+            "มงคล",
         ]
 
         # แนวคิดหลักที่คาดหวังตามหัวข้อ
@@ -65,7 +81,9 @@ class ResearchRetrievalAgent(BaseAgent[ResearchRetrievalInput, ResearchRetrieval
             all_passages = self._simulate_search(input_data, queries)
 
             # 3. จัดอันดับและแยกประเภท
-            primary, supportive = self._categorize_passages(all_passages, input_data.max_passages)
+            primary, supportive = self._categorize_passages(
+                all_passages, input_data.max_passages
+            )
 
             # 4. สร้าง summary bullets
             summary_bullets = self._generate_summary_bullets(primary, supportive)
@@ -112,7 +130,7 @@ class ResearchRetrievalAgent(BaseAgent[ResearchRetrievalInput, ResearchRetrieval
         queries.append(QueryUsed(type="base", query=normalized_query))
 
         # Refinement queries ตาม hints
-        for i, hint in enumerate(input_data.refinement_hints[:3]):
+        for _i, hint in enumerate(input_data.refinement_hints[:3]):
             if "หลักคำสอน" in hint or "ธรรม" in hint:
                 query_type = "refinement_doctrine"
                 refined_query = f"{normalized_query} หลักธรรม คำสอน"
@@ -154,15 +172,15 @@ class ResearchRetrievalAgent(BaseAgent[ResearchRetrievalInput, ResearchRetrieval
         random.seed(42)  # สำหรับผลลัพธ์ที่ tutorialistic
 
         mock_passages = []
-        
+
         # สร้าง mock passages ตาม topic
         topic_lower = input_data.topic_title.lower()
-        
+
         if "นอน" in topic_lower or "หลับ" in topic_lower:
             mock_passages.extend(self._create_sleep_related_passages())
         if "เครียด" in topic_lower or "กังวล" in topic_lower:
             mock_passages.extend(self._create_stress_related_passages())
-        
+
         # เพิ่ม passages ทั่วไป
         mock_passages.extend(self._create_general_passages())
 
@@ -173,8 +191,12 @@ class ResearchRetrievalAgent(BaseAgent[ResearchRetrievalInput, ResearchRetrieval
         # กรองตาม required_tags
         if input_data.required_tags:
             tagged_passages = [
-                p for p in mock_passages
-                if any(tag in p.get("doctrinal_tags", []) for tag in input_data.required_tags)
+                p
+                for p in mock_passages
+                if any(
+                    tag in p.get("doctrinal_tags", [])
+                    for tag in input_data.required_tags
+                )
             ]
             # ถ้าไม่พบ passages ที่ตรงกับ required_tags ใช้ผลลัพธ์ทั้งหมด
             if tagged_passages:
@@ -198,13 +220,13 @@ class ResearchRetrievalAgent(BaseAgent[ResearchRetrievalInput, ResearchRetrieval
                 "reason": "เน้นการมีสติก่อนพักผ่อน",
             },
             {
-                "id": "sleep_02", 
+                "id": "sleep_02",
                 "source_name": "มหาสติปัฏฐานสูตร",
                 "collection": "canon",
                 "canonical_ref": "DN 22",
                 "original_text": "ภิกษุทั้งหลาย ภิกษุย่อมรู้แจ้งว่า กำลังหายใจเข้า กำลังหายใจออก เมื่อใจสงบแล้ว ร่างกายก็สงบตาม",
                 "doctrinal_tags": ["อานาปานสติ", "สติ", "ความสงบ"],
-                "license": "public_domain", 
+                "license": "public_domain",
                 "reason": "วิธีใช้ลมหายใจเพื่อความสงบ",
             },
         ]
@@ -214,7 +236,7 @@ class ResearchRetrievalAgent(BaseAgent[ResearchRetrievalInput, ResearchRetrieval
         return [
             {
                 "id": "stress_01",
-                "source_name": "ธัมมจักกัปปวัตตนสูตร", 
+                "source_name": "ธัมมจักกัปปวัตตนสูตร",
                 "collection": "canon",
                 "canonical_ref": "SN 56.11",
                 "original_text": "นี้คือทุกข์ นี้คือสมุทัยของทุกข์ นี้คือนิโรธของทุกข์ นี้คือมรรคที่นำไปสู่นิโรธทุกข์",
@@ -230,7 +252,7 @@ class ResearchRetrievalAgent(BaseAgent[ResearchRetrievalInput, ResearchRetrieval
             {
                 "id": "general_01",
                 "source_name": "บทความ: ปล่อยวางในชีวิตประจำวัน",
-                "collection": "modern_article", 
+                "collection": "modern_article",
                 "canonical_ref": None,
                 "original_text": "การปล่อยวางไม่ใช่การยอมแพ้ แต่เป็นการเข้าใจว่าสิ่งต่างๆ มีการเปลี่ยนแปลงอยู่เสมอ เมื่อเราไม่ยึดติด ใจก็จะเบาและสงบ",
                 "doctrinal_tags": ["ปล่อยวาง", "อนิจจัง"],
@@ -239,7 +261,9 @@ class ResearchRetrievalAgent(BaseAgent[ResearchRetrievalInput, ResearchRetrieval
             },
         ]
 
-    def _calculate_relevance(self, passage: dict[str, Any], input_data: ResearchRetrievalInput) -> float:
+    def _calculate_relevance(
+        self, passage: dict[str, Any], input_data: ResearchRetrievalInput
+    ) -> float:
         """คำนวณคะแนนความเกี่ยวข้อง"""
         # Semantic similarity (mock)
         semantic_sim = random.uniform(0.4, 0.9)
@@ -248,22 +272,28 @@ class ResearchRetrievalAgent(BaseAgent[ResearchRetrievalInput, ResearchRetrieval
         query_words = input_data.raw_query.lower().split()
         text_words = passage["original_text"].lower().split()
         keyword_matches = sum(1 for word in query_words if word in text_words)
-        keyword_boost = min(keyword_matches / len(query_words), 1.0) if query_words else 0
+        keyword_boost = (
+            min(keyword_matches / len(query_words), 1.0) if query_words else 0
+        )
 
         # Tag match
         required_tags = set(input_data.required_tags)
         passage_tags = set(passage.get("doctrinal_tags", []))
-        tag_match = len(required_tags & passage_tags) / len(required_tags) if required_tags else 1.0
+        tag_match = (
+            len(required_tags & passage_tags) / len(required_tags)
+            if required_tags
+            else 1.0
+        )
 
         # Recency decay (สำหรับบทความสมัยใหม่)
         recency_decay = 0.8 if passage["collection"] == "modern_article" else 1.0
 
         # คำนวณคะแนนรวม
         relevance = (
-            self.relevance_weights["semantic_sim"] * semantic_sim +
-            self.relevance_weights["keyword_boost"] * keyword_boost +
-            self.relevance_weights["tag_match"] * tag_match +
-            self.relevance_weights["recency_decay"] * recency_decay
+            self.relevance_weights["semantic_sim"] * semantic_sim
+            + self.relevance_weights["keyword_boost"] * keyword_boost
+            + self.relevance_weights["tag_match"] * tag_match
+            + self.relevance_weights["recency_decay"] * recency_decay
         )
 
         return min(relevance, 1.0)
@@ -278,20 +308,22 @@ class ResearchRetrievalAgent(BaseAgent[ResearchRetrievalInput, ResearchRetrieval
         # คำนวณ threshold สำหรับ primary
         relevance_scores = [p["relevance_final"] for p in all_passages]
         median_score = sorted(relevance_scores)[len(relevance_scores) // 2]
-        std_score = sum((x - median_score) ** 2 for x in relevance_scores) ** 0.5 / len(relevance_scores)
+        std_score = sum((x - median_score) ** 2 for x in relevance_scores) ** 0.5 / len(
+            relevance_scores
+        )
         primary_threshold = median_score + (std_score * 0.25)
 
         primary_passages = []
         supportive_passages = []
 
         primary_limit = int(max_passages * 0.6)
-        
+
         for passage_data in all_passages[:max_passages]:
-            is_primary = (
-                passage_data["relevance_final"] >= primary_threshold or
-                any(tag in ["สติ", "ปล่อยวาง", "อานาปานสติ"] for tag in passage_data.get("doctrinal_tags", []))
+            is_primary = passage_data["relevance_final"] >= primary_threshold or any(
+                tag in ["สติ", "ปล่อยวาง", "อานาปานสติ"]
+                for tag in passage_data.get("doctrinal_tags", [])
             )
-            
+
             passage = Passage(
                 id=passage_data["id"],
                 source_name=passage_data["source_name"],
@@ -306,7 +338,7 @@ class ResearchRetrievalAgent(BaseAgent[ResearchRetrievalInput, ResearchRetrieval
                 reason=passage_data.get("reason", "เกี่ยวข้องกับหัวข้อ"),
                 position_score=random.uniform(0.3, 0.9),
             )
-            
+
             if is_primary and len(primary_passages) < primary_limit:
                 primary_passages.append(passage)
             else:
@@ -314,16 +346,18 @@ class ResearchRetrievalAgent(BaseAgent[ResearchRetrievalInput, ResearchRetrieval
 
         return primary_passages, supportive_passages
 
-    def _generate_summary_bullets(self, primary: list[Passage], supportive: list[Passage]) -> list[str]:
+    def _generate_summary_bullets(
+        self, primary: list[Passage], supportive: list[Passage]
+    ) -> list[str]:
         """สร้างสรุปหัวใจหลัก"""
         all_passages = primary + supportive
-        
+
         if not all_passages:
             # ส่งคืน bullets ขั้นต่ำเมื่อไม่มี passages
             return [
                 "ไม่พบข้อมูลที่เกี่ยวข้องในคลังธรรมะ",
                 "แนะนำให้ปรับคำค้นหาหรือเพิ่ม refinement hints",
-                "สามารถค้นหาในแหล่งอื่นเพิ่มเติม"
+                "สามารถค้นหาในแหล่งอื่นเพิ่มเติม",
             ]
 
         # วิเคราะห์แนวคิดหลักจาก passages
@@ -332,63 +366,72 @@ class ResearchRetrievalAgent(BaseAgent[ResearchRetrievalInput, ResearchRetrieval
             key_concepts.update(passage.doctrinal_tags)
 
         bullets = []
-        
+
         if "สติ" in key_concepts:
             bullets.append("การมีสติต่อปัจจุบันขณะช่วยให้จิตใจสงบและเป็นสุข")
-            
+
         if "ปล่อยวาง" in key_concepts:
             bullets.append("การปล่อยวางความยึดมั่นช่วยลดความทุกข์และความกังวล")
-            
+
         if "อานาปานสติ" in key_concepts:
             bullets.append("การสังเกตลมหายใจเป็นวิธีปฏิบัติที่เข้าถึงง่ายและมีประสิทธิภาพ")
-            
+
         if "อนิจจัง" in key_concepts:
             bullets.append("การเข้าใจความไม่เที่ยงช่วยให้ยอมรับการเปลี่ยนแปลง")
 
         # เพิ่มให้ครบ 3-6 ข้อ
         while len(bullets) < 3:
             bullets.append("หลักธรรมช่วยให้เข้าใจและจัดการกับปัญหาในชีวิตได้อย่างมีสติ")
-            
+
         while len(bullets) < 4 and "เวทนา" in key_concepts:
             bullets.append("การสังเกตความรู้สึกโดยไม่ตัดสินช่วยให้มีความสงบภายใน")
 
         return bullets[:6]  # จำกัดไม่เกิน 6 ข้อ
 
     def _assess_coverage(
-        self, input_data: ResearchRetrievalInput, primary: list[Passage], supportive: list[Passage]
+        self,
+        input_data: ResearchRetrievalInput,
+        primary: list[Passage],
+        supportive: list[Passage],
     ) -> CoverageAssessment:
         """ประเมินความครอบคลุมของข้อมูล"""
         all_passages = primary + supportive
-        
+
         # สกัดแนวคิดที่พบ
         core_concepts = set()
         for passage in all_passages:
             core_concepts.update(passage.doctrinal_tags)
-        
+
         # กำหนดแนวคิดที่คาดหวังตาม topic
         expected_concepts = set(input_data.required_tags)
-        
+
         # เพิ่มแนวคิดที่คาดหวังตาม topic pattern
         topic_lower = input_data.topic_title.lower()
         for pattern, concepts in self.topic_concept_mapping.items():
             if pattern in topic_lower:
                 expected_concepts.update(concepts)
-        
+
         # ถ้าไม่มี expected_concepts จาก mapping, ใช้ default
         if not expected_concepts:
             expected_concepts = {"สติ", "ปล่อยวาง"}
-            
+
         missing_concepts = expected_concepts - core_concepts
-        
+
         # คำนวณ confidence
-        passage_factor = min(1.0, (len(primary) + len(supportive) * 0.5) / input_data.max_passages)
-        concept_factor = len(core_concepts & expected_concepts) / len(expected_concepts) if expected_concepts else 1.0
+        passage_factor = min(
+            1.0, (len(primary) + len(supportive) * 0.5) / input_data.max_passages
+        )
+        concept_factor = (
+            len(core_concepts & expected_concepts) / len(expected_concepts)
+            if expected_concepts
+            else 1.0
+        )
         confidence = min(1.0, passage_factor * concept_factor)
-        
+
         # ปรับ confidence ถ้ามี missing_concepts
         if missing_concepts and confidence > 0.85:
             confidence = min(confidence, 0.85)
-            
+
         notes = ""
         if missing_concepts:
             notes = f"ยังขาดแนวคิด: {', '.join(missing_concepts)}"
@@ -402,11 +445,18 @@ class ResearchRetrievalAgent(BaseAgent[ResearchRetrievalInput, ResearchRetrieval
         )
 
     def _calculate_stats(
-        self, all_passages: list[dict[str, Any]], primary: list[Passage], supportive: list[Passage]
+        self,
+        all_passages: list[dict[str, Any]],
+        primary: list[Passage],
+        supportive: list[Passage],
     ) -> RetrievalStats:
         """คำนวณสถิติการดึงข้อมูล"""
         primary_relevance = [p.relevance_final for p in primary]
-        avg_relevance = sum(primary_relevance) / len(primary_relevance) if primary_relevance else 0.0
+        avg_relevance = (
+            sum(primary_relevance) / len(primary_relevance)
+            if primary_relevance
+            else 0.0
+        )
 
         return RetrievalStats(
             primary_count=len(primary),
@@ -417,7 +467,10 @@ class ResearchRetrievalAgent(BaseAgent[ResearchRetrievalInput, ResearchRetrieval
         )
 
     def _create_meta_info(
-        self, input_data: ResearchRetrievalInput, primary: list[Passage], supportive: list[Passage]
+        self,
+        input_data: ResearchRetrievalInput,
+        primary: list[Passage],
+        supportive: list[Passage],
     ) -> MetaInfo:
         """สร้างข้อมูล metadata"""
         applied_filters = []
@@ -442,20 +495,23 @@ class ResearchRetrievalAgent(BaseAgent[ResearchRetrievalInput, ResearchRetrieval
         )
 
     def _generate_warnings(
-        self, coverage: CoverageAssessment, primary: list[Passage], supportive: list[Passage]
+        self,
+        coverage: CoverageAssessment,
+        primary: list[Passage],
+        supportive: list[Passage],
     ) -> list[str]:
         """สร้างคำเตือน"""
         warnings = []
-        
+
         if coverage.missing_concepts:
             warnings.append(f"missing_concepts: {', '.join(coverage.missing_concepts)}")
-            
+
         if coverage.confidence < 0.4:
             warnings.append("insufficient_passages")
-            
+
         if not primary:
             warnings.append("no_primary_passages")
-            
+
         total_passages = len(primary) + len(supportive)
         if total_passages < 3:
             warnings.append("very_few_passages")

@@ -18,12 +18,8 @@ class ResearchRetrievalInput(BaseModel):
         default_factory=list, description="คำแนะนำในการปรับแต่งคำค้น"
     )
     max_passages: int = Field(default=12, description="จำนวน passages สูงสุดที่ต้องการ")
-    required_tags: list[str] = Field(
-        default_factory=list, description="แท็กที่จำเป็นต้องมี"
-    )
-    forbidden_sources: list[str] = Field(
-        default_factory=list, description="แหล่งที่ห้ามใช้"
-    )
+    required_tags: list[str] = Field(default_factory=list, description="แท็กที่จำเป็นต้องมี")
+    forbidden_sources: list[str] = Field(default_factory=list, description="แหล่งที่ห้ามใช้")
     context_language: str = Field(default="th", description="ภาษาของบริบท")
 
     @field_validator("max_passages")
@@ -50,11 +46,15 @@ class QueryUsed(BaseModel):
     @field_validator("type")
     @classmethod
     def validate_query_type(cls, v):
-        valid_types = ["base", "refinement_doctrine", "refinement_practice", "refinement_story"]
+        valid_types = [
+            "base",
+            "refinement_doctrine",
+            "refinement_practice",
+            "refinement_story",
+        ]
         if v not in valid_types:
             raise ValueError(f"ประเภท query ต้องเป็นหนึ่งใน: {valid_types}")
         return v
-
 
 
 class Passage(BaseModel):
@@ -125,7 +125,9 @@ class RetrievalStats(BaseModel):
     filtered_out: int = Field(description="จำนวนที่ถูกกรองออก")
     avg_relevance_primary: float = Field(description="คะแนนเฉลี่ยของ primary")
 
-    @field_validator("primary_count", "supportive_count", "initial_candidates", "filtered_out")
+    @field_validator(
+        "primary_count", "supportive_count", "initial_candidates", "filtered_out"
+    )
     @classmethod
     def validate_counts(cls, v):
         if v < 0:

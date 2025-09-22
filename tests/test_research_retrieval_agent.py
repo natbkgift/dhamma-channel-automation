@@ -187,18 +187,21 @@ class TestResearchRetrievalAgent:
         )
 
         result = agent.run(input_with_tags)
-        
+
         # ตรวจสอบว่าได้ output ที่ถูกต้อง
         if isinstance(result, ErrorResponse):
             pytest.skip("ได้ ErrorResponse แทน ResearchRetrievalOutput")
-            
+
         all_passages = result.primary + result.supportive
 
         # ถ้ามี passages ควรมี tag ที่ต้องการ หรือ passages ทั่วไป
         if all_passages:
             # อย่างน้อยบาง passages ควรมี required tags หรือ related tags
-            has_relevant_tags = any(
-                any(tag in passage.doctrinal_tags for tag in input_with_tags.required_tags + ["สติ", "ปล่อยวาง"])
+            any(
+                any(
+                    tag in passage.doctrinal_tags
+                    for tag in input_with_tags.required_tags + ["สติ", "ปล่อยวาง"]
+                )
                 for passage in all_passages
             )
 
@@ -222,7 +225,7 @@ class TestResearchRetrievalAgent:
         )
 
         result = agent.run(sleep_input)
-        
+
         # ควรมี passages ที่เกี่ยวกับการนอน
         all_passages = result.primary + result.supportive
         assert len(all_passages) > 0
@@ -231,7 +234,7 @@ class TestResearchRetrievalAgent:
         all_tags = set()
         for passage in all_passages:
             all_tags.update(passage.doctrinal_tags)
-        
+
         relevant_tags = {"สติ", "ความสงบ", "อานาปานสติ"}
         assert len(all_tags & relevant_tags) > 0
 
@@ -263,7 +266,7 @@ class TestResearchRetrievalAgent:
         """ทดสอบการปรับแต่งคำค้น"""
         test_query = "วิธีการปล่อยวางที่มีประสิทธิภาพ"
         normalized = agent._normalize_query(test_query)
-        
+
         assert isinstance(normalized, str)
         assert "ปล่อยวาง" in normalized  # คำธรรมะต้องเก็บไว้
 
@@ -334,7 +337,7 @@ class TestResearchRetrievalAgent:
         """ทดสอบการเก็บคำธรรมะสำคัญ"""
         query_with_dhamma = "สติและปล่อยวางในชีวิต"
         normalized = agent._normalize_query(query_with_dhamma)
-        
+
         assert "สติ" in normalized
         assert "ปล่อยวาง" in normalized
 
@@ -348,7 +351,7 @@ class TestResearchRetrievalAgent:
         )
 
         result = agent.run(empty_input)
-        
+
         # ควรได้ผลลัพธ์แม้ไม่มี passages หรือ ErrorResponse
         if isinstance(result, ErrorResponse):
             # ถ้าได้ ErrorResponse ก็ยอมรับได้

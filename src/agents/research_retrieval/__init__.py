@@ -7,6 +7,6 @@ from .model import ResearchRetrievalInput, ResearchRetrievalOutput
 
 __all__ = [
     "ResearchRetrievalAgent",
-    "ResearchRetrievalInput", 
+    "ResearchRetrievalInput",
     "ResearchRetrievalOutput",
 ]
