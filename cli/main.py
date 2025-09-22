@@ -17,6 +17,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
 from agents.trend_scout import TrendScoutAgent, TrendScoutInput
+from agents.topic_prioritizer import TopicPrioritizerAgent, TopicPrioritizerInput
 from automation_core.config import config
 from automation_core.logging import get_logger
 
@@ -211,10 +212,179 @@ def _calculate_average_score(topics) -> float:
 
 
 @app.command()
+def topic_prioritizer(
+    input_file: Path = typer.Option(
+        ...,
+        "--input",
+        "-i", 
+        help="📁 ไฟล์ JSON ข้อมูลนำเข้าสำหรับ TopicPrioritizerAgent",
+        exists=True,
+        readable=True,
+    ),
+    output_file: Path = typer.Option(
+        "output/topic_prioritizer_result.json", "--out", "-o", help="📄 ไฟล์ผลลัพธ์ (JSON)"
+    ),
+    show_schedule: bool = typer.Option(True, "--schedule/--no-schedule", help="แสดงตารางเวลา"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="แสดงข้อมูลละเอียด"),
+):
+    """
+    🎯 รัน TopicPrioritizerAgent เพื่อจัดลำดับความสำคัญและสร้างปฏิทินการผลิต
+
+    ตัวอย่างการใช้งาน:
+
+    dhamma-automation topic-prioritizer --input candidate_topics.json --out schedule.json
+    """
+
+    console.print("\n🙏 [bold blue]ระบบอัตโนมัติ ธรรมะดีดี[/bold blue]")
+    console.print("🎯 รัน TopicPrioritizerAgent v1.0.0\n")
+
+    try:
+        # โหลดข้อมูลนำเข้า
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
+        ) as progress:
+            # โหลดไฟล์ input
+            task1 = progress.add_task("📖 กำลังโหลดข้อมูล...", total=100)
+            progress.update(task1, advance=30)
+
+            try:
+                with open(input_file, encoding="utf-8") as f:
+                    input_data_dict = json.load(f)
+                progress.update(task1, advance=30)
+
+                # แปลงเป็น Pydantic model
+                input_data = TopicPrioritizerInput(**input_data_dict)
+                progress.update(task1, advance=40)
+
+                if verbose:
+                    console.print(
+                        f"✅ โหลดข้อมูลสำเร็จ: {len(input_data.candidate_topics)} หัวข้อผู้สมัคร"
+                    )
+
+            except json.JSONDecodeError as e:
+                console.print(f"❌ [red]ข้อผิดพลาดในไฟล์ JSON: {e}[/red]")
+                raise typer.Exit(1)
+            except Exception as e:
+                console.print(f"❌ [red]ไม่สามารถโหลดข้อมูลได้: {e}[/red]")
+                raise typer.Exit(1)
+
+            # สร้าง Agent และรัน
+            task2 = progress.add_task("🤖 กำลังจัดลำดับและสร้างปฏิทิน...", total=100)
+
+            try:
+                agent = TopicPrioritizerAgent()
+                progress.update(task2, advance=20)
+
+                result = agent.run(input_data)
+                progress.update(task2, advance=80)
+
+                if verbose:
+                    console.print(f"✅ สร้างปฏิทินสำเร็จ: {len(result.scheduled)} หัวข้อในตาราง")
+
+            except Exception as e:
+                console.print(f"❌ [red]เกิดข้อผิดพลาดในการประมวลผล: {e}[/red]")
+                if verbose:
+                    console.print_exception()
+                raise typer.Exit(1)
+
+            # บันทึกผลลัพธ์
+            task3 = progress.add_task("💾 กำลังบันทึกผลลัพธ์...", total=100)
+            progress.update(task3, advance=30)
+
+            try:
+                # สร้างโฟลเดอร์หากไม่มี
+                output_file.parent.mkdir(parents=True, exist_ok=True)
+
+                progress.update(task3, advance=30)
+
+                # บันทึกเป็น JSON
+                with open(output_file, "w", encoding="utf-8") as f:
+                    json.dump(
+                        result.model_dump(),
+                        f,
+                        ensure_ascii=False,
+                        indent=2,
+                        default=str,  # สำหรับ datetime
+                    )
+
+                progress.update(task3, advance=40)
+
+                console.print(f"✅ บันทึกผลลัพธ์แล้ว: [green]{output_file}[/green]")
+
+            except Exception as e:
+                console.print(f"❌ [red]ไม่สามารถบันทึกผลลัพธ์ได้: {e}[/red]")
+                raise typer.Exit(1)
+
+        # แสดงตารางเวลา
+        if show_schedule and result.scheduled:
+            console.print("\n📅 [bold]ปฏิทินการผลิตเนื้อหา[/bold]")
+            _display_schedule_table(result.scheduled)
+
+        # แสดงสรุปผลลัพธ์
+        console.print("\n📈 [bold]สรุปผลลัพธ์[/bold]")
+        console.print(f"• จำนวนหัวข้อในตาราง: [cyan]{len(result.scheduled)}[/cyan]")
+        console.print(f"• จำนวนหัวข้อนอกตาราง: [cyan]{len(result.unscheduled)}[/cyan]")
+        console.print(f"• กลยุทธ์: [cyan]{result.strategy_focus}[/cyan]")
+        console.print(f"• เสาหลักที่หลากหลาย: [cyan]{result.diversity_summary.distinct_pillars}[/cyan]")
+        
+        if result.scheduled:
+            avg_score = sum(t.priority_score for t in result.scheduled) / len(result.scheduled)
+            console.print(f"• คะแนนเฉลี่ย: [cyan]{avg_score:.1f}[/cyan]")
+
+        console.print("\n🎉 [bold green]เสร็จสิ้น![/bold green] ปฏิทินการผลิตพร้อมใช้งาน")
+
+    except KeyboardInterrupt:
+        console.print("\n⏹️  หยุดการทำงานโดยผู้ใช้")
+        raise typer.Exit(0)
+    except Exception as e:
+        logger.error(f"เกิดข้อผิดพลาดไม่คาดคิด: {e}")
+        console.print(f"❌ [red]เกิดข้อผิดพลาดไม่คาดคิด: {e}[/red]")
+        raise typer.Exit(1)
+
+
+def _display_schedule_table(scheduled_topics):
+    """แสดงตารางปฏิทินการผลิต"""
+
+    table = Table(
+        title="📅 ปฏิทินการผลิตเนื้อหา",
+        box=box.ROUNDED,
+        show_header=True,
+        header_style="bold magenta",
+    )
+
+    table.add_column("สัปดาห์", style="cyan", width=8, justify="center")
+    table.add_column("ลำดับ", style="dim white", width=6, justify="center")
+    table.add_column("หัวข้อ", style="white", min_width=25)
+    table.add_column("ประเภท", style="yellow", width=10)
+    table.add_column("เสาหลัก", style="green", width=15)
+    table.add_column("คะแนน", style="blue", width=8, justify="center")
+    table.add_column("บทบาท", style="magenta", width=15)
+
+    # เรียงตามสัปดาห์และลำดับ
+    sorted_topics = sorted(scheduled_topics, key=lambda x: (x.week, x.slot_index))
+
+    for topic in sorted_topics:
+        table.add_row(
+            topic.week,
+            str(topic.slot_index),
+            topic.topic_title,
+            topic.content_type,
+            topic.pillar,
+            f"{topic.priority_score:.1f}",
+            topic.expected_role,
+        )
+
+    console.print(table)
+
+
+@app.command()
 def version():
     """📋 แสดงเวอร์ชันของระบบ"""
     console.print(f"🙏 [bold blue]Dhamma Automation[/bold blue] v{config.app_name}")
     console.print("📊 TrendScoutAgent v1.0.0")
+    console.print("🎯 TopicPrioritizerAgent v1.0.0")
     console.print("⚙️  Python CLI with Typer & Rich")
 
 
