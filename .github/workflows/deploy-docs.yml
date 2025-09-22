@@ -6,6 +6,7 @@ on:
     paths:
       - "docs/**"
       - "mkdocs.yml"
+      - ".github/workflows/deploy-docs.yml"
   workflow_dispatch:
 
 permissions:
@@ -46,7 +47,11 @@ jobs:
           pip install mkdocs mkdocs-material
 
       - name: Build documentation
-        run: mkdocs build --strict
+        run: |
+          mkdocs build --strict
+          # Verify that the site was built correctly
+          test -f site/index.html || { echo "Build failed: site/index.html not found"; exit 1; }
+          echo "Documentation built successfully"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
