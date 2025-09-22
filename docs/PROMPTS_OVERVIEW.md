@@ -108,6 +108,45 @@ filled_prompt = prompt_template.format(
 - การตรวจสอบลิขสิทธิ์
 - การจัดการ missing concepts
 
+### 3. ScriptOutlineAgent (script_outline_v1.txt)
+
+**วัตถุประสงค์**: สร้างโครงร่างวิดีโอ Long-form 8-12 นาทีพร้อมการจัดโครงสร้างและเวลา
+
+**Input Variables**:
+```
+{topic_title}              # หัวข้อวิดีโอ
+{summary_bullets}          # สรุปประเด็นหลัก
+{core_concepts}            # แนวคิดหลัก
+{missing_concepts}         # แนวคิดที่ขาดหายไป
+{target_minutes}           # เป้าหมายความยาว (นาที)
+{viewer_persona}           # โปรไฟล์ผู้ชมเป้าหมาย
+{style_preferences}        # การตั้งค่าสไตล์
+{retention_goals}          # เป้าหมายการกักเก็บผู้ชม
+```
+
+**Output Format**: JSON ตาม ScriptOutlineOutput schema
+
+**โครงสร้างมาตรฐาน**:
+1. Hook (≤ 8s) — ดึงความสนใจ
+2. Problem Amplify — ขยายปัญหา (45-60s)
+3. Story/Analogy — ภาพเปรียบ (60-90s)
+4. Core Teaching — การสอนหลัก (2-3 sub-segments)
+5. Practice/Application — ขั้นตอนปฏิบัติ
+6. Reflection Question — คำถามสะท้อน
+7. Soft CTA — เรียกร้องปฏิบัติ
+8. Calm Closing — การปิดที่สงบ
+
+**Hook Patterns**:
+- question_open, contrast_mini, micro_story, sensory_invoke, data_hint
+
+**Retention Pattern Tags**:
+- pattern_interrupt, guided_breath, rhetorical_question, analogy_shift, soft_pause, recap_bridge, emotional_labeling
+
+**การตรวจสอบ**:
+- Pacing Check: เวลารวม ±15% จากเป้าหมาย
+- Concept Coverage: ติดตามการครอบคลุมแนวคิด
+- Interrupt Spacing: retention patterns ทุก ~120 วินาที
+
 ## 🔄 Prompt Templates ในอนาคต
 
 ### 2. TopicPrioritizerAgent (topic_prioritizer_v1.txt) - Phase 1
