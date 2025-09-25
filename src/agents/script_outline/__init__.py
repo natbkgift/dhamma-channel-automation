@@ -4,15 +4,15 @@ Script Outline Agent - Agent สำหรับสร้างโครงร่
 
 from .agent import ScriptOutlineAgent
 from .model import (
-    ScriptOutlineInput,
-    ScriptOutlineOutput,
-    OutlineSection,
-    ViewerPersona,
-    StylePreferences,
-    RetentionGoals,
-    PacingCheck,
     ConceptCoverage,
     MetaInfo,
+    OutlineSection,
+    PacingCheck,
+    RetentionGoals,
+    ScriptOutlineInput,
+    ScriptOutlineOutput,
+    StylePreferences,
+    ViewerPersona,
 )
 
 __all__ = [
