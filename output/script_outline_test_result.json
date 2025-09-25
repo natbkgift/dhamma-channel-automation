@@ -1,0 +1,276 @@
+{
+  "topic": "ปล่อยวางความกังวลก่อนนอน",
+  "duration_target_min": 10,
+  "outline": [
+    {
+      "section": "Hook",
+      "goal": "ดึงให้ผู้ชมรู้สึกถูกเข้าใจ",
+      "est_seconds": 7,
+      "retention_tags": [
+        "rhetorical_question"
+      ],
+      "hook_pattern": "micro_story",
+      "content_draft": "เมื่อคืนคุณนอนไม่ค่อยหลับ…",
+      "key_points": null,
+      "analogy_type": null,
+      "beat_points": null,
+      "sub_segments": null,
+      "steps": null,
+      "question": null,
+      "cta_phrase": null,
+      "closing_line": null
+    },
+    {
+      "section": "Problem Amplify",
+      "goal": "ขยายอาการ + ภาวะใจ",
+      "est_seconds": 50,
+      "retention_tags": [
+        "emotional_labeling",
+        "pattern_interrupt"
+      ],
+      "hook_pattern": null,
+      "content_draft": null,
+      "key_points": [
+        "ร่างกายเหนื่อยแต่ความคิดยังตึง",
+        "ยิ่งพยายามหยุดคิดยิ่งคิดมาก",
+        "คิดถึงผลลัพธ์พรุ่งนี้ → ใจยิ่งไม่พัก"
+      ],
+      "analogy_type": null,
+      "beat_points": null,
+      "sub_segments": null,
+      "steps": null,
+      "question": null,
+      "cta_phrase": null,
+      "closing_line": null
+    },
+    {
+      "section": "Story / Analogy",
+      "goal": null,
+      "est_seconds": 80,
+      "retention_tags": [
+        "analogy_shift"
+      ],
+      "hook_pattern": null,
+      "content_draft": null,
+      "key_points": null,
+      "analogy_type": "ปล่อยหินในน้ำ",
+      "beat_points": [
+        "กุมก้อนหินแน่น = ความคิด",
+        "แรงกดมือเริ่มเจ็บ = ใจเหนื่อย",
+        "ปล่อยให้ตก = คลายการยึด"
+      ],
+      "sub_segments": null,
+      "steps": null,
+      "question": null,
+      "cta_phrase": null,
+      "closing_line": null
+    },
+    {
+      "section": "Core Teaching",
+      "goal": null,
+      "est_seconds": 270,
+      "retention_tags": [
+        "guided_breath",
+        "soft_pause"
+      ],
+      "hook_pattern": null,
+      "content_draft": null,
+      "key_points": null,
+      "analogy_type": null,
+      "beat_points": null,
+      "sub_segments": [
+        {
+          "label": "การรับรู้สติ",
+          "est_seconds": 80,
+          "teaching_points": [
+            "สังเกตลมหายใจเข้าออก",
+            "รู้เมื่อใจไปคิดเรื่องอื่น"
+          ],
+          "concept_links": [
+            "สติ",
+            "สมาธิ"
+          ],
+          "citation_placeholders": [
+            "p123"
+          ],
+          "retention_tags": [
+            "soft_pause"
+          ]
+        },
+        {
+          "label": "การรับรู้เวทนา",
+          "est_seconds": 90,
+          "teaching_points": [
+            "สังเกตความตึงบริเวณหน้าอก/หน้าผาก",
+            "ไม่ต้องผลักความคิด แค่รู้ว่ามี"
+          ],
+          "concept_links": [
+            "เวทนา",
+            "สติ"
+          ],
+          "citation_placeholders": [
+            "p223"
+          ],
+          "retention_tags": [
+            "soft_pause"
+          ]
+        },
+        {
+          "label": "การปล่อยวาง",
+          "est_seconds": 100,
+          "teaching_points": [
+            "ยอมรับสิ่งที่เกิดขึ้น",
+            "ไม่บังคับให้เป็นไปตามใจ"
+          ],
+          "concept_links": [
+            "ปล่อยวาง",
+            "อุปาทาน"
+          ],
+          "citation_placeholders": [
+            "p323"
+          ],
+          "retention_tags": [
+            "soft_pause"
+          ]
+        }
+      ],
+      "steps": null,
+      "question": null,
+      "cta_phrase": null,
+      "closing_line": null
+    },
+    {
+      "section": "Practice / Application",
+      "goal": null,
+      "est_seconds": 75,
+      "retention_tags": [
+        "recap_bridge"
+      ],
+      "hook_pattern": null,
+      "content_draft": null,
+      "key_points": null,
+      "analogy_type": null,
+      "beat_points": null,
+      "sub_segments": null,
+      "steps": [
+        "วางมือถือให้พ้นสายตา",
+        "หาที่นั่งสบาย หรือนอนในท่าที่ผ่อนคลาย",
+        "หลับตาเบาๆ และรู้เวทนากาย 10–15 วินาที",
+        "ตามลมหายใจธรรมชาติ 5 รอบ",
+        "สังเกตความคิดที่เหลือ แล้วปล่อยวาง",
+        "บอกตัวเอง 'พรุ่งนี้ค่อยจัดการ' แล้วปล่อยใจให้พัก"
+      ],
+      "question": null,
+      "cta_phrase": null,
+      "closing_line": null
+    },
+    {
+      "section": "Reflection Question",
+      "goal": null,
+      "est_seconds": 15,
+      "retention_tags": [
+        "rhetorical_question",
+        "soft_pause"
+      ],
+      "hook_pattern": null,
+      "content_draft": null,
+      "key_points": null,
+      "analogy_type": null,
+      "beat_points": null,
+      "sub_segments": null,
+      "steps": null,
+      "question": "ถ้าเราไม่สามารถควบคุมความคิดได้ เราจะปล่อยวางยังไง?",
+      "cta_phrase": null,
+      "closing_line": null
+    },
+    {
+      "section": "Soft CTA",
+      "goal": null,
+      "est_seconds": 18,
+      "retention_tags": [],
+      "hook_pattern": null,
+      "content_draft": null,
+      "key_points": null,
+      "analogy_type": null,
+      "beat_points": null,
+      "sub_segments": null,
+      "steps": null,
+      "question": null,
+      "cta_phrase": "ถ้าคลิปนี้ช่วยให้ใจคุณเบาลง ฝากกดติดตาม แล้วลองทำอีกครั้งนะครับ",
+      "closing_line": null
+    },
+    {
+      "section": "Calm Closing",
+      "goal": null,
+      "est_seconds": 10,
+      "retention_tags": [
+        "soft_pause"
+      ],
+      "hook_pattern": null,
+      "content_draft": null,
+      "key_points": null,
+      "analogy_type": null,
+      "beat_points": null,
+      "sub_segments": null,
+      "steps": null,
+      "question": null,
+      "cta_phrase": null,
+      "closing_line": "พอแล้วสำหรับวันนี้ ใจค่อยๆ พักได้"
+    }
+  ],
+  "pacing_check": {
+    "total_est_seconds": 525,
+    "within_range": true,
+    "target_range_seconds": [
+      510,
+      690
+    ],
+    "comment": "อยู่ในช่วงเป้าหมายที่เหมาะสม"
+  },
+  "concept_coverage": {
+    "expected": [
+      "สติ",
+      "เวทนา",
+      "ปล่อยวาง",
+      "อานาปานสติ",
+      "เมตตา"
+    ],
+    "covered": [
+      "ปล่อยวาง",
+      "เวทนา",
+      "สติ"
+    ],
+    "missing": [
+      "อานาปานสติ",
+      "เมตตา"
+    ],
+    "suggest_add_in_section": "Reflection Question หรือ Calm Closing",
+    "coverage_ratio": 0.6
+  },
+  "hook_variants": [
+    "เคยไหม นอนไม่ค่อยหลับ?",
+    "ทั้งนอนไม่ค่อยหลับแต่คิดเรื่องงานซ้ำ?"
+  ],
+  "meta": {
+    "hook_pattern_selected": "micro_story",
+    "retention_patterns_used": [
+      "rhetorical_question",
+      "analogy_shift",
+      "soft_pause",
+      "recap_bridge",
+      "pattern_interrupt",
+      "guided_breath",
+      "emotional_labeling"
+    ],
+    "interrupt_spacing_ok": true,
+    "self_check": {
+      "time_within_tolerance": true,
+      "has_core_sections": true,
+      "no_empty_sections": true
+    }
+  },
+  "warnings": [
+    "missing concept: อานาปานสติ",
+    "missing concept: เมตตา"
+  ]
+}
