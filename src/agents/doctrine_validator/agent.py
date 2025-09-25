@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from difflib import SequenceMatcher
 
 from automation_core.base_agent import BaseAgent
@@ -155,7 +155,7 @@ class DoctrineValidatorAgent(
             )
 
             output = DoctrineValidatorOutput(
-                validated_at=datetime.now(timezone.utc).isoformat(),
+                validated_at=datetime.now(UTC).isoformat(),
                 strictness=input_data.strictness,
                 segments=processed_segments,
                 summary=Summary(

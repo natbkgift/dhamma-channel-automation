@@ -34,7 +34,7 @@ class SegmentType(StrEnum):
     OTHER = "other"
 
     @classmethod
-    def from_raw(cls, value: str) -> "SegmentType":
+    def from_raw(cls, value: str) -> SegmentType:
         """สร้าง SegmentType จาก string แบบยืดหยุ่น"""
 
         normalized = (value or "").strip().lower()
