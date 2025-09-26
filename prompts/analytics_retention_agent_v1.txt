@@ -125,7 +125,7 @@
 2. all_compare_fields_present: views/ctr/avd/retention มี compare_to_baseline
 3. no_missing_data: ข้อมูลครบ
 4. ถ้าข้อมูลขาด/ผิด → ใส่ warnings[] ระบุข้อผิดพลาด
-5. flags: include “early_drop”, “gradual drop”, “low_ctr”, “low_comments”, “underperform” ตามเงื่อนไข
+5. flags: include “early drop”, “gradual drop”, “low_ctr”, “low_comments”, “underperform” ตามเงื่อนไข
 
 [ERROR SCHEMA]
 {
