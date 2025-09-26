@@ -218,6 +218,48 @@ filled_prompt = prompt_template.format(
 )
 ```
 
+### 6. AnalyticsRetentionAgent (analytics_retention_agent_v1.txt)
+
+**วัตถุประสงค์**: ประมวลผลข้อมูล Analytics ของวิดีโอรายคลิป เพื่อตรวจสอบประสิทธิภาพเทียบ baseline/goal และแนะนำการปรับปรุงต่อเนื่อง
+
+**Input Variables**:
+```
+{video_analytics_json}   # ข้อมูล analytics ดิบของคลิป
+{baseline_json}          # ค่าเฉลี่ยฐานเทียบเคียง
+{goal_json}              # เป้าหมายแคมเปญหรือ KPI
+```
+
+**Output Format**: JSON ตาม schema ใน prompt โดยประกอบด้วย summary, compare_to_baseline, insights, root_causes, recommended_actions, flags, meta และ warnings
+
+**การประเมินหลัก**:
+- CTR เทียบ baseline/goal และให้คำแนะนำปรับ thumbnail/title หากต่ำกว่าเป้า
+- Retention วิเคราะห์ avg_percentage_viewed และ retention curve เพื่อหา drop point และ flag ความผิดปกติ
+- AVD ตรวจเทียบ baseline เพื่อประเมินคุณภาพเนื้อหาโดยรวม
+- Traffic sources พิจารณาสัดส่วน browse+search (<70% ให้เพิ่ม SEO/ suggested optimization)
+- Engagement (comments, shares, subscribers) เพื่อสังเกต CTA หรือ segment ที่ทำงานได้ดี/ควรเสริม
+
+**Flag Conditions**:
+- `early_drop`: retention drop ภายใน 120 วินาทีแรก
+- `mid_clip_drop`: drop point อยู่ช่วงกลางคลิป (≥120 วินาที)
+- `gradual_drop`: retention ลดลงอย่างต่อเนื่องและชัน
+- `low_ctr`: CTR ต่ำกว่า baseline หรือ goal
+- `low_comments`: คอมเมนต์ต่ำกว่าค่าเฉลี่ย baseline
+- `underperform`: ตัวชี้วัดรวมหลายมิติต่ำกว่า baseline อย่างมีนัยสำคัญ
+
+**ตัวอย่างการใช้งาน**:
+```python
+from automation_core.prompt_loader import load_prompt, get_prompt_path
+
+prompt_path = get_prompt_path("analytics_retention_agent_v1.txt")
+prompt_template = load_prompt(prompt_path)
+
+filled_prompt = prompt_template.format(
+    video_analytics_json=json.dumps(video_metrics, ensure_ascii=False),
+    baseline_json=json.dumps(baseline_metrics, ensure_ascii=False),
+    goal_json=json.dumps(goal_metrics, ensure_ascii=False)
+)
+```
+
 ## 🔄 Prompt Templates ในอนาคต
 
 ### 2. TopicPrioritizerAgent (topic_prioritizer_v1.txt) - Phase 1
