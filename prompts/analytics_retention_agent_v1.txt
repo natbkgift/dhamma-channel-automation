@@ -53,6 +53,7 @@
 - CTR: ถ้า > baseline & goal → highlight success, ถ้าต่ำ ให้แนะนำปรับ thumbnail/title
 - Retention: ดู avg_percentage_viewed และ retention_curve
   - หาก drop_point_sec < 120 → flag “early drop”
+  - หาก drop_point_sec >= 120 → flag “mid_clip_drop”
   - ถ้า retention_curve ลดทีละ step รุนแรง → flag “gradual_drop”
   - ถ้าช่วงใดต่ำผิดปกติ ให้แนะนำแก้ไข (เช่น shorten intro)
 - AVD (average_view_duration_sec): เทียบเป้าหมาย/ baseline
@@ -140,9 +141,9 @@
 
 [USER RUNTIME TEMPLATE]
 สรุปและวิเคราะห์ผล analytics ของวิดีโอนี้:
-VideoAnalytics: {{video_analytics_json}}
-Baseline: {{baseline_json}}
-Goal: {{goal_json}}
+VideoAnalytics: {video_analytics_json}
+Baseline: {baseline_json}
+Goal: {goal_json}
 
 ส่งออก JSON ตาม Output Schema เท่านั้น ห้ามมีข้อความอื่นนอก JSON
 
