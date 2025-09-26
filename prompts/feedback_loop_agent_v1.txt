@@ -29,7 +29,7 @@
         "Retention ต่ำกว่าเป้าหมาย 1.8 จุด",
         "AVD สูงกว่า baseline"
       ],
-      "flags": ["mid_clip_drop"]
+      "flags": ["gradual drop"]
     },
     {
       "video_id": "V02",
@@ -70,7 +70,7 @@
 }
 
 [FEEDBACK RULES]
-- วิเคราะห์ recurring flags (early_drop, mid_clip_drop, low_ctr ฯลฯ) และจับ pattern
+- วิเคราะห์ recurring flags (early drop, gradual drop, low_ctr ฯลฯ) และจับ pattern
 - ถ้า thumbnail experiment ชนะบ่อยแบบเดียว → แนะนำให้เป็น template default
 - ถ้าช่วง drop point ซ้ำที่ segment เดิม (กลาง/ต้น/ท้าย) → แนะนำ action script/outline
 - ถ้า CTR ดีแต่ retention ต่ำ → เน้น optimize script, pacing, CTA
@@ -83,7 +83,7 @@
 {
   "feedback_scope": "weekly",
   "recurring_insight": [
-    "พบ mid_clip_drop บ่อยในคลิปแนวแนะนำวิธีปฏิบัติ",
+    "พบ gradual drop บ่อยในคลิปแนวแนะนำวิธีปฏิบัติ",
     "thumbnail แนว minimal/zen ชนะ experiment หลายรอบ",
     "CTR ดีแต่ retention ยังต่ำกว่าเป้าในบางคลิป"
   ],
@@ -150,7 +150,7 @@ ForecastSummaries: {{forecast_summaries_json}}
         "Retention ต่ำกว่าเป้าหมาย 1.8 จุด",
         "AVD สูงกว่า baseline"
       ],
-      "flags": ["mid_clip_drop"]
+      "flags": ["gradual drop"]
     },
     {
       "video_id": "V02",
@@ -194,7 +194,7 @@ ForecastSummaries: {{forecast_summaries_json}}
 {
   "feedback_scope": "weekly",
   "recurring_insight": [
-    "พบ mid_clip_drop บ่อยในคลิปแนวแนะนำวิธีปฏิบัติ",
+    "พบ gradual drop บ่อยในคลิปแนวแนะนำวิธีปฏิบัติ",
     "thumbnail แนว minimal/zen ชนะ experiment หลายรอบ",
     "CTR ดีแต่ retention ยังต่ำกว่าเป้าในบางคลิป"
   ],
