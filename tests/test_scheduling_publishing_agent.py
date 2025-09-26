@@ -194,3 +194,22 @@ def test_scheduling_agent_collision_and_overflow() -> None:
     assert result.meta.self_check.no_collision is False
     assert result.meta.self_check.no_overflow is False
     assert result.warnings  # warnings should include collision/overflow notes
+
+
+def test_agent_requires_anchor_for_base_week(basic_input: SchedulingInput) -> None:
+    agent = SchedulingPublishingAgent()
+
+    anchorless_input = basic_input.model_copy(
+        update={
+            "constraints": ScheduleConstraints(
+                max_videos_per_day=basic_input.constraints.max_videos_per_day,
+                max_longform_per_week=basic_input.constraints.max_longform_per_week,
+                max_shorts_per_week=basic_input.constraints.max_shorts_per_week,
+                avoid_duplicate_pillar_in_24hr=basic_input.constraints.avoid_duplicate_pillar_in_24hr,
+                forbidden_times=[],
+            )
+        }
+    )
+
+    with pytest.raises(ValueError):
+        agent.run(anchorless_input)

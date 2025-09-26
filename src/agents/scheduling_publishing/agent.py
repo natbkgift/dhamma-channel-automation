@@ -2,10 +2,9 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass
-from datetime import date, datetime, time, timedelta, timezone
-from typing import Iterable, Optional
-
+from datetime import UTC, date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 from automation_core.base_agent import BaseAgent
@@ -208,41 +207,21 @@ class SchedulingPublishingAgent(
         day_usage: dict[date, int],
         scheduled_slots: list[tuple[str, datetime]],
         timezone_info: ZoneInfo,
-    ) -> Optional[CandidateSlot]:
+    ) -> CandidateSlot | None:
         """Find valid slot that respects all constraints."""
 
-        max_weeks_to_check = 6  # prevent infinite loops
-        start_week_index = entry.week_index
-
-        candidate_generator = self._candidate_slots(
+        return self._find_available_slot(
             entry,
+            constraints,
             analytics,
             base_monday,
-            start_week_index,
-            max_weeks_to_check,
+            week_usage,
+            day_usage,
+            scheduled_slots,
             timezone_info,
+            max_weeks_to_check=6,
+            check_pillar_collision=constraints.avoid_duplicate_pillar_in_24hr,
         )
-
-        for candidate in candidate_generator:
-            if not self._check_week_capacity(
-                week_usage[candidate.week_index], entry.content_type, constraints
-            ):
-                continue
-
-            if day_usage[candidate.local_datetime.date()] >= constraints.max_videos_per_day:
-                continue
-
-            if self._is_forbidden(candidate.utc_datetime, constraints):
-                continue
-
-            if constraints.avoid_duplicate_pillar_in_24hr and self._has_pillar_collision(
-                entry.pillar, candidate.utc_datetime, scheduled_slots
-            ):
-                continue
-
-            return candidate
-
-        return None
 
     def _find_collision_slot(
         self,
@@ -254,12 +233,39 @@ class SchedulingPublishingAgent(
         day_usage: dict[date, int],
         scheduled_slots: list[tuple[str, datetime]],
         timezone_info: ZoneInfo,
-    ) -> Optional[CandidateSlot]:
+    ) -> CandidateSlot | None:
         """Find slot allowing collision if no clean slot found."""
 
-        max_weeks_to_check = 4
-        start_week_index = entry.week_index
+        return self._find_available_slot(
+            entry,
+            constraints,
+            analytics,
+            base_monday,
+            week_usage,
+            day_usage,
+            scheduled_slots,
+            timezone_info,
+            max_weeks_to_check=4,
+            check_pillar_collision=False,
+        )
 
+    def _find_available_slot(
+        self,
+        entry: ContentCalendarEntry,
+        constraints: ScheduleConstraints,
+        analytics: AudienceAnalytics,
+        base_monday: date,
+        week_usage: dict[int, dict[str, int]],
+        day_usage: dict[date, int],
+        scheduled_slots: list[tuple[str, datetime]],
+        timezone_info: ZoneInfo,
+        *,
+        max_weeks_to_check: int,
+        check_pillar_collision: bool,
+    ) -> CandidateSlot | None:
+        """Common logic for locating an available slot."""
+
+        start_week_index = entry.week_index
         candidate_generator = self._candidate_slots(
             entry,
             analytics,
@@ -278,7 +284,12 @@ class SchedulingPublishingAgent(
             if day_usage[candidate.local_datetime.date()] >= constraints.max_videos_per_day:
                 continue
 
-            if self._is_forbidden(candidate.utc_datetime, constraints):
+            if constraints.is_forbidden(candidate.utc_datetime):
+                continue
+
+            if check_pillar_collision and self._has_pillar_collision(
+                entry.pillar, candidate.utc_datetime, scheduled_slots
+            ):
                 continue
 
             return candidate
@@ -312,7 +323,7 @@ class SchedulingPublishingAgent(
                         continue
 
                     local_dt = datetime.combine(candidate_date, slot_time, timezone_info)
-                    utc_dt = local_dt.astimezone(timezone.utc)
+                    utc_dt = local_dt.astimezone(UTC)
                     reason = self._build_reason(candidate_date, slot_time, analytics, week_offset)
 
                     yield CandidateSlot(
@@ -326,7 +337,7 @@ class SchedulingPublishingAgent(
                 fallback_local = time(19, 0)
                 if fallback_local not in top_times and fallback_local not in avoid_times:
                     local_dt = datetime.combine(candidate_date, fallback_local, timezone_info)
-                    utc_dt = local_dt.astimezone(timezone.utc)
+                    utc_dt = local_dt.astimezone(UTC)
                     reason = (
                         f"ใช้เวลา fallback 19:00 เพราะ slot prime เต็มในวัน {candidate_date.strftime('%A')}"
                     )
@@ -350,11 +361,7 @@ class SchedulingPublishingAgent(
         if input_data.constraints.planning_start_date:
             return input_data.constraints.planning_start_date
 
-        parsed_start_dates = []
-        for interval in input_data.constraints.forbidden_times:
-            start_str, _ = interval.split("/", 1)
-            start_dt = self._parse_datetime(start_str).astimezone(timezone.utc)
-            parsed_start_dates.append(start_dt)
+        parsed_start_dates = [start for start, _ in input_data.constraints.forbidden_intervals_utc]
 
         if parsed_start_dates:
             earliest_start = min(parsed_start_dates)
@@ -363,9 +370,9 @@ class SchedulingPublishingAgent(
             base = earliest_monday - timedelta(weeks=min_week_index - 1)
             return base
 
-        # fallback: current week Monday in timezone
-        today_local = datetime.now(timezone_info).date()
-        return today_local - timedelta(days=today_local.weekday())
+        raise ValueError(
+            "planning_start_date หรือ forbidden_times ต้องถูกระบุเพื่อกำหนดสัปดาห์ตั้งต้น"
+        )
 
     def _check_week_capacity(
         self,
@@ -373,22 +380,18 @@ class SchedulingPublishingAgent(
         content_type: str,
         constraints: ScheduleConstraints,
     ) -> bool:
-        if content_type == "longform":
-            return usage[content_type] < constraints.max_longform_per_week
-        if content_type == "shorts":
-            return usage[content_type] < constraints.max_shorts_per_week
-        return True
+        limits = {
+            "longform": constraints.max_longform_per_week,
+            "shorts": constraints.max_shorts_per_week,
+            "live": constraints.max_live_per_week,
+            "audio": constraints.max_audio_per_week,
+        }
 
-    def _is_forbidden(self, candidate_utc: datetime, constraints: ScheduleConstraints) -> bool:
-        for interval in constraints.forbidden_times:
-            start_str, end_str = interval.split("/", 1)
-            start_dt = self._parse_datetime(start_str)
-            end_dt = self._parse_datetime(end_str)
-            start_dt = start_dt.astimezone(timezone.utc)
-            end_dt = end_dt.astimezone(timezone.utc)
-            if start_dt <= candidate_utc < end_dt:
-                return True
-        return False
+        limit = limits.get(content_type)
+        if limit is None:
+            return True
+
+        return usage[content_type] < limit
 
     def _has_pillar_collision(
         self,
@@ -409,7 +412,7 @@ class SchedulingPublishingAgent(
         scheduled_items: list[ScheduleEntry],
         pillar: str,
         candidate_utc: datetime,
-    ) -> Optional[str]:
+    ) -> str | None:
         twenty_four_hours = timedelta(hours=24)
         for item in scheduled_items:
             if item.pillar != pillar:
@@ -461,14 +464,14 @@ class SchedulingPublishingAgent(
             "Saturday": 5,
             "Sunday": 6,
         }
-        preferred_order: dict[int, int] = {}
+        preferred_days: set[int] = set()
         for name in recent_best_days:
             idx = day_map.get(name)
-            if idx is not None and idx not in preferred_order:
-                preferred_order[idx] = len(preferred_order)
+            if idx is not None:
+                preferred_days.add(idx)
 
-        ordered_best = sorted(preferred_order, key=preferred_order.get)
-        remaining = [idx for idx in range(7) if idx not in preferred_order]
+        ordered_best = sorted(preferred_days)
+        remaining = [idx for idx in range(7) if idx not in preferred_days]
         return ordered_best + remaining
 
     def _build_reason(
@@ -490,8 +493,3 @@ class SchedulingPublishingAgent(
         hour, minute = value.split(":")
         return time(int(hour), int(minute))
 
-    @staticmethod
-    def _parse_datetime(value: str) -> datetime:
-        if value.endswith("Z"):
-            value = value[:-1] + "+00:00"
-        return datetime.fromisoformat(value)
