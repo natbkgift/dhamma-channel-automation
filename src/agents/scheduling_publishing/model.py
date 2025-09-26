@@ -1,10 +1,12 @@
 """Pydantic models for Scheduling & Publishing agent."""
 from __future__ import annotations
 
-from datetime import date, datetime
-from typing import Literal, Optional
+from datetime import UTC, date, datetime
+from typing import Literal
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, PrivateAttr, validator
+
+from .utils import parse_iso_datetime
 
 
 class ContentCalendarEntry(BaseModel):
@@ -17,9 +19,7 @@ class ContentCalendarEntry(BaseModel):
     content_type: Literal["longform", "shorts", "live", "audio"] = Field(
         ..., description="ประเภทคอนเทนต์"
     )
-    expected_duration_min: Optional[int] = Field(
-        None, ge=0, description="ระยะเวลาคาดการณ์ (นาที)"
-    )
+    expected_duration_min: int | None = Field(None, ge=0, description="ระยะเวลาคาดการณ์ (นาที)")
     suggested_publish_week: str = Field(
         ..., pattern=r"^W\d+$", description="สัปดาห์แนะนำ (เช่น W1)"
     )
@@ -38,14 +38,26 @@ class ScheduleConstraints(BaseModel):
     max_videos_per_day: int = Field(..., ge=1)
     max_longform_per_week: int = Field(..., ge=0)
     max_shorts_per_week: int = Field(..., ge=0)
+    max_live_per_week: int | None = Field(
+        None,
+        ge=0,
+        description="จำกัดจำนวน live ต่อสัปดาห์ (None หมายถึงไม่จำกัด)",
+    )
+    max_audio_per_week: int | None = Field(
+        None,
+        ge=0,
+        description="จำกัดจำนวน audio ต่อสัปดาห์ (None หมายถึงไม่จำกัด)",
+    )
     avoid_duplicate_pillar_in_24hr: bool = True
     forbidden_times: list[str] = Field(default_factory=list)
-    planning_start_date: Optional[date] = Field(
+    planning_start_date: date | None = Field(
         None,
         description=(
             "วันเริ่มต้นสัปดาห์แรกของแผน (ตาม timezone ของ audience). หากไม่ระบุจะคำนวณอัตโนมัติ"
         ),
     )
+
+    _forbidden_intervals_utc: list[tuple[datetime, datetime]] = PrivateAttr(default_factory=list)
 
     @validator("forbidden_times", each_item=True)
     def validate_forbidden_interval(cls, value: str) -> str:
@@ -54,17 +66,32 @@ class ScheduleConstraints(BaseModel):
         if "/" not in value:
             raise ValueError("forbidden time interval must use start/end format")
         start, end = value.split("/", 1)
-        cls._parse_datetime(start)
-        cls._parse_datetime(end)
+        parse_iso_datetime(start)
+        parse_iso_datetime(end)
         return value
 
-    @staticmethod
-    def _parse_datetime(value: str) -> datetime:
-        """Parse ISO 8601 string supporting trailing Z."""
+    def __init__(self, **data: object) -> None:
+        super().__init__(**data)
+        self._forbidden_intervals_utc = [
+            (
+                parse_iso_datetime(start).astimezone(UTC),
+                parse_iso_datetime(end).astimezone(UTC),
+            )
+            for start, end in (interval.split("/", 1) for interval in self.forbidden_times)
+        ]
 
-        if value.endswith("Z"):
-            value = value[:-1] + "+00:00"
-        return datetime.fromisoformat(value)
+    @property
+    def forbidden_intervals_utc(self) -> list[tuple[datetime, datetime]]:
+        """Return forbidden intervals in UTC."""
+
+        return list(self._forbidden_intervals_utc)
+
+    def is_forbidden(self, candidate_utc: datetime) -> bool:
+        """Check if the candidate datetime falls into a forbidden interval."""
+
+        return any(
+            start <= candidate_utc < end for start, end in self._forbidden_intervals_utc
+        )
 
 
 class AudienceAnalytics(BaseModel):
@@ -81,15 +108,15 @@ class ScheduleEntry(BaseModel):
 
     video_id: str
     topic_title: str
-    scheduled_datetime_utc: Optional[datetime]
-    scheduled_datetime_local: Optional[datetime]
+    scheduled_datetime_utc: datetime | None
+    scheduled_datetime_local: datetime | None
     publish_status: Literal["scheduled", "pending", "collision", "overflow"]
     pillar: str
     content_type: str
     priority_score: float
     reason: str
-    collision_with: Optional[str] = None
-    overflow_reason: Optional[str] = None
+    collision_with: str | None = None
+    overflow_reason: str | None = None
     auto_publish_ready: bool
 
 
