@@ -240,8 +240,7 @@ filled_prompt = prompt_template.format(
 
 **Flag Conditions**:
 - `early_drop`: retention drop ภายใน 120 วินาทีแรก
-- `mid_clip_drop`: drop point อยู่ช่วงกลางคลิป (≥120 วินาที)
-- `gradual_drop`: retention ลดลงอย่างต่อเนื่องและชัน
+- `gradual drop`: retention ลดลงอย่างต่อเนื่องและชัน
 - `low_ctr`: CTR ต่ำกว่า baseline หรือ goal
 - `low_comments`: คอมเมนต์ต่ำกว่าค่าเฉลี่ย baseline
 - `underperform`: ตัวชี้วัดรวมหลายมิติต่ำกว่า baseline อย่างมีนัยสำคัญ

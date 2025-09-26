@@ -107,9 +107,7 @@
     "A/B test thumbnail กับแนว emotional face",
     "เพิ่ม CTA ให้คนคอมเมนต์ประสบการณ์"
   ],
-  "flags": [
-    "mid_clip_drop"
-  ],
+  "flags": [],
   "meta": {
     "baseline_id": "2025-09-avg",
     "goal_id": "2025-10-campaign1",
@@ -127,7 +125,7 @@
 2. all_compare_fields_present: views/ctr/avd/retention มี compare_to_baseline
 3. no_missing_data: ข้อมูลครบ
 4. ถ้าข้อมูลขาด/ผิด → ใส่ warnings[] ระบุข้อผิดพลาด
-5. flags: include “early_drop”, “mid_clip_drop”, “gradual_drop”, “low_ctr”, “low_comments”, “underperform” ตามเงื่อนไข
+5. flags: include “early_drop”, “gradual drop”, “low_ctr”, “low_comments”, “underperform” ตามเงื่อนไข
 
 [ERROR SCHEMA]
 {
@@ -229,9 +227,7 @@ Goal: {goal_json}
     "A/B test thumbnail กับแนว emotional face",
     "เพิ่ม CTA ให้คนคอมเมนต์ประสบการณ์"
   ],
-  "flags": [
-    "mid_clip_drop"
-  ],
+  "flags": [],
   "meta": {
     "baseline_id": "2025-09-avg",
     "goal_id": "2025-10-campaign1",
