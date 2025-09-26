@@ -172,6 +172,52 @@ filled_prompt = prompt_template.format(
 - no_empty_line: ไม่มีบรรทัดว่างในข้อความ subtitle
 - self_check: ผ่านการตรวจสอบทั้งหมด
 
+### 5. VisualAssetAgent (visual_asset_agent_v1.txt)
+
+**วัตถุประสงค์**: แนะนำ visual assets สำหรับแต่ละ segment ของวิดีโอตาม narrative summary และเวลาที่กำหนด พร้อมระบุ prompt สำหรับการสร้างภาพหรือคำค้นหา stock ที่เหมาะสม
+
+**Input Variables**:
+```
+{
+  "narrative_summary": "สรุปเนื้อหาโดยรวม",
+  "segments_time_json": [
+    {
+      "segment_index": 0,
+      "section": "Hook | Teaching | Practice | Reflection | CTA | Closing | Story | Transition | Problem | Quote | Recap",
+      "time_range": "0-7",
+      "segment_text": "ข้อความ segment"
+    }
+  ]
+}
+```
+
+**Asset Types**:
+- `broll`: ฟุตเทจประกอบหรือภาพนามธรรมสร้างบรรยากาศ
+- `illustration`: ภาพประกอบ minimal สำหรับสื่อสารการปฏิบัติหรือแนวคิด
+- `text_overlay`: ข้อความสั้น ≤ 8 คำ เพื่อย้ำใจความหรือคำคม
+- `atmosphere`: ภาพ/วิดีโอเพื่อสร้างอารมณ์สงบหรือฉากหลัง
+
+**Output Format**: JSON ตาม VisualAssetPlan schema
+
+**Validation Rules**:
+- ทุก segment ต้องได้รับ asset อย่างน้อยหนึ่งรายการ
+- จํานวน assets ทั้งหมดต้องไม่เกิน 3 เท่าของจำนวน segment
+- หลีกเลี่ยงภาพพระสงฆ์หรือบุคคลเฉพาะหากไม่ได้รับอนุญาต และตั้ง `sensitive_flag` เมื่อจำเป็น
+- ระบุ license ให้ชัดเจน (`generate`, `public_domain`, `licensed_stock`)
+
+**ตัวอย่างการใช้งาน**:
+```python
+from automation_core.prompt_loader import load_prompt, get_prompt_path
+
+prompt_path = get_prompt_path("visual_asset_agent_v1.txt")
+prompt_template = load_prompt(prompt_path)
+
+filled_prompt = prompt_template.format(
+    narrative_summary=input_data.narrative_summary,
+    segments_time_json=json.dumps(input_data.segments_time_json, ensure_ascii=False)
+)
+```
+
 ## 🔄 Prompt Templates ในอนาคต
 
 ### 2. TopicPrioritizerAgent (topic_prioritizer_v1.txt) - Phase 1
