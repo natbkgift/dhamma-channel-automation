@@ -256,9 +256,7 @@ class DoctrineValidatorAgent(
             status = SegmentStatus.HALLUCINATION
             detail = "ไม่พบใจความใน passages"
             if best_similarity >= 0.6:
-                detail = (
-                    "พบใจความใกล้เคียงใน passages แต่ไม่มี citation"
-                )
+                detail = "พบใจความใกล้เคียงใน passages แต่ไม่มี citation"
                 suggestions = "เพิ่ม citation ให้กับใจความสอนหลัก"
             elif not embedding_available:
                 detail += " (ใช้การเทียบคำแบบพื้นฐาน)"
