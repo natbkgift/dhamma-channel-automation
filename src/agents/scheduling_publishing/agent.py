@@ -467,7 +467,7 @@ class SchedulingPublishingAgent(
             if idx is not None and idx not in preferred_order:
                 preferred_order[idx] = len(preferred_order)
 
-        ordered_best = sorted(preferred_order, key=lambda x: (x, preferred_order[x]))
+        ordered_best = sorted(preferred_order, key=preferred_order.get)
         remaining = [idx for idx in range(7) if idx not in preferred_order]
         return ordered_best + remaining
 
