@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from datetime import UTC, datetime
+import json
+from importlib import resources
+from pathlib import Path
+from typing import Any, Mapping, Sequence
 
 from automation_core.base_agent import BaseAgent
 
@@ -17,29 +22,65 @@ from .model import (
 class DataSyncAgent(BaseAgent[DataSyncRequest, DataSyncResponse]):
     """Agent สำหรับประมวลผล data_sync_request และสร้าง payload พร้อม log"""
 
-    def __init__(self) -> None:
+    DEFAULT_SCHEMA_RESOURCE = "schema_registry.json"
+
+    def __init__(
+        self,
+        *,
+        schema_registry: Mapping[str, Sequence[str]] | None = None,
+        schema_registry_path: str | Path | None = None,
+    ) -> None:
         super().__init__(
             name="DataSyncAgent",
             version="1.0.0",
             description="ตรวจสอบ schema และเตรียม payload สำหรับงานซิงก์ข้อมูล",
         )
 
-        # registry ของ schema เวอร์ชันต่างๆ และฟิลด์ที่คาดหวัง
-        self.schema_registry: dict[str, list[str]] = {
-            "v2.1": [
-                "video_id",
-                "title",
-                "views",
-                "ctr_pct",
-                "retention_pct",
-            ],
-            "v2.0": [
-                "video_id",
-                "title",
-                "views",
-                "ctr_pct",
-            ],
-        }
+        self.schema_registry: dict[str, list[str]] = self._load_schema_registry(
+            schema_registry=schema_registry,
+            schema_registry_path=schema_registry_path,
+        )
+
+    def _load_schema_registry(
+        self,
+        *,
+        schema_registry: Mapping[str, Sequence[str]] | None,
+        schema_registry_path: str | Path | None,
+    ) -> dict[str, list[str]]:
+        if schema_registry is not None:
+            return self._normalize_schema_registry(schema_registry)
+
+        if schema_registry_path is not None:
+            path = Path(schema_registry_path)
+            if not path.exists():
+                msg = f"schema registry path '{path}' ไม่พบไฟล์"
+                raise FileNotFoundError(msg)
+            data = json.loads(path.read_text(encoding="utf-8"))
+            return self._normalize_schema_registry(data)
+
+        with resources.files(__package__).joinpath(
+            self.DEFAULT_SCHEMA_RESOURCE
+        ).open("r", encoding="utf-8") as registry_file:
+            data = json.load(registry_file)
+        return self._normalize_schema_registry(data)
+
+    @staticmethod
+    def _normalize_schema_registry(
+        data: Mapping[str, Sequence[str] | Any]
+    ) -> dict[str, list[str]]:
+        normalized: dict[str, list[str]] = {}
+        for version, fields in data.items():
+            if not isinstance(fields, Sequence) or isinstance(fields, (str, bytes)):
+                msg = "schema registry ต้องระบุ list ของชื่อฟิลด์เป็น string"
+                raise ValueError(msg)
+            field_list: list[str] = []
+            for field in fields:
+                if not isinstance(field, str):
+                    msg = "schema registry ต้องประกอบด้วยชื่อฟิลด์เป็น string เท่านั้น"
+                    raise ValueError(msg)
+                field_list.append(field)
+            normalized[str(version)] = field_list
+        return normalized
 
     def run(self, input_data: DataSyncRequest) -> DataSyncResponse:
         logs: list[DataSyncLogEntry] = []
@@ -69,10 +110,31 @@ class DataSyncAgent(BaseAgent[DataSyncRequest, DataSyncResponse]):
                     "อัปเดต schema registry หรือใช้ schema_version ที่รองรับ"
                 )
             else:
+                actual_fields = input_data.data.fields
+                duplicate_fields = sorted(
+                    field
+                    for field, count in Counter(actual_fields).items()
+                    if count > 1
+                )
                 expected_set = set(expected_fields)
-                actual_set = set(input_data.data.fields)
+                actual_set = set(actual_fields)
                 missing_fields = sorted(expected_set - actual_set)
                 extra_fields = sorted(actual_set - expected_set)
+
+                schema_status = "success"
+                schema_messages: list[str] = []
+
+                if duplicate_fields:
+                    errors.append(
+                        "พบฟิลด์ซ้ำ: " + ", ".join(duplicate_fields)
+                    )
+                    suggestions.append(
+                        "ลบฟิลด์ที่ซ้ำออกเพื่อให้ mapping ตรงกับ schema"
+                    )
+                    schema_status = "failed"
+                    schema_messages.append(
+                        "พบฟิลด์ซ้ำ: " + ", ".join(duplicate_fields)
+                    )
 
                 if missing_fields:
                     errors.append(
@@ -82,12 +144,16 @@ class DataSyncAgent(BaseAgent[DataSyncRequest, DataSyncResponse]):
                         "เติมข้อมูลฟิลด์ที่จำเป็นให้ตรงกับ schema ก่อนทำการซิงก์"
                     )
                     schema_status = "failed"
-                    schema_message = (
+                    schema_messages.append(
                         "ฟิลด์ไม่ครบตาม schema: " + ", ".join(missing_fields)
                     )
+
+                if schema_status == "success":
+                    schema_message = (
+                        f"field mapping ตรง schema {input_data.data.schema_version}"
+                    )
                 else:
-                    schema_status = "success"
-                    schema_message = f"field mapping ตรง schema {input_data.data.schema_version}"
+                    schema_message = "; ".join(schema_messages)
 
                 logs.append(
                     DataSyncLogEntry(

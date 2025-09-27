@@ -54,12 +54,15 @@ Documentation = "https://natbkgift.github.io/dhamma-channel-automation"
 dhamma-automation = "cli.main:app"
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["src*", "cli*", "automation_core*", "agents*"]
+where = ["src", "."]
+include = ["automation_core*", "agents*", "cli*"]
 
 [tool.setuptools.package-dir]
-"automation_core" = "src/automation_core"
-"agents" = "src/agents"
+"" = "src"
+"cli" = "cli"
+
+[tool.setuptools.package-data]
+"agents.data_sync" = ["schema_registry.json"]
 
 [tool.ruff]
 target-version = "py311"
