@@ -61,7 +61,7 @@ class DataSyncPayload(BaseModel):
     schema_version: str
     field_mapping: list[str]
     row_count: int
-    sync_type: str
+    sync_type: Literal["copy", "sync", "migrate", "update", "merge"]
     rule: SyncRule
     status: Literal["ready", "pending", "warning", "error", "merged"]
 
