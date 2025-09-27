@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from collections import Counter
-from datetime import UTC, datetime
 import json
+from collections import Counter
+from collections.abc import Mapping, Sequence
+from datetime import datetime, timezone
 from importlib import resources
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 from automation_core.base_agent import BaseAgent
 
@@ -70,7 +71,10 @@ class DataSyncAgent(BaseAgent[DataSyncRequest, DataSyncResponse]):
     ) -> dict[str, list[str]]:
         normalized: dict[str, list[str]] = {}
         for version, fields in data.items():
-            if not isinstance(fields, Sequence) or isinstance(fields, (str, bytes)):
+            if isinstance(fields, (str, bytes)):  # noqa: UP038 - Python < 3.10 compatibility
+                msg = "schema registry ต้องระบุ list ของชื่อฟิลด์เป็น string"
+                raise ValueError(msg)
+            if not isinstance(fields, Sequence):
                 msg = "schema registry ต้องระบุ list ของชื่อฟิลด์เป็น string"
                 raise ValueError(msg)
             field_list: list[str] = []
@@ -98,7 +102,7 @@ class DataSyncAgent(BaseAgent[DataSyncRequest, DataSyncResponse]):
                 )
                 logs.append(
                     DataSyncLogEntry(
-                        timestamp=datetime.now(UTC),
+                        timestamp=datetime.now(timezone.utc),  # noqa: UP017
                         event="schema_validated",
                         status="failed",
                         message=(
@@ -157,7 +161,7 @@ class DataSyncAgent(BaseAgent[DataSyncRequest, DataSyncResponse]):
 
                 logs.append(
                     DataSyncLogEntry(
-                        timestamp=datetime.now(UTC),
+                        timestamp=datetime.now(timezone.utc),  # noqa: UP017
                         event="schema_validated",
                         status=schema_status,
                         message=schema_message,
@@ -177,7 +181,7 @@ class DataSyncAgent(BaseAgent[DataSyncRequest, DataSyncResponse]):
             errors.append("row_count ต้องมากกว่า 0")
             logs.append(
                 DataSyncLogEntry(
-                    timestamp=datetime.now(UTC),
+                    timestamp=datetime.now(timezone.utc),  # noqa: UP017
                     event="row_count_checked",
                     status="failed",
                     message="จำนวนแถวเป็น 0 หรือค่าติดลบ",
@@ -189,7 +193,7 @@ class DataSyncAgent(BaseAgent[DataSyncRequest, DataSyncResponse]):
         else:
             logs.append(
                 DataSyncLogEntry(
-                    timestamp=datetime.now(UTC),
+                    timestamp=datetime.now(timezone.utc),  # noqa: UP017
                     event="row_count_checked",
                     status="success",
                     message=f"row_count = {input_data.data.row_count}",
@@ -200,7 +204,7 @@ class DataSyncAgent(BaseAgent[DataSyncRequest, DataSyncResponse]):
         if input_data.rule.overwrite_if_exists:
             logs.append(
                 DataSyncLogEntry(
-                    timestamp=datetime.now(UTC),
+                    timestamp=datetime.now(timezone.utc),  # noqa: UP017
                     event="overwrite_flag",
                     status="pending",
                     message="ตั้งค่า overwrite_if_exists = true (ตรวจสอบไฟล์ปลายทางก่อนคัดลอก)",
@@ -212,7 +216,7 @@ class DataSyncAgent(BaseAgent[DataSyncRequest, DataSyncResponse]):
             final_status = "error"
             logs.append(
                 DataSyncLogEntry(
-                    timestamp=datetime.now(UTC),
+                    timestamp=datetime.now(timezone.utc),  # noqa: UP017
                     event="sync_aborted",
                     status="failed",
                     message="หยุดการซิงก์เนื่องจากพบข้อผิดพลาด",
@@ -222,7 +226,7 @@ class DataSyncAgent(BaseAgent[DataSyncRequest, DataSyncResponse]):
             final_status = "warning" if warnings else "ready"
             logs.append(
                 DataSyncLogEntry(
-                    timestamp=datetime.now(UTC),
+                    timestamp=datetime.now(timezone.utc),  # noqa: UP017
                     event="payload_ready",
                     status="warning" if warnings else "success",
                     message=(
