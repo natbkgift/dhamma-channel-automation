@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, date, datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field, PrivateAttr, validator
+from pydantic import BaseModel, Field, PrivateAttr, field_validator
 
 from .utils import parse_iso_datetime
 
@@ -64,15 +64,16 @@ class ScheduleConstraints(BaseModel):
         default_factory=list
     )
 
-    @validator("forbidden_times", each_item=True)
-    def validate_forbidden_interval(cls, value: str) -> str:
+    @field_validator("forbidden_times")
+    def validate_forbidden_interval(cls, value: list[str]) -> list[str]:
         """Ensure forbidden time intervals can be parsed."""
 
-        if "/" not in value:
-            raise ValueError("forbidden time interval must use start/end format")
-        start, end = value.split("/", 1)
-        parse_iso_datetime(start)
-        parse_iso_datetime(end)
+        for interval in value:
+            if "/" not in interval:
+                raise ValueError("forbidden time interval must use start/end format")
+            start, end = interval.split("/", 1)
+            parse_iso_datetime(start)
+            parse_iso_datetime(end)
         return value
 
     def __init__(self, **data: object) -> None:
@@ -104,9 +105,9 @@ class ScheduleConstraints(BaseModel):
 class AudienceAnalytics(BaseModel):
     """Analytics about audience behaviour."""
 
-    top_time_slots_utc: list[str] = Field(..., min_items=1)
+    top_time_slots_utc: list[str] = Field(..., min_length=1)
     lowest_traffic_slots_utc: list[str] = Field(default_factory=list)
-    recent_best_days: list[str] = Field(..., min_items=1)
+    recent_best_days: list[str] = Field(..., min_length=1)
     timezone: str = Field(..., description="IANA timezone string")
 
 
@@ -162,7 +163,7 @@ class SchedulingInput(BaseModel):
     constraints: ScheduleConstraints
     audience_analytics: AudienceAnalytics
 
-    @validator("content_calendar")
+    @field_validator("content_calendar")
     def validate_calendar(
         cls, value: list[ContentCalendarEntry]
     ) -> list[ContentCalendarEntry]:
