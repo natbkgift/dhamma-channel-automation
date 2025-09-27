@@ -12,9 +12,7 @@ class SyncRule(BaseModel):
     overwrite_if_exists: bool = Field(
         False, description="ถ้าจริงให้ overwrite ไฟล์ที่มีอยู่ในเป้าหมาย"
     )
-    validate_schema: bool = Field(
-        True, description="ตรวจสอบ schema ของข้อมูลก่อนซิงก์"
-    )
+    validate_schema: bool = Field(True, description="ตรวจสอบ schema ของข้อมูลก่อนซิงก์")
 
 
 class SyncData(BaseModel):

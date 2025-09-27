@@ -32,9 +32,7 @@ class YTTrendingItem(BaseModel):
     title: str = Field(description="ชื่อวิดีโอ")
     views_est: int = Field(ge=0, description="จำนวนการดูโดยประมาณ")
     age_days: int = Field(ge=0, description="อายุของวิดีโอ (วัน)")
-    keywords: list[str] = Field(
-        ..., min_length=1, description="คำสำคัญที่สกัดได้"
-    )
+    keywords: list[str] = Field(..., min_length=1, description="คำสำคัญที่สกัดได้")
 
 
 class CompetitorComment(BaseModel):
@@ -68,9 +66,7 @@ class EmbeddingSimilarGroup(BaseModel):
 class TrendScoutInput(BaseModel):
     """Input สำหรับ TrendScoutAgent"""
 
-    keywords: list[str] = Field(
-        ..., min_length=1, description="คำสำคัญที่ต้องการวิเคราะห์"
-    )
+    keywords: list[str] = Field(..., min_length=1, description="คำสำคัญที่ต้องการวิเคราะห์")
     google_trends: list[GoogleTrendItem] = Field(
         default_factory=list, description="ข้อมูลเทรนด์จาก Google"
     )
@@ -94,7 +90,9 @@ class TopicScore(BaseModel):
     brand_fit: float = Field(ge=0, le=1, description="ความเข้ากับแบรนด์")
     composite: float = Field(ge=0, le=1, description="คะแนนรวม")
 
-    @field_validator("search_intent", "freshness", "evergreen", "brand_fit", "composite")
+    @field_validator(
+        "search_intent", "freshness", "evergreen", "brand_fit", "composite"
+    )
     def validate_score_range(cls, value: float) -> float:
         if not 0 <= value <= 1:
             raise ValueError("คะแนนต้องอยู่ระหว่าง 0-1")
@@ -107,9 +105,7 @@ class TopicEntry(BaseModel):
     rank: int = Field(ge=1, description="อันดับ")
     title: str = Field(max_length=34, description="ชื่อหัวข้อ")
     pillar: str = Field(description="เสาหลักของเนื้อหา")
-    predicted_14d_views: int = Field(
-        ge=0, description="การดูคาดการณ์ 14 วัน"
-    )
+    predicted_14d_views: int = Field(ge=0, description="การดูคาดการณ์ 14 วัน")
     scores: TopicScore = Field(description="คะแนนในแต่ละมิติ")
     reason: str = Field(description="เหตุผลที่แนะนำ")
     raw_keywords: list[str] = Field(description="คำสำคัญต้นฉบับ")
@@ -146,18 +142,14 @@ class TrendScoutOutput(BaseModel):
     generated_at: datetime = Field(
         default_factory=datetime.now, description="เวลาที่สร้างผลลัพธ์"
     )
-    topics: list[TopicEntry] = Field(
-        max_length=15, description="หัวข้อที่แนะนำ"
-    )
+    topics: list[TopicEntry] = Field(max_length=15, description="หัวข้อที่แนะนำ")
     discarded_duplicates: list[DiscardedDuplicate] = Field(
         default_factory=list, description="หัวข้อที่ถูกตัดออกเพราะซ้ำ"
     )
     meta: MetaInfo = Field(description="ข้อมูล Meta")
 
     @field_validator("topics")
-    def validate_topics(
-        cls, value: list["TopicEntry"]
-    ) -> list["TopicEntry"]:  # noqa: F821 (forward reference)
+    def validate_topics(cls, value: list["TopicEntry"]) -> list["TopicEntry"]:  # noqa: F821 (forward reference)
         if len(value) > 1:
             scores = [topic.scores.composite for topic in value]
             if scores != sorted(scores, reverse=True):

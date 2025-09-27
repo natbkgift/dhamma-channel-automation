@@ -67,31 +67,31 @@ class DataSyncAgent(BaseAgent[DataSyncRequest, DataSyncResponse]):
                         ),
                     )
                 )
-                suggestions.append(
-                    "อัปเดต schema registry หรือใช้ schema_version ที่รองรับ"
-                )
+                suggestions.append("อัปเดต schema registry หรือใช้ schema_version ที่รองรับ")
             else:
                 missing_fields = [
-                    field for field in expected_fields if field not in input_data.data.fields
+                    field
+                    for field in expected_fields
+                    if field not in input_data.data.fields
                 ]
                 extra_fields = [
-                    field for field in input_data.data.fields if field not in expected_fields
+                    field
+                    for field in input_data.data.fields
+                    if field not in expected_fields
                 ]
 
                 if missing_fields:
-                    errors.append(
-                        "พบฟิลด์ขาดหาย: " + ", ".join(sorted(missing_fields))
-                    )
-                    suggestions.append(
-                        "เติมข้อมูลฟิลด์ที่จำเป็นให้ตรงกับ schema ก่อนทำการซิงก์"
-                    )
+                    errors.append("พบฟิลด์ขาดหาย: " + ", ".join(sorted(missing_fields)))
+                    suggestions.append("เติมข้อมูลฟิลด์ที่จำเป็นให้ตรงกับ schema ก่อนทำการซิงก์")
                     schema_status = "failed"
-                    schema_message = (
-                        "ฟิลด์ไม่ครบตาม schema: " + ", ".join(sorted(missing_fields))
+                    schema_message = "ฟิลด์ไม่ครบตาม schema: " + ", ".join(
+                        sorted(missing_fields)
                     )
                 else:
                     schema_status = "success"
-                    schema_message = f"field mapping ตรง schema {input_data.data.schema_version}"
+                    schema_message = (
+                        f"field mapping ตรง schema {input_data.data.schema_version}"
+                    )
 
                 logs.append(
                     DataSyncLogEntry(
@@ -121,9 +121,7 @@ class DataSyncAgent(BaseAgent[DataSyncRequest, DataSyncResponse]):
                     message="จำนวนแถวเป็น 0 หรือค่าติดลบ",
                 )
             )
-            suggestions.append(
-                "ตรวจสอบขั้นตอนดึงข้อมูลหรือ filter ที่อาจทำให้ไม่มีข้อมูล"
-            )
+            suggestions.append("ตรวจสอบขั้นตอนดึงข้อมูลหรือ filter ที่อาจทำให้ไม่มีข้อมูล")
         else:
             logs.append(
                 DataSyncLogEntry(
