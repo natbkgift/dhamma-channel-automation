@@ -142,6 +142,7 @@
 MonitoringLog: {{monitoring_log_json}}
 Threshold: {{threshold_json}}
 Config: {{config_json}}
+History: {{history_json}}
 
 ส่งออก JSON ตาม Output Schema เท่านั้น ห้ามมีข้อความอื่นนอก JSON
 
@@ -176,6 +177,16 @@ Config: {{config_json}}
   "config": {
     "incident_notify": ["operator", "admin"],
     "auto_restart_on": ["critical"]
+  },
+  "history": {
+    "previous_health_reports": [
+      {
+        "agent": "Notification Agent",
+        "service": "LINE",
+        "flags": ["high_latency", "high_error_rate"],
+        "timestamp": "2025-09-27T08:00:00Z"
+      }
+    ]
   }
 }
 
