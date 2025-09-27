@@ -30,21 +30,11 @@ class YTTrendingItem(BaseModel):
     """ข้อมูลวิดีโอที่กำลังเทรนด์ใน YouTube"""
 
     title: str = Field(description="ชื่อวิดีโอ")
-    views_est: int = Field(description="จำนวนการดูโดยประมาณ")
-    age_days: int = Field(description="อายุของวิดีโอ (วัน)")
-    keywords: list[str] = Field(default_factory=list, description="คำสำคัญที่สกัดได้")
-
-    @field_validator("views_est")
-    def validate_views(cls, value: int) -> int:
-        if value < 0:
-            raise ValueError("จำนวนการดูต้องไม่เป็นลบ")
-        return value
-
-    @field_validator("age_days")
-    def validate_age(cls, value: int) -> int:
-        if value < 0:
-            raise ValueError("อายุวิดีโอต้องไม่เป็นลบ")
-        return value
+    views_est: int = Field(ge=0, description="จำนวนการดูโดยประมาณ")
+    age_days: int = Field(ge=0, description="อายุของวิดีโอ (วัน)")
+    keywords: list[str] = Field(
+        ..., min_length=1, description="คำสำคัญที่สกัดได้"
+    )
 
 
 class CompetitorComment(BaseModel):
@@ -78,7 +68,9 @@ class EmbeddingSimilarGroup(BaseModel):
 class TrendScoutInput(BaseModel):
     """Input สำหรับ TrendScoutAgent"""
 
-    keywords: list[str] = Field(description="คำสำคัญที่ต้องการวิเคราะห์")
+    keywords: list[str] = Field(
+        ..., min_length=1, description="คำสำคัญที่ต้องการวิเคราะห์"
+    )
     google_trends: list[GoogleTrendItem] = Field(
         default_factory=list, description="ข้อมูลเทรนด์จาก Google"
     )
@@ -91,12 +83,6 @@ class TrendScoutInput(BaseModel):
     embeddings_similar_groups: list[EmbeddingSimilarGroup] = Field(
         default_factory=list, description="กลุ่มคำที่คล้ายกัน"
     )
-
-    @field_validator("keywords")
-    def validate_keywords(cls, value: list[str]) -> list[str]:
-        if not value:
-            raise ValueError("ต้องมีคำสำคัญอย่างน้อย 1 คำ")
-        return value
 
 
 class TopicScore(BaseModel):
@@ -118,33 +104,17 @@ class TopicScore(BaseModel):
 class TopicEntry(BaseModel):
     """หัวข้อคอนเทนต์ที่แนะนำ"""
 
-    rank: int = Field(description="อันดับ")
-    title: str = Field(description="ชื่อหัวข้อ")
+    rank: int = Field(ge=1, description="อันดับ")
+    title: str = Field(max_length=34, description="ชื่อหัวข้อ")
     pillar: str = Field(description="เสาหลักของเนื้อหา")
-    predicted_14d_views: int = Field(description="การดูคาดการณ์ 14 วัน")
+    predicted_14d_views: int = Field(
+        ge=0, description="การดูคาดการณ์ 14 วัน"
+    )
     scores: TopicScore = Field(description="คะแนนในแต่ละมิติ")
     reason: str = Field(description="เหตุผลที่แนะนำ")
     raw_keywords: list[str] = Field(description="คำสำคัญต้นฉบับ")
     similar_to: list[str] = Field(default_factory=list, description="คล้ายกับหัวข้ือื่น")
     risk_flags: list[str] = Field(default_factory=list, description="ธงเตือนความเสี่ยง")
-
-    @field_validator("rank")
-    def validate_rank(cls, value: int) -> int:
-        if value < 1:
-            raise ValueError("อันดับต้องเป็นจำนวนเต็มบวก")
-        return value
-
-    @field_validator("predicted_14d_views")
-    def validate_predicted_views(cls, value: int) -> int:
-        if value < 0:
-            raise ValueError("การดูคาดการณ์ต้องไม่เป็นลบ")
-        return value
-
-    @field_validator("title")
-    def validate_title_length(cls, value: str) -> str:
-        if len(value) > 34:
-            raise ValueError("ชื่อหัวข้อยาวเกิน 34 ตัวอักษร")
-        return value
 
 
 class SelfCheck(BaseModel):
@@ -176,7 +146,9 @@ class TrendScoutOutput(BaseModel):
     generated_at: datetime = Field(
         default_factory=datetime.now, description="เวลาที่สร้างผลลัพธ์"
     )
-    topics: list[TopicEntry] = Field(description="หัวข้อที่แนะนำ")
+    topics: list[TopicEntry] = Field(
+        max_length=15, description="หัวข้อที่แนะนำ"
+    )
     discarded_duplicates: list[DiscardedDuplicate] = Field(
         default_factory=list, description="หัวข้อที่ถูกตัดออกเพราะซ้ำ"
     )
@@ -186,8 +158,6 @@ class TrendScoutOutput(BaseModel):
     def validate_topics(
         cls, value: list["TopicEntry"]
     ) -> list["TopicEntry"]:  # noqa: F821 (forward reference)
-        if len(value) > 15:
-            raise ValueError("จำนวนหัวข้อต้องไม่เกิน 15 หัวข้อ")
         if len(value) > 1:
             scores = [topic.scores.composite for topic in value]
             if scores != sorted(scores, reverse=True):
