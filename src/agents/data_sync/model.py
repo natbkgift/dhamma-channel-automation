@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class SyncRule(BaseModel):
@@ -25,7 +25,7 @@ class SyncData(BaseModel):
     fields: list[str] = Field(..., description="รายชื่อฟิลด์ในข้อมูล")
     row_count: int = Field(..., ge=0, description="จำนวนแถวของข้อมูล")
 
-    @validator("fields")
+    @field_validator("fields")
     def validate_fields_not_empty(cls, value: list[str]) -> list[str]:
         if not value:
             raise ValueError("fields ต้องมีอย่างน้อย 1 รายการ")
