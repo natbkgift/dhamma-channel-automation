@@ -1,11 +1,6 @@
 """Unit tests สำหรับ DataSyncAgent"""
 
-import sys
-from pathlib import Path
-
 import pytest
-
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from agents.data_sync import DataSyncAgent, DataSyncRequest, SyncData, SyncRule
 
@@ -92,6 +87,34 @@ def test_data_sync_agent_extra_fields_warning():
     assert response.warnings
     assert any("ฟิลด์เกิน" in warning for warning in response.warnings)
     assert response.data_sync_log[-1].status == "warning"
+
+
+def test_data_sync_agent_duplicate_fields_error():
+    agent = DataSyncAgent()
+    request = build_request(
+        data=SyncData(
+            file_name="analytics_duplicate.csv",
+            schema_version="v2.1",
+            fields=[
+                "video_id",
+                "title",
+                "views",
+                "views",
+                "ctr_pct",
+                "retention_pct",
+            ],
+            row_count=100,
+        )
+    )
+
+    response = agent.run(request)
+
+    assert response.data_sync_payload.status == "error"
+    assert any("ฟิลด์ซ้ำ" in error for error in response.errors)
+    assert any(
+        log.event == "schema_validated" and log.status == "failed"
+        for log in response.data_sync_log
+    )
 
 
 def test_data_sync_agent_unknown_schema_error():

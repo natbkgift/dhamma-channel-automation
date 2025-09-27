@@ -1,0 +1,15 @@
+{
+  "v2.1": [
+    "video_id",
+    "title",
+    "views",
+    "ctr_pct",
+    "retention_pct"
+  ],
+  "v2.0": [
+    "video_id",
+    "title",
+    "views",
+    "ctr_pct"
+  ]
+}
