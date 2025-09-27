@@ -147,7 +147,48 @@ filled_prompt = prompt_template.format(
 - Concept Coverage: ติดตามการครอบคลุมแนวคิด
 - Interrupt Spacing: retention patterns ทุก ~120 วินาที
 
-### 4. LocalizationSubtitleAgent (localization_subtitle_v2.txt)
+### 4. NotificationAgent (notification_agent_v1.txt)
+
+**วัตถุประสงค์**: รวม event log จากระบบย่อยเพื่อสร้าง payload แจ้งเตือนที่เหมาะสมตามกลุ่มผู้รับและช่องทาง
+
+**Input Variables**:
+```
+{events_json}                # รายการเหตุการณ์พร้อม agent, type, code, message, suggested_action
+{notification_context_json}  # ข้อมูล operator, ช่องทางที่รองรับ, ค่า aggregate window
+```
+
+**Notification Rules**:
+- critical → แจ้ง operator และ admin ทุกช่องทางที่ระบบรองรับ
+- warning → แจ้ง operator + production ผ่าน dashboard และ LINE
+- info → แจ้ง operator ผ่าน dashboard เท่านั้น (default)
+- สรุปข้อความ ≤ 280 ตัวอักษร พร้อม suggested_action ที่ชัดเจน
+- aggregate event ซ้ำ/ใกล้เคียงภายใน window เพื่อลด spam
+
+**Output Format**: JSON ตาม schema ที่มี fields `notifications` และ `meta` พร้อม self-check (`all_sections_present`, `no_duplicate`)
+
+**Error Schema**:
+```
+{
+  "error": {
+    "code": "MISSING_DATA | SCHEMA_VIOLATION",
+    "message": "รายละเอียด",
+    "suggested_fix": "คำแนะนำ"
+  }
+}
+```
+
+**ตัวอย่างการใช้งาน**:
+```
+from automation_core.prompt_loader import load_prompt, get_prompt_path
+
+prompt = load_prompt(get_prompt_path("notification_agent_v1.txt"))
+filled = prompt.format(
+    events_json=json.dumps(events, ensure_ascii=False),
+    notification_context_json=json.dumps(context, ensure_ascii=False)
+)
+```
+
+### 5. LocalizationSubtitleAgent (localization_subtitle_v2.txt)
 
 **วัตถุประสงค์**: แปลงสคริปต์ที่ผ่านการอนุมัติให้เป็นไฟล์ SRT พร้อมสรุปภาษาอังกฤษ
 
@@ -172,7 +213,7 @@ filled_prompt = prompt_template.format(
 - no_empty_line: ไม่มีบรรทัดว่างในข้อความ subtitle
 - self_check: ผ่านการตรวจสอบทั้งหมด
 
-### 5. VisualAssetAgent (visual_asset_agent_v1.txt)
+### 6. VisualAssetAgent (visual_asset_agent_v1.txt)
 
 **วัตถุประสงค์**: แนะนำ visual assets สำหรับแต่ละ segment ของวิดีโอตาม narrative summary และเวลาที่กำหนด พร้อมระบุ prompt สำหรับการสร้างภาพหรือคำค้นหา stock ที่เหมาะสม
 
@@ -218,7 +259,7 @@ filled_prompt = prompt_template.format(
 )
 ```
 
-### 6. AnalyticsRetentionAgent (analytics_retention_agent_v1.txt)
+### 7. AnalyticsRetentionAgent (analytics_retention_agent_v1.txt)
 
 **วัตถุประสงค์**: ประมวลผลข้อมูล Analytics ของวิดีโอรายคลิป เพื่อตรวจสอบประสิทธิภาพเทียบ baseline/goal และแนะนำการปรับปรุงต่อเนื่อง
 
