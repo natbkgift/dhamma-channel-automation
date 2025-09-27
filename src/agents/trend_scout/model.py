@@ -106,7 +106,7 @@ class TopicScore(BaseModel):
     freshness: float = Field(description="ความใหม่")
     evergreen: float = Field(description="ความคงทน")
     brand_fit: float = Field(ge=0, le=1, description="ความเข้ากับแบรนด์")
-    composite: float = Field(description="คะแนนรวม")
+    composite: float = Field(ge=0, le=1, description="คะแนนรวม")
 
     @field_validator("search_intent", "freshness", "evergreen", "brand_fit", "composite")
     def validate_score_range(cls, value: float) -> float:
