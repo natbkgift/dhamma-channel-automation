@@ -1,5 +1,22 @@
 """agents - โมดูลรวม AI Agents ทั้งหมด"""
 
+from .error_flag import (
+    AgentError as ErrorFlagAgentError,
+)
+from .error_flag import (
+    AgentLog as ErrorFlagAgentLog,
+)
+from .error_flag import (
+    CriticalItem as ErrorFlagCriticalItem,
+)
+from .error_flag import (
+    ErrorFlagAgent,
+    ErrorFlagInput,
+    ErrorFlagOutput,
+)
+from .error_flag import (
+    WarningItem as ErrorFlagWarningItem,
+)
 from .localization_subtitle.agent import LocalizationSubtitleAgent
 from .localization_subtitle.model import (
     LocalizationSubtitleInput,
@@ -58,6 +75,13 @@ __all__ = [
     "LocalizationSubtitleOutput",
     "LocalizationSubtitleMeta",
     "SubtitleSegment",
+    "ErrorFlagAgent",
+    "ErrorFlagInput",
+    "ErrorFlagOutput",
+    "ErrorFlagAgentLog",
+    "ErrorFlagAgentError",
+    "ErrorFlagCriticalItem",
+    "ErrorFlagWarningItem",
 ]
 
 try:  # Optional dependency: sentence_transformers
