@@ -71,7 +71,10 @@ class DataSyncAgent(BaseAgent[DataSyncRequest, DataSyncResponse]):
     ) -> dict[str, list[str]]:
         normalized: dict[str, list[str]] = {}
         for version, fields in data.items():
-            if not isinstance(fields, Sequence) or isinstance(fields, str | bytes):
+            if isinstance(fields, (str, bytes)):  # noqa: UP038 - Python < 3.10 compatibility
+                msg = "schema registry ต้องระบุ list ของชื่อฟิลด์เป็น string"
+                raise ValueError(msg)
+            if not isinstance(fields, Sequence):
                 msg = "schema registry ต้องระบุ list ของชื่อฟิลด์เป็น string"
                 raise ValueError(msg)
             field_list: list[str] = []
