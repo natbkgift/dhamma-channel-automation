@@ -6,7 +6,7 @@ Pydantic Models สำหรับ TrendScoutAgent
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class GoogleTrendItem(BaseModel):
@@ -16,14 +16,14 @@ class GoogleTrendItem(BaseModel):
     score_series: list[int] = Field(description="คะแนนเทรนด์ในแต่ละช่วงเวลา")
     region: str = Field(default="TH", description="ภูมิภาค")
 
-    @validator("score_series")
-    def validate_scores(cls, v):
-        if not v:
-            return v
-        for score in v:
+    @field_validator("score_series")
+    def validate_scores(cls, value: list[int]) -> list[int]:
+        if not value:
+            return value
+        for score in value:
             if not 0 <= score <= 100:
                 raise ValueError("Google Trends score ต้องอยู่ระหว่าง 0-100")
-        return v
+        return value
 
 
 class YTTrendingItem(BaseModel):
@@ -34,17 +34,17 @@ class YTTrendingItem(BaseModel):
     age_days: int = Field(description="อายุของวิดีโอ (วัน)")
     keywords: list[str] = Field(default_factory=list, description="คำสำคัญที่สกัดได้")
 
-    @validator("views_est")
-    def validate_views(cls, v):
-        if v < 0:
+    @field_validator("views_est")
+    def validate_views(cls, value: int) -> int:
+        if value < 0:
             raise ValueError("จำนวนการดูต้องไม่เป็นลบ")
-        return v
+        return value
 
-    @validator("age_days")
-    def validate_age(cls, v):
-        if v < 0:
+    @field_validator("age_days")
+    def validate_age(cls, value: int) -> int:
+        if value < 0:
             raise ValueError("อายุวิดีโอต้องไม่เป็นลบ")
-        return v
+        return value
 
 
 class CompetitorComment(BaseModel):
@@ -54,11 +54,11 @@ class CompetitorComment(BaseModel):
     comment: str = Field(description="ความคิดเห็น")
     likes: int = Field(default=0, description="จำนวน likes")
 
-    @validator("likes")
-    def validate_likes(cls, v):
-        if v < 0:
+    @field_validator("likes")
+    def validate_likes(cls, value: int) -> int:
+        if value < 0:
             raise ValueError("จำนวน likes ต้องไม่เป็นลบ")
-        return v
+        return value
 
 
 class EmbeddingSimilarGroup(BaseModel):
@@ -68,11 +68,11 @@ class EmbeddingSimilarGroup(BaseModel):
     keywords: list[str] = Field(description="คำในกลุ่ม")
     similarity_score: float = Field(description="คะแนนความคล้าย")
 
-    @validator("similarity_score")
-    def validate_similarity(cls, v):
-        if not 0 <= v <= 1:
+    @field_validator("similarity_score")
+    def validate_similarity(cls, value: float) -> float:
+        if not 0 <= value <= 1:
             raise ValueError("Similarity score ต้องอยู่ระหว่าง 0-1")
-        return v
+        return value
 
 
 class TrendScoutInput(BaseModel):
@@ -92,11 +92,11 @@ class TrendScoutInput(BaseModel):
         default_factory=list, description="กลุ่มคำที่คล้ายกัน"
     )
 
-    @validator("keywords")
-    def validate_keywords(cls, v):
-        if not v:
+    @field_validator("keywords")
+    def validate_keywords(cls, value: list[str]) -> list[str]:
+        if not value:
             raise ValueError("ต้องมีคำสำคัญอย่างน้อย 1 คำ")
-        return v
+        return value
 
 
 class TopicScore(BaseModel):
@@ -108,11 +108,13 @@ class TopicScore(BaseModel):
     brand_fit: float = Field(description="ความเข้ากับแบรนด์")
     composite: float = Field(description="คะแนนรวม")
 
-    @validator("search_intent", "freshness", "evergreen", "brand_fit", "composite")
-    def validate_score_range(cls, v):
-        if not 0 <= v <= 1:
+    @field_validator(
+        "search_intent", "freshness", "evergreen", "brand_fit", "composite"
+    )
+    def validate_score_range(cls, value: float) -> float:
+        if not 0 <= value <= 1:
             raise ValueError("คะแนนต้องอยู่ระหว่าง 0-1")
-        return v
+        return value
 
 
 class TopicEntry(BaseModel):
@@ -128,23 +130,23 @@ class TopicEntry(BaseModel):
     similar_to: list[str] = Field(default_factory=list, description="คล้ายกับหัวข้ือื่น")
     risk_flags: list[str] = Field(default_factory=list, description="ธงเตือนความเสี่ยง")
 
-    @validator("rank")
-    def validate_rank(cls, v):
-        if v < 1:
+    @field_validator("rank")
+    def validate_rank(cls, value: int) -> int:
+        if value < 1:
             raise ValueError("อันดับต้องเป็นจำนวนเต็มบวก")
-        return v
+        return value
 
-    @validator("predicted_14d_views")
-    def validate_predicted_views(cls, v):
-        if v < 0:
+    @field_validator("predicted_14d_views")
+    def validate_predicted_views(cls, value: int) -> int:
+        if value < 0:
             raise ValueError("การดูคาดการณ์ต้องไม่เป็นลบ")
-        return v
+        return value
 
-    @validator("title")
-    def validate_title_length(cls, v):
-        if len(v) > 34:
+    @field_validator("title")
+    def validate_title_length(cls, value: str) -> str:
+        if len(value) > 34:
             raise ValueError("ชื่อหัวข้อยาวเกิน 34 ตัวอักษร")
-        return v
+        return value
 
 
 class SelfCheck(BaseModel):
@@ -182,19 +184,15 @@ class TrendScoutOutput(BaseModel):
     )
     meta: MetaInfo = Field(description="ข้อมูล Meta")
 
-    @validator("topics")
-    def validate_topics_limit(cls, v):
-        if len(v) > 15:
+    @field_validator("topics")
+    def validate_topics(cls, value: list["TopicEntry"]) -> list["TopicEntry"]:  # noqa: F821 (forward reference)
+        if len(value) > 15:
             raise ValueError("จำนวนหัวข้อต้องไม่เกิน 15 หัวข้อ")
-        return v
-
-    @validator("topics")
-    def validate_topics_sorted(cls, v):
-        if len(v) > 1:
-            scores = [topic.scores.composite for topic in v]
+        if len(value) > 1:
+            scores = [topic.scores.composite for topic in value]
             if scores != sorted(scores, reverse=True):
                 raise ValueError("หัวข้อต้องเรียงตามคะแนน composite จากมากไปน้อย")
-        return v
+        return value
 
 
 class ErrorResponse(BaseModel):
