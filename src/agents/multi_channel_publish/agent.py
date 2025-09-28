@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 from automation_core.base_agent import BaseAgent
 
@@ -34,10 +34,10 @@ class MultiChannelPublishAgent(
         request = input_data.publish_request
         timestamp = datetime.now(UTC)
 
-        payloads: List[ChannelPublishPayload] = []
-        logs: List[MultiChannelPublishLogEntry] = []
-        warnings: List[str] = []
-        errors: List[str] = []
+        payloads: list[ChannelPublishPayload] = []
+        logs: list[MultiChannelPublishLogEntry] = []
+        warnings: list[str] = []
+        errors: list[str] = []
 
         for channel in request.channels:
             if channel not in self.SUPPORTED_CHANNELS:
@@ -110,13 +110,15 @@ class MultiChannelPublishAgent(
     # ------------------------------------------------------------------
     def _map_channel(
         self, channel: str, request: PublishRequest
-    ) -> Tuple[Dict[str, Any], List[str], List[str]]:
+    ) -> tuple[dict[str, Any], list[str], list[str]]:
         mapper = getattr(self, f"_map_{channel.lower()}", None)
         if mapper is None:
             return {}, ["ยังไม่มี logic สำหรับช่องทางนี้"], ["mapping_not_implemented"]
         return mapper(request)
 
-    def _map_youtube(self, request: PublishRequest) -> Tuple[Dict[str, Any], List[str], List[str]]:
+    def _map_youtube(
+        self, request: PublishRequest
+    ) -> tuple[dict[str, Any], list[str], list[str]]:
         mapped = {
             "video": request.assets.video,
             "title": request.title,
@@ -138,7 +140,9 @@ class MultiChannelPublishAgent(
         suggestions = [required[key] for key in missing]
         return mapped, suggestions, missing
 
-    def _map_tiktok(self, request: PublishRequest) -> Tuple[Dict[str, Any], List[str], List[str]]:
+    def _map_tiktok(
+        self, request: PublishRequest
+    ) -> tuple[dict[str, Any], list[str], list[str]]:
         extra = request.extra_setting.get("TikTok", {})
         mapped = {
             "video": request.assets.vertical_video,
@@ -157,7 +161,9 @@ class MultiChannelPublishAgent(
         suggestions = [required[key] for key in missing]
         return mapped, suggestions, missing
 
-    def _map_facebook(self, request: PublishRequest) -> Tuple[Dict[str, Any], List[str], List[str]]:
+    def _map_facebook(
+        self, request: PublishRequest
+    ) -> tuple[dict[str, Any], list[str], list[str]]:
         extra = request.extra_setting.get("Facebook", {})
         mapped = {
             "video": request.assets.video,
