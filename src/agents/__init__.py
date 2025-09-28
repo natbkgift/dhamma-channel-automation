@@ -48,6 +48,22 @@ from .multi_channel_publish import (
 from .multi_channel_publish import (
     PublishRequest as MultiChannelPublishRequest,
 )
+from .personalization import (
+    EngagementMetrics as PersonalizationEngagementMetrics,
+)
+from .personalization import (
+    PersonalizationAgent,
+    PersonalizationConfig,
+    PersonalizationInput,
+    PersonalizationMeta,
+    PersonalizationOutput,
+    PersonalizationRequest,
+    PersonalizedRecommendation,
+    RecommendationItem as PersonalizationRecommendationItem,
+    TrendInterest as PersonalizationTrendInterest,
+    UserProfile as PersonalizationUserProfile,
+    ViewHistoryItem as PersonalizationViewHistoryItem,
+)
 from .research_retrieval.agent import ResearchRetrievalAgent
 from .research_retrieval.model import ResearchRetrievalInput, ResearchRetrievalOutput
 from .scheduling_publishing.agent import SchedulingPublishingAgent
@@ -89,6 +105,18 @@ __all__ = [
     "ScriptOutlineAgent",
     "ScriptOutlineInput",
     "ScriptOutlineOutput",
+    "PersonalizationAgent",
+    "PersonalizationInput",
+    "PersonalizationOutput",
+    "PersonalizationRequest",
+    "PersonalizedRecommendation",
+    "PersonalizationMeta",
+    "PersonalizationConfig",
+    "PersonalizationTrendInterest",
+    "PersonalizationUserProfile",
+    "PersonalizationViewHistoryItem",
+    "PersonalizationEngagementMetrics",
+    "PersonalizationRecommendationItem",
     "ScriptWriterAgent",
     "ScriptWriterInput",
     "ScriptWriterOutput",
