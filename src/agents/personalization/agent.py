@@ -419,7 +419,7 @@ class PersonalizationAgent(BaseAgent[PersonalizationInput, PersonalizationOutput
         topics: list[_Candidate],
         features: list[_Candidate],
     ) -> list[_Candidate]:
-        """Interleave ranked pools so recommendations mix formats naturally."""
+        """สลับรายการ candidate ที่จัดอันดับแล้วเพื่อให้คำแนะนำผสมผสานกันอย่างเป็นธรรมชาติ"""
         selected: list[_Candidate] = []
         ranked_videos = sorted(videos, key=lambda c: c.confidence, reverse=True)
         ranked_topics = sorted(topics, key=lambda c: c.confidence, reverse=True)
