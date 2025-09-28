@@ -486,7 +486,6 @@ class PersonalizationAgent(
         avg_watch: float | None,
     ) -> list[str]:
         alerts: list[str] = []
-        history_list = list(view_history)
         for item in recommendations:
             if item.confidence_pct < config.min_confidence_pct:
                 alerts.append(
@@ -494,7 +493,7 @@ class PersonalizationAgent(
                 )
         if avg_watch is not None and avg_watch < 40:
             alerts.append("ผู้ใช้มี retention ต่ำกว่า 40% ต่อเนื่อง")
-        if engagement.total < 2 and len(history_list) >= 2:
+        if engagement.total < 2 and len(view_history) >= 2:
             alerts.append("engagement ต่ำ เสี่ยง disengaged")
         return alerts
 
