@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Collection, Iterable
 from dataclasses import dataclass
 from datetime import date, timedelta
+import json
+from pathlib import Path
 from statistics import mean
-from typing import Literal
+from typing import Any, Literal, cast
 
 from automation_core.base_agent import BaseAgent
 
@@ -35,112 +37,32 @@ class _Candidate:
     payload: dict
 
 
+def _load_library_data() -> dict[str, Any]:
+    data_path = Path(__file__).with_name("personalization_data.json")
+    with data_path.open(encoding="utf-8") as file:
+        return json.load(file)
+
+
+_LIBRARY_DATA = _load_library_data()
+_VIDEO_LIBRARY = cast(dict[str, list[dict[str, object]]], _LIBRARY_DATA["video_library"])
+_TOPIC_LIBRARY = cast(dict[str, list[dict[str, object]]], _LIBRARY_DATA["topic_library"])
+_FEATURE_LIBRARY = cast(
+    dict[str, list[dict[str, object]]], _LIBRARY_DATA["feature_library"]
+)
+_FALLBACK_VIDEO = cast(dict[str, object], _LIBRARY_DATA["fallback_video"])
+_FALLBACK_TOPIC = cast(dict[str, object], _LIBRARY_DATA["fallback_topic"])
+_FALLBACK_FEATURE = cast(dict[str, object], _LIBRARY_DATA["fallback_feature"])
+
+
 class PersonalizationAgent(BaseAgent[PersonalizationInput, PersonalizationOutput]):
     """Agent สำหรับสร้างคำแนะนำคอนเทนต์เฉพาะบุคคล"""
 
-    VIDEO_LIBRARY: dict[str, list[dict[str, object]]] = {
-        "นอนหลับ": [
-            {
-                "video_id": "V05",
-                "title": "สมาธิก่อนนอน",
-                "base_conf": 82.0,
-                "angle": "ผ่อนคลายก่อนเข้านอน",
-            },
-            {
-                "video_id": "V15",
-                "title": "ปล่อยใจเบาก่อนหลับ",
-                "base_conf": 76.0,
-                "angle": "ปล่อยวางความคิดฟุ้งซ่าน",
-            },
-        ],
-        "สมาธิ": [
-            {
-                "video_id": "V07",
-                "title": "ฝึกสมาธิ 10 นาที",
-                "base_conf": 78.0,
-                "angle": "ฝึกสั้นๆ ทำได้ทุกวัน",
-            },
-            {
-                "video_id": "V18",
-                "title": "สมาธิเพื่อใจนิ่ง",
-                "base_conf": 74.0,
-                "angle": "เสริมวินัยและสติ",
-            },
-        ],
-        "สุขภาพจิต": [
-            {
-                "video_id": "V22",
-                "title": "ดูแลใจในวันที่เหนื่อย",
-                "base_conf": 75.0,
-                "angle": "ฟื้นแรงใจ",
-            }
-        ],
-    }
-
-    TOPIC_LIBRARY: dict[str, list[dict[str, object]]] = {
-        "นอนหลับ": [
-            {
-                "topic": "Mindfulness สำหรับการนอน",
-                "base_conf": 74.0,
-                "insight": "เทรนด์การนอนหลับสูงและผู้ใช้สนใจ",
-            }
-        ],
-        "สมาธิ": [
-            {
-                "topic": "คอร์สสมาธิ 7 วัน",
-                "base_conf": 72.0,
-                "insight": "ผู้ใช้ดูคอนเทนต์สมาธิจบเกิน 90%",
-            }
-        ],
-        "สุขภาพจิต": [
-            {
-                "topic": "จัดการความเครียดในชีวิตประจำวัน",
-                "base_conf": 70.0,
-                "insight": "โปรไฟล์สนใจสุขภาพจิต",
-            }
-        ],
-    }
-
-    FEATURE_LIBRARY: dict[str, list[dict[str, object]]] = {
-        "นอนหลับ": [
-            {
-                "feature": "playlist สมาธิก่อนนอน",
-                "base_conf": 68.0,
-                "insight": "ช่วยให้ผู้ใช้ฟังต่อเนื่อง",
-            }
-        ],
-        "สมาธิ": [
-            {
-                "feature": "แจ้งเตือนฝึกสมาธิทุกเช้า",
-                "base_conf": 66.0,
-                "insight": "รักษาความสม่ำเสมอในการฝึก",
-            }
-        ],
-        "สุขภาพจิต": [
-            {
-                "feature": "คอมมิวนิตี้แชร์ประสบการณ์",
-                "base_conf": 64.0,
-                "insight": "เปิดพื้นที่พูดคุยสุขภาพใจ",
-            }
-        ],
-    }
-
-    FALLBACK_VIDEO = {
-        "video_id": "GEN01",
-        "title": "ผ่อนคลายใจเบื้องต้น",
-        "base_conf": 68.0,
-        "angle": "ดูแลใจสำหรับทุกคน",
-    }
-    FALLBACK_TOPIC = {
-        "topic": "ดูแลใจและสมาธิพื้นฐาน",
-        "base_conf": 68.0,
-        "insight": "หัวข้อกว้างที่ตอบโจทย์ผู้ชมส่วนใหญ่",
-    }
-    FALLBACK_FEATURE = {
-        "feature": "playlist รวมธรรมะฟังสั้น",
-        "base_conf": 65.0,
-        "insight": "เพิ่มเวลาการรับชม",
-    }
+    VIDEO_LIBRARY: dict[str, list[dict[str, object]]] = _VIDEO_LIBRARY
+    TOPIC_LIBRARY: dict[str, list[dict[str, object]]] = _TOPIC_LIBRARY
+    FEATURE_LIBRARY: dict[str, list[dict[str, object]]] = _FEATURE_LIBRARY
+    FALLBACK_VIDEO = _FALLBACK_VIDEO
+    FALLBACK_TOPIC = _FALLBACK_TOPIC
+    FALLBACK_FEATURE = _FALLBACK_FEATURE
 
     RECENT_VIEW_THRESHOLD = 14
     COMPLETION_THRESHOLD = 90.0
@@ -485,12 +407,11 @@ class PersonalizationAgent(BaseAgent[PersonalizationInput, PersonalizationOutput
         self,
         recommendations: list[RecommendationItem],
         config: PersonalizationConfig,
-        view_history: Iterable[ViewHistoryItem],
+        view_history: Collection[ViewHistoryItem],
         engagement: EngagementMetrics,
         avg_watch: float | None,
     ) -> list[str]:
         alerts: list[str] = []
-        history_list = list(view_history)
         for item in recommendations:
             if item.confidence_pct < config.min_confidence_pct:
                 alerts.append(
@@ -498,7 +419,7 @@ class PersonalizationAgent(BaseAgent[PersonalizationInput, PersonalizationOutput
                 )
         if avg_watch is not None and avg_watch < 40:
             alerts.append("ผู้ใช้มี retention ต่ำกว่า 40% ต่อเนื่อง")
-        if engagement.total < 2 and len(history_list) >= 2:
+        if engagement.total < 2 and len(view_history) >= 2:
             alerts.append("engagement ต่ำ เสี่ยง disengaged")
         return alerts
 
