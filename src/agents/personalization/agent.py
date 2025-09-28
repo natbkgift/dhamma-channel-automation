@@ -495,9 +495,9 @@ class PersonalizationAgent(BaseAgent[PersonalizationInput, PersonalizationOutput
                 alerts.append(
                     f"ตรวจสอบคำแนะนำลำดับ {item.priority} ความมั่นใจ {item.confidence_pct}%"
                 )
-        if avg_watch is not None and avg_watch < 40:
-            alerts.append("ผู้ใช้มี retention ต่ำกว่า 40% ต่อเนื่อง")
-        if engagement.total < 2 and len(history_list) >= 2:
+        if avg_watch is not None and avg_watch < self.LOW_RETENTION_ALERT_THRESHOLD:
+            alerts.append(f"ผู้ใช้มี retention ต่ำกว่า {int(self.LOW_RETENTION_ALERT_THRESHOLD)}% ต่อเนื่อง")
+        if engagement.total < self.LOW_ENGAGEMENT_ALERT_THRESHOLD and len(history_list) >= self.MIN_HISTORY_FOR_ALERT:
             alerts.append("engagement ต่ำ เสี่ยง disengaged")
         return alerts
 
