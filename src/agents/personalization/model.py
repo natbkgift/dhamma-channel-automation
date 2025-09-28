@@ -25,14 +25,7 @@ class UserProfile(BaseModel):
     def normalize_interest(cls, value: List[str] | None) -> List[str]:
         if not value:
             return []
-        cleaned: list[str] = []
-        for item in value:
-            if not item:
-                continue
-            cleaned_item = item.strip()
-            if cleaned_item:
-                cleaned.append(cleaned_item)
-        return cleaned
+        return [item.strip() for item in value if item and item.strip()]
 
 
 class ViewHistoryItem(BaseModel):
