@@ -33,6 +33,15 @@ from .localization_subtitle.model import (
     LocalizationSubtitleOutput,
     SubtitleSegment,
 )
+from .multi_channel_publish import (
+    ChannelPublishPayload as MultiChannelPublishChannelPayload,
+    MultiChannelPublishAgent,
+    MultiChannelPublishInput,
+    MultiChannelPublishLogEntry,
+    MultiChannelPublishOutput,
+    PublishAssets as MultiChannelPublishAssets,
+    PublishRequest as MultiChannelPublishRequest,
+)
 from .research_retrieval.agent import ResearchRetrievalAgent
 from .research_retrieval.model import ResearchRetrievalInput, ResearchRetrievalOutput
 from .scheduling_publishing.agent import SchedulingPublishingAgent
@@ -64,6 +73,13 @@ __all__ = [
     "ResearchRetrievalAgent",
     "ResearchRetrievalInput",
     "ResearchRetrievalOutput",
+    "MultiChannelPublishAgent",
+    "MultiChannelPublishInput",
+    "MultiChannelPublishOutput",
+    "MultiChannelPublishRequest",
+    "MultiChannelPublishAssets",
+    "MultiChannelPublishChannelPayload",
+    "MultiChannelPublishLogEntry",
     "ScriptOutlineAgent",
     "ScriptOutlineInput",
     "ScriptOutlineOutput",
