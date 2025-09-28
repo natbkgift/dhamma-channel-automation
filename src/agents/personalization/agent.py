@@ -27,7 +27,7 @@ from .model import (
 class _Candidate:
     """ข้อมูลชั่วคราวสำหรับจัดอันดับคำแนะนำ"""
 
-    type: str
+    type: Literal["video", "topic", "feature"]
     confidence: float
     reason: str
     payload: dict
