@@ -147,7 +147,7 @@ class CommunityInsightAgent(
             return "ปล่อยวาง"
         if len(text) <= 4:
             return None
-        return text
+        return None
 
     def _extract_concern(self, message: str) -> str | None:
         text = message.strip()
