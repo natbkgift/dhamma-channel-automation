@@ -106,8 +106,8 @@
   "feedback_summary": {
     "sentiment_count": {
       "positive": 1,
-      "negative": 0,
-      "neutral": 2
+      "negative": 1,
+      "neutral": 1
     },
     "recurring_issue": [
       {"keyword": "เสียงเบา", "count": 1}
@@ -135,7 +135,7 @@
         "content_id": "V02",
         "user_id": "U1002",
         "comment": "เสียงเบาไปนิดครับ อยากให้ดังขึ้น",
-        "sentiment": "neutral"
+        "sentiment": "negative"
       },
       {
         "source": "Facebook",
@@ -178,12 +178,19 @@
 ```json
 {
   "error": {
-    "code": "MISSING_DATA | SCHEMA_VIOLATION",
+    "code": "SCHEMA_VIOLATION",
     "message": "รายละเอียดปัญหา",
     "suggested_fix": "คำแนะนำในการแก้ไข"
   }
 }
 ```
+
+เลือกค่า `error.code` จากรายการต่อไปนี้ให้ตรงกับสถานการณ์:
+- `MISSING_FEEDBACK_DATA` — ไม่พบฟิลด์ `feedback_data` หรือมีค่าว่าง
+- `SCHEMA_VIOLATION` — โครงสร้างอินพุตไม่ตรงตามที่กำหนด
+- `EMPTY_FEEDBACK_DATA` — `feedback_data` มีแต่ข้อมูลที่ถูกกรองออกจนไม่เหลือรายการให้วิเคราะห์
+- `UNSUPPORTED_LANGUAGE` — ข้อมูลทั้งหมดถูกกรองออกเพราะอยู่นอก `language_allowlist`
+- `INTERNAL_ERROR` — เกิดข้อผิดพลาดภายในที่ไม่สามารถจัดการได้
 
 ## User Runtime Template
 ขณะโต้ตอบกับผู้ใช้ ให้ใช้แม่แบบข้อความดังนี้:
@@ -236,8 +243,8 @@ Config: {{config_json}}
   "feedback_summary": {
     "sentiment_count": {
       "positive": 1,
-      "negative": 0,
-      "neutral": 2
+      "negative": 1,
+      "neutral": 1
     },
     "recurring_issue": [
       {"keyword": "เสียงเบา", "count": 1}
@@ -265,7 +272,7 @@ Config: {{config_json}}
         "content_id": "V02",
         "user_id": "U1002",
         "comment": "เสียงเบาไปนิดครับ อยากให้ดังขึ้น",
-        "sentiment": "neutral"
+        "sentiment": "negative"
       },
       {
         "source": "Facebook",
