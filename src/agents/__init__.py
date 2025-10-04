@@ -2,6 +2,21 @@
 
 # ruff: noqa: I001
 
+from .community_insight import (  # noqa: E402  # ruff: noqa: E402
+    AlertItem as CommunityInsightAlertItem,
+    CommunityConcern as CommunityInsightConcern,
+    CommunityInsightAgent,
+    CommunityInsightConfig,
+    CommunityInsightMeta,
+    CommunityInsightPayload,
+    CommunityInsightRequest,
+    CommunityInsightResponse,
+    CommunityMessage as CommunityInsightMessage,
+    EmergingTopic as CommunityInsightEmergingTopic,
+    InfluencerActivity as CommunityInsightInfluencerActivity,
+    MetaSelfCheck as CommunityInsightMetaSelfCheck,
+    RecurringTheme as CommunityInsightRecurringTheme,
+)
 from .data_sync import (
     DataSyncAgent,
     DataSyncLogEntry,
@@ -120,6 +135,19 @@ __all__ = [
     "LocalizationSubtitleOutput",
     "LocalizationSubtitleMeta",
     "SubtitleSegment",
+    "CommunityInsightAgent",
+    "CommunityInsightRequest",
+    "CommunityInsightResponse",
+    "CommunityInsightPayload",
+    "CommunityInsightMeta",
+    "CommunityInsightMetaSelfCheck",
+    "CommunityInsightRecurringTheme",
+    "CommunityInsightConcern",
+    "CommunityInsightEmergingTopic",
+    "CommunityInsightInfluencerActivity",
+    "CommunityInsightAlertItem",
+    "CommunityInsightConfig",
+    "CommunityInsightMessage",
     "DataSyncAgent",
     "DataSyncRequest",
     "DataSyncResponse",
