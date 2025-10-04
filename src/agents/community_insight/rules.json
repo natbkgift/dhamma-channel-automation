@@ -1,0 +1,53 @@
+{
+  "themes": [
+    {
+      "theme": "สมาธิสำหรับวัยรุ่น",
+      "keywords": ["สมาธิ", "วัยรุ่น"],
+      "insights": ["community สนใจธรรมะสำหรับวัยรุ่น"],
+      "recommendations": ["ผลิตคอนเทนต์สมาธิสำหรับวัยรุ่น"]
+    },
+    {
+      "theme": "ธรรมะแก้เครียด",
+      "keywords": ["ธรรมะ", "แก้เครียด"],
+      "insights": ["community สนใจธรรมะแก้เครียด"],
+      "recommendations": ["จัด live Q&A แก้เครียด"]
+    },
+    {
+      "theme": "ปล่อยวาง",
+      "keywords": ["ปล่อยวาง"],
+      "insights": ["community พูดถึงปล่อยวาง"],
+      "recommendations": ["ทำเพลย์ลิสต์หรือรีโพสต์คลิปปล่อยวาง"]
+    }
+  ],
+  "concerns": [
+    {
+      "concern": "เครียดกับงาน",
+      "keywords": ["เครียด", "งาน"],
+      "alerts": [
+        {"type": "concern", "message": "พบข้อความเกี่ยวกับ 'เครียด' ใน community"}
+      ]
+    },
+    {
+      "concern": "ความเครียด",
+      "keywords": ["เครียด"],
+      "alerts": [
+        {"type": "concern", "message": "พบข้อความเกี่ยวกับ 'เครียด' ใน community"}
+      ]
+    }
+  ],
+  "emerging_topics": [
+    {
+      "theme": "สมาธิสำหรับวัยรุ่น",
+      "topic": "Q&A วัยรุ่น",
+      "reason": "มี influencer ถามถึงสมาธิสำหรับวัยรุ่น",
+      "trigger_keywords": ["วัยรุ่น", "สมาธิ"]
+    }
+  ],
+  "default_concern_responses": [
+    {
+      "keywords": ["เครียด"],
+      "insights": ["ความเครียดเป็น pain point ช่วงนี้"],
+      "recommendations": ["จัด live Q&A แก้เครียด"]
+    }
+  ]
+}
