@@ -24,14 +24,20 @@
       "concern": "เครียดกับงาน",
       "keywords": ["เครียด", "งาน"],
       "alerts": [
-        {"type": "concern", "message": "พบข้อความเกี่ยวกับ 'เครียด' ใน community"}
+        {
+          "type": "concern",
+          "message": "พบข้อความว่าเครียดกับงานใน community"
+        }
       ]
     },
     {
       "concern": "ความเครียด",
       "keywords": ["เครียด"],
       "alerts": [
-        {"type": "concern", "message": "พบข้อความเกี่ยวกับ 'เครียด' ใน community"}
+        {
+          "type": "concern",
+          "message": "พบข้อความเกี่ยวกับ 'เครียด' ใน community"
+        }
       ]
     }
   ],
@@ -49,5 +55,21 @@
       "insights": ["ความเครียดเป็น pain point ช่วงนี้"],
       "recommendations": ["จัด live Q&A แก้เครียด"]
     }
-  ]
+  ],
+  "influencer_activity": {
+    "rules": [
+      {
+        "keywords": ["ดีมาก", "อยากได้อีก"],
+        "activity_with_theme": "รีวิวคลิป{theme}, กระตุ้นความสนใจ"
+      },
+      {
+        "keywords": ["อยาก"],
+        "activity_with_theme": "เสนอหัวข้อ{theme}"
+      }
+    ],
+    "defaults": {
+      "with_theme": "กระตุ้นการสนทนาเรื่อง{theme}",
+      "without_theme": "มีส่วนร่วมในบทสนทนา"
+    }
+  }
 }

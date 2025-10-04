@@ -11,6 +11,7 @@ from automation_core.base_agent import BaseAgent
 
 from .model import (
     AlertItem,
+    AlertKeywordConfig,
     CommunityConcern,
     CommunityInsightConfig,
     CommunityInsightMeta,
@@ -51,7 +52,8 @@ class CommunityInsightAgent(
         alerts: list[AlertItem] = []
         insights: set[str] = set()
         recommendations: set[str] = set()
-        triggered_alert_messages: set[str] = set()
+        triggered_alerts: set[tuple[str, str]] = set()
+        tracked_influencers = set(input_data.config.track_influencer)
 
         for message in filtered_messages:
             theme_rule = self._match_theme(message.message)
@@ -72,21 +74,18 @@ class CommunityInsightAgent(
                     concern_counts.get(concern_rule.concern, 0) + 1
                 )
                 for alert in concern_rule.alerts:
-                    if alert.message not in triggered_alert_messages:
+                    signature = (alert.type, alert.message)
+                    if signature not in triggered_alerts:
                         alerts.append(alert)
-                        triggered_alert_messages.add(alert.message)
+                        triggered_alerts.add(signature)
 
-            for alert_message in keyword_alerts:
-                if alert_message not in triggered_alert_messages:
-                    alerts.append(
-                        AlertItem(
-                            type="concern",
-                            message=alert_message,
-                        )
-                    )
-                    triggered_alert_messages.add(alert_message)
+            for alert in keyword_alerts:
+                signature = (alert.type, alert.message)
+                if signature not in triggered_alerts:
+                    alerts.append(alert)
+                    triggered_alerts.add(signature)
 
-            if message.user_id in input_data.config.track_influencer:
+            if message.user_id in tracked_influencers:
                 activity = self._summarize_influencer_activity(
                     message, theme_rule.theme if theme_rule else None
                 )
@@ -139,9 +138,7 @@ class CommunityInsightAgent(
         """Count words using Thai word tokenisation for higher accuracy."""
 
         tokens = [
-            token
-            for token in word_tokenize(text, engine="newmm")
-            if token.strip()
+            token for token in word_tokenize(text, engine="newmm") if token.strip()
         ]
         return len(tokens)
 
@@ -160,26 +157,46 @@ class CommunityInsightAgent(
         return None
 
     def _detect_alert_keywords(
-        self, message: str, keywords: Iterable[str]
-    ) -> set[str]:
-        detected = set()
+        self, message: str, keywords: Iterable[AlertKeywordConfig]
+    ) -> list[AlertItem]:
+        detected: list[AlertItem] = []
         for keyword in keywords:
-            if keyword and keyword in message:
-                detected.add(f"พบข้อความเกี่ยวกับ '{keyword}' ใน community")
+            if keyword.keyword and keyword.keyword in message:
+                detected.append(
+                    AlertItem(
+                        type=keyword.type,
+                        message=keyword.render_message(),
+                    )
+                )
         return detected
 
     def _summarize_influencer_activity(
         self, message: CommunityMessage, theme: str | None
     ) -> InfluencerActivity:
-        text = message.message
-        if "ดีมาก" in text and "อยากได้อีก" in text and theme:
-            activity = "รีวิวคลิปปล่อยวาง, กระตุ้นความสนใจ"
-        elif "อยาก" in text and theme:
-            activity = f"เสนอหัวข้อ{theme}"
-        elif theme:
-            activity = f"กระตุ้นการสนทนาเรื่อง{theme}"
+        text = message.message.strip()
+        for rule in self._rules.influencer_activity_rules:
+            if all(keyword in text for keyword in rule.keywords):
+                if theme and rule.activity_with_theme:
+                    activity = self._render_activity(rule.activity_with_theme, theme)
+                    return InfluencerActivity(
+                        user_id=message.user_id, activity=activity
+                    )
+                if not theme and rule.activity_without_theme:
+                    return InfluencerActivity(
+                        user_id=message.user_id,
+                        activity=self._render_activity(
+                            rule.activity_without_theme, None
+                        ),
+                    )
+
+        if theme:
+            activity = self._render_activity(
+                self._rules.influencer_activity_defaults.with_theme, theme
+            )
         else:
-            activity = "มีส่วนร่วมในบทสนทนา"
+            activity = self._render_activity(
+                self._rules.influencer_activity_defaults.without_theme, None
+            )
         return InfluencerActivity(user_id=message.user_id, activity=activity)
 
     def _infer_emerging_topic(
@@ -194,6 +211,11 @@ class CommunityInsightAgent(
             ):
                 return EmergingTopic(topic=rule.topic, reason=rule.reason)
         return None
+
+    def _render_activity(self, template: str, theme: str | None) -> str:
+        if "{theme}" in template and theme is not None:
+            return template.format(theme=theme)
+        return template.replace("{theme}", "")
 
     def _topic_exists(self, topics: Iterable[EmergingTopic], topic: str) -> bool:
         return any(item.topic == topic for item in topics)
@@ -220,7 +242,9 @@ class CommunityInsightAgent(
             payload.actionable_recommendation,
         ]
         all_sections_present = all(field is not None for field in fields)
-        no_empty_fields = all(len(field) > 0 for field in fields if isinstance(field, list))
+        no_empty_fields = all(
+            len(field) > 0 for field in fields if isinstance(field, list)
+        )
 
         return CommunityInsightMeta(
             message_count=message_count,

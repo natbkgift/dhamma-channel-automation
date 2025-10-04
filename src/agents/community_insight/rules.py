@@ -41,17 +41,36 @@ class ConcernResponseRule:
 
 
 @dataclass(frozen=True)
+class InfluencerActivityRule:
+    keywords: tuple[str, ...]
+    activity_with_theme: str | None = None
+    activity_without_theme: str | None = None
+
+
+@dataclass(frozen=True)
+class InfluencerActivityDefaults:
+    with_theme: str
+    without_theme: str
+
+
+@dataclass(frozen=True)
 class CommunityInsightRules:
     themes: tuple[ThemeRule, ...]
     concerns: tuple[ConcernRule, ...]
     emerging_topics: tuple[EmergingTopicRule, ...]
     default_concern_responses: tuple[ConcernResponseRule, ...]
+    influencer_activity_rules: tuple[InfluencerActivityRule, ...]
+    influencer_activity_defaults: InfluencerActivityDefaults
 
 
 def load_rules() -> CommunityInsightRules:
     """Load rule definitions from the bundled JSON configuration file."""
 
-    with resources.files(__package__).joinpath("rules.json").open("r", encoding="utf-8") as fp:
+    with (
+        resources.files(__package__)
+        .joinpath("rules.json")
+        .open("r", encoding="utf-8") as fp
+    ):
         raw = json.load(fp)
 
     def _as_tuple(items: Iterable[str]) -> tuple[str, ...]:
@@ -98,9 +117,27 @@ def load_rules() -> CommunityInsightRules:
         for entry in raw.get("default_concern_responses", [])
     )
 
+    influencer_activity_data = raw.get("influencer_activity", {})
+    influencer_activity_rules = tuple(
+        InfluencerActivityRule(
+            keywords=_as_tuple(entry.get("keywords", [])),
+            activity_with_theme=entry.get("activity_with_theme"),
+            activity_without_theme=entry.get("activity_without_theme"),
+        )
+        for entry in influencer_activity_data.get("rules", [])
+    )
+
+    defaults_data = influencer_activity_data.get("defaults", {})
+    influencer_defaults = InfluencerActivityDefaults(
+        with_theme=defaults_data.get("with_theme", "กระตุ้นการสนทนาเรื่อง{theme}"),
+        without_theme=defaults_data.get("without_theme", "มีส่วนร่วมในบทสนทนา"),
+    )
+
     return CommunityInsightRules(
         themes=themes,
         concerns=concerns,
         emerging_topics=emerging_topics,
         default_concern_responses=default_concern_responses,
+        influencer_activity_rules=influencer_activity_rules,
+        influencer_activity_defaults=influencer_defaults,
     )

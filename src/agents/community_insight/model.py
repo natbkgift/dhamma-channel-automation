@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class CommunityMessage(BaseModel):
@@ -16,12 +17,48 @@ class CommunityMessage(BaseModel):
     timestamp: datetime
 
 
+class AlertKeywordConfig(BaseModel):
+    """Declarative configuration for keyword-triggered alerts."""
+
+    keyword: str
+    type: str = "concern"
+    message_template: str = "พบข้อความเกี่ยวกับ '{keyword}' ใน community"
+
+    def render_message(self) -> str:
+        """Render the alert message using the configured template."""
+
+        return self.message_template.format(keyword=self.keyword)
+
+
 class CommunityInsightConfig(BaseModel):
     """Configuration flags for the insight analysis."""
 
     min_word_count: int = Field(ge=0)
     track_influencer: list[str] = Field(default_factory=list)
-    alert_keywords: list[str] = Field(default_factory=list)
+    alert_keywords: list[AlertKeywordConfig] = Field(default_factory=list)
+
+    @field_validator("alert_keywords", mode="before")
+    @classmethod
+    def _convert_keywords(cls, value: Any) -> list[AlertKeywordConfig]:
+        """Allow shorthand string configuration for alert keywords."""
+
+        if not value:
+            return []
+        if not isinstance(value, list):
+            msg = f"alert_keywords must be a list, got {type(value)!r}"
+            raise TypeError(msg)
+        converted: list[AlertKeywordConfig] = []
+        for item in value:
+            if isinstance(item, AlertKeywordConfig):
+                converted.append(item)
+            elif isinstance(item, str):
+                converted.append(AlertKeywordConfig(keyword=item))
+            elif isinstance(item, dict):
+                converted.append(AlertKeywordConfig(**item))
+            else:
+                msg = f"Unsupported alert keyword configuration: {item!r}"
+                raise TypeError(msg)
+        return converted
 
 
 class CommunityInsightRequest(BaseModel):
