@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['**']
   pull_request:
-    branches: [ "main" ]
+    branches: ['**']
 
 # ป้องกันไม่ให้ workflow ซ้อนเมื่อ push ถี่
 concurrency:
@@ -13,12 +13,112 @@ concurrency:
 
 permissions:
   contents: read
+  packages: read
 
 env:
   PYTHONUNBUFFERED: "1"
   PIP_DISABLE_PIP_VERSION_CHECK: "1"
 
 jobs:
+  quality-gate:
+    name: Build • Test • Verify
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: testing
+      APP_DEBUG: true
+      DB_CONNECTION: sqlite
+      DB_DATABASE: database/database.sqlite
+      CACHE_DRIVER: file
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: sync
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, intl, pdo_sqlite, bcmath, fileinfo, gd
+          tools: composer:v2
+          coverage: xdebug
+          ini-values: memory_limit=-1, post_max_size=64M, upload_max_filesize=64M
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            npm-
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Install Node dependencies
+        run: npm ci --no-progress
+
+      - name: Prepare application state
+        run: |
+          cp .env.example .env
+          php -r "if (!file_exists('database')) { mkdir('database', 0777, true); }"
+          php -r "if (!file_exists('database/database.sqlite')) { touch('database/database.sqlite'); }"
+          php artisan key:generate --force
+          php artisan config:clear
+
+      - name: Security audit (Composer)
+        run: composer audit --locked --no-dev --ignore-severity=low --ignore-severity=medium
+
+      - name: Security audit (npm)
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Run database migrations
+        run: php artisan migrate --force --no-interaction
+
+      - name: PHP lint (Pint)
+        run: vendor/bin/pint --test
+
+      - name: Static analysis (PHPStan)
+        run: vendor/bin/phpstan analyse --configuration=phpstan.neon --no-progress --memory-limit=1G
+
+      - name: ESLint
+        run: npm run lint -- --max-warnings=0
+
+      - name: Run test suite with coverage
+        run: |
+          mkdir -p storage/coverage
+          php artisan test --coverage --min=60 --coverage-clover=storage/coverage/clover.xml --without-tty
+
+      - name: Build frontend assets
+        run: npm run build -- --emptyOutDir
+
+      - name: Smoke tests (health + browse)
+        run: php artisan test --group=smoke --without-tty
+
+      - name: Upload frontend build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: public/build
+          if-no-files-found: error
+          retention-days: 7
+
   lint:
     name: Lint (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
