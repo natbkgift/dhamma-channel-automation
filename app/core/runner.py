@@ -32,6 +32,26 @@ def _resolve_python(cmd: list[str]) -> list[str]:
     return cmd
 
 
+def _parse_pipeline_enabled(env_value: str | None) -> bool:
+    """
+    Parse PIPELINE_ENABLED environment variable.
+
+    Args:
+        env_value: Value from os.environ.get('PIPELINE_ENABLED')
+
+    Returns:
+        True if pipeline should run (enabled or not set)
+        False if pipeline should be disabled
+
+    Default: True (enabled) when env var is not set
+    """
+    if env_value is None:
+        return True  # Default to enabled
+
+    # Case-insensitive check for "false"
+    return env_value.strip().lower() not in ("false", "0", "no", "off", "disabled")
+
+
 class ProcessJob:
     def __init__(self, agent_key: str, cmd: list[str]):
         self.agent_key = agent_key
@@ -113,6 +133,18 @@ class ProcessJob:
     async def start(self):
         if self.status in ("running", "starting", "paused"):
             return
+
+        # Check global kill switch (PIPELINE_ENABLED)
+        pipeline_enabled = _parse_pipeline_enabled(os.environ.get("PIPELINE_ENABLED"))
+
+        if not pipeline_enabled:
+            self.status = "disabled"
+            self.progress = 100
+            msg = "[DISABLED] Pipeline disabled by PIPELINE_ENABLED=false"
+            self.log.append(msg)
+            self._append_file_log(msg)
+            return
+
         self.status = "starting"
         msg = f"เริ่มรันคำสั่ง: {' '.join(self.cmd)}"
         self.log.append(msg)

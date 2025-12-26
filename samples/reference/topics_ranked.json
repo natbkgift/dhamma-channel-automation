@@ -1,0 +1,49 @@
+{
+  "prioritized_at": "2025-11-04T09:20:11.366192",
+  "total_evaluated": 5,
+  "selected_top": 3,
+  "ranked": [
+    {
+      "rank": 1,
+      "title": "เจริญสติในชีวิตประจำวัน 5 นาที",
+      "scores": {
+        "impact": 6,
+        "feasibility": 10,
+        "alignment": 10,
+        "total": 8.4
+      },
+      "reason": "Short-form mindfulness content กำลังเป็นเทรนด์ในช่วง 30 วันข้างหน้า",
+      "difficulty": "ง่าย",
+      "risk": "ต่ำ - เนื้อหาพื้นฐาน ไม่ขัดแย้ง",
+      "audience": "คนทำงาน, ผู้เริ่มต้น"
+    },
+    {
+      "rank": 2,
+      "title": "เมตตาภาวนา: วิธีฝึกให้มีใจเมตตา",
+      "scores": {
+        "impact": 6,
+        "feasibility": 10,
+        "alignment": 10,
+        "total": 8.4
+      },
+      "reason": "วันมาฆบูชาใกล้เข้ามา (ก.พ. 2026)",
+      "difficulty": "ง่าย",
+      "risk": "ต่ำ",
+      "audience": "ผู้ปฏิบัติธรรม"
+    },
+    {
+      "rank": 3,
+      "title": "วิธีรับมือความเครียดด้วยอานาปานสติ",
+      "scores": {
+        "impact": 8,
+        "feasibility": 7,
+        "alignment": 10,
+        "total": 8.2
+      },
+      "reason": "เกี่ยวข้องกับความเครียด ซึ่งเป็นปัญหาที่พบบ่อย",
+      "difficulty": "ปานกลาง",
+      "risk": "ต่ำ",
+      "audience": "คนทำงาน"
+    }
+  ]
+}
