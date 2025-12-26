@@ -206,3 +206,12 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 astral-shape-439509-h4-2cfc6b202fa3.json
+
+# Pipeline outputs (keep existing tracked files, ignore new ones)
+output/logs/
+output/*/
+!output/.gitkeep
+tmp/
+artifacts/
+.env.local
+.env.*.local
