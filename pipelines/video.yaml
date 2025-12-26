@@ -1,0 +1,52 @@
+pipeline: dhamma-video
+version: 0.1
+steps:
+  - id: trend_scout
+    uses: TrendScout
+    input:
+      niches: ["dhamma", "mindfulness", "Buddhism (TH)"]
+      horizon_days: 30
+    output: trend_candidates.json
+
+  - id: topic_prioritizer
+    uses: TopicPrioritizer
+    needs: [trend_scout]
+    input_from: trend_candidates.json
+    output: topics_ranked.json
+
+  - id: research_retrieval
+    uses: ResearchRetrieval
+    needs: [topic_prioritizer]
+    input_from: topics_ranked.json
+    output: research_bundle.json
+
+  - id: script_outline
+    uses: ScriptOutline
+    needs: [research_retrieval]
+    input_from: research_bundle.json
+    output: outline.md
+
+  - id: script_writer
+    uses: ScriptWriter
+    needs: [script_outline]
+    input_from: outline.md
+    output: script.md
+
+  - id: doctrine_validator
+    uses: DoctrineValidator
+    needs: [script_writer]
+    input_from: script.md
+    output: script_validated.md
+    on_fail: flag
+
+  - id: seo_metadata
+    uses: SEOAndMetadata
+    needs: [doctrine_validator]
+    input_from: script_validated.md
+    output: metadata.json
+
+  - id: publish
+    uses: SchedulingPublishing
+    needs: [seo_metadata]
+    input_from: metadata.json
+    output: publish_receipt.json

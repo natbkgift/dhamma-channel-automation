@@ -1,0 +1,117 @@
+pipeline: dhamma-video-complete
+version: 1.0
+description: Complete end-to-end video production pipeline with 17 agents
+
+steps:
+  # ========== PHASE 1: DISCOVERY & RESEARCH ==========
+  
+  - id: trend_scout
+    uses: TrendScout
+    input:
+      niches: ["dhamma", "mindfulness", "Buddhism (TH)"]
+      horizon_days: 30
+    output: trend_candidates.json
+
+  - id: topic_prioritizer
+    uses: TopicPrioritizer
+    needs: [trend_scout]
+    input_from: trend_candidates.json
+    output: topics_ranked.json
+
+  - id: research_retrieval
+    uses: ResearchRetrieval
+    needs: [topic_prioritizer]
+    input_from: topics_ranked.json
+    output: research_bundle.json
+
+  - id: data_enrichment
+    uses: DataEnrichment
+    needs: [research_retrieval]
+    input_from: research_bundle.json
+    output: data_enrichment.json
+
+  # ========== PHASE 2: CONTENT CREATION ==========
+
+  - id: script_outline
+    uses: ScriptOutline
+    needs: [data_enrichment]
+    input_from: data_enrichment.json
+    output: outline.md
+
+  - id: script_writer
+    uses: ScriptWriter
+    needs: [script_outline]
+    input_from: outline.md
+    output: script.md
+
+  - id: doctrine_validator
+    uses: DoctrineValidator
+    needs: [script_writer]
+    input_from: script.md
+    output: script_validated.md
+    on_fail: flag
+
+  - id: legal_compliance
+    uses: LegalCompliance
+    needs: [doctrine_validator]
+    input_from: script_validated.md
+    output: compliance_report.json
+
+  # ========== PHASE 3: PRODUCTION ASSETS ==========
+
+  - id: visual_asset
+    uses: VisualAsset
+    needs: [legal_compliance]
+    input_from: script_validated.md
+    output: visual_guide.json
+
+  - id: voiceover
+    uses: Voiceover
+    needs: [legal_compliance]
+    input_from: script_validated.md
+    output: voiceover_guide.json
+
+  - id: localization
+    uses: Localization
+    needs: [legal_compliance]
+    input_from: script_validated.md
+    output: localization.json
+
+  # ========== PHASE 4: PUBLISHING PREPARATION ==========
+
+  - id: seo_metadata
+    uses: SEOAndMetadata
+    needs: [legal_compliance]
+    input_from: script_validated.md
+    output: metadata.json
+
+  - id: thumbnail_generator
+    uses: ThumbnailGenerator
+    needs: [seo_metadata]
+    input_from: metadata.json
+    output: thumbnail_concepts.json
+
+  - id: format_conversion
+    uses: FormatConversion
+    needs: [seo_metadata]
+    input_from: script_validated.md
+    output: format_specs.json
+
+  - id: multi_channel
+    uses: MultiChannelPublish
+    needs: [seo_metadata]
+    input_from: metadata.json
+    output: multi_channel.json
+
+  - id: publish
+    uses: SchedulingPublishing
+    needs: [multi_channel]
+    input_from: multi_channel.json
+    output: publish_receipt.json
+
+  # ========== PHASE 5: BACKUP & ARCHIVE ==========
+
+  - id: backup_archive
+    uses: BackupArchive
+    needs: [publish]
+    output: backup_manifest.json

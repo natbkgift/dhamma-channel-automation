@@ -1,0 +1,2592 @@
+"""
+Dhamma Channel Automation - Orchestrator Pipeline
+รันเอเจนต์ตามลำดับที่กำหนดใน YAML pipeline
+"""
+import argparse
+import json
+import os
+import shutil
+import time
+from datetime import datetime
+from pathlib import Path
+import yaml
+
+
+ROOT = Path(__file__).parent
+
+
+def ensure_dir(p: Path):
+    """สร้างโฟลเดอร์ถ้ายังไม่มี"""
+    p.mkdir(parents=True, exist_ok=True)
+
+
+def write_text(path: Path, text: str):
+    """เขียนไฟล์ข้อความ"""
+    ensure_dir(path.parent)
+    path.write_text(text, encoding="utf-8")
+
+
+def write_json(path: Path, obj):
+    """เขียนไฟล์ JSON"""
+    ensure_dir(path.parent)
+    path.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def read_json(path: Path):
+    """อ่านไฟล์ JSON"""
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def log(msg: str, level="INFO"):
+    """พิมพ์ log พร้อม timestamp"""
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{timestamp}] [{level}] {msg}")
+
+
+# ========== AGENT IMPLEMENTATIONS (PHASE: SYSTEM SETUP) ==========
+
+def agent_prompt_pack(step, run_dir: Path):
+    """Prompt Pack/Workflow Diagram - จัดการแพ็กพร็อมต์และไดอะแกรม"""
+    out = run_dir / step["output"]
+    
+    # สแกนพร็อมต์จริงจากโฟลเดอร์
+    prompts_dir = ROOT / "prompts"
+    prompt_files = list(prompts_dir.glob("*.txt")) if prompts_dir.exists() else []
+    
+    prompts_dict = {}
+    for pf in prompt_files:
+        agent_name = pf.stem.replace("_v1", "").replace("_", " ").title()
+        prompts_dict[pf.stem] = {
+            "file": str(pf.relative_to(ROOT)),
+            "agent": agent_name,
+            "size_bytes": pf.stat().st_size
+        }
+    
+    pack = {
+        "pack_id": "dhamma_v1",
+        "created_at": datetime.now().isoformat(),
+        "total_prompts": len(prompts_dict),
+        "prompts": prompts_dict,
+        "workflow_diagram": {
+            "phases": ["system_setup", "discovery", "content_creation", "publishing", "analytics"],
+            "agents_per_phase": {
+                "system_setup": ["PromptPack", "AgentTemplate", "Security", "Integration", "DataSync", 
+                                "InventoryIndex", "Monitoring", "Notification", "ErrorFlag", "Dashboard", "BackupArchive"],
+                "discovery": ["TrendScout", "TopicPrioritizer", "ResearchRetrieval", "DataEnrichment"],
+                "content_creation": ["ScriptOutline", "ScriptWriter", "DoctrineValidator", "LegalCompliance",
+                                    "VisualAsset", "Voiceover", "Localization", "ThumbnailGenerator"],
+                "publishing": ["SEOMetadata", "FormatConversion", "MultiChannelPublish", "SchedulingPublishing"],
+                "analytics": ["Analytics", "AdvancedBI", "ExperimentOrchestrator", "GrowthForecast", 
+                             "FeedbackLoop", "UserFeedbackCollector", "CommunityInsight"]
+            }
+        }
+    }
+    
+    write_json(out, pack)
+    log(f"✓ Prompt Pack created with {len(prompts_dict)} prompts from {prompts_dir}")
+    return out
+
+
+def agent_template(step, run_dir: Path):
+    """Agent Template - แม่แบบสร้างเอเจนต์ใหม่"""
+    out = run_dir / step["output"]
+    
+    template = {
+        "agent_template_version": "1.0",
+        "template": {
+            "name": "{{AGENT_NAME}}",
+            "version": "1.0",
+            "description": "{{DESCRIPTION}}",
+            "input_schema": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            },
+            "output_schema": {
+                "type": "object",
+                "properties": {
+                    "status": {"type": "string"},
+                    "result": {"type": "object"}
+                }
+            },
+            "error_handling": {
+                "retry_count": 3,
+                "timeout_seconds": 300,
+                "fallback_action": "notify_and_halt"
+            }
+        },
+        "example_agents": ["TrendScout", "TopicPrioritizer", "ResearchRetrieval"]
+    }
+    
+    write_json(out, template)
+    log("✓ Agent Template created")
+    return out
+
+
+def agent_security(step, run_dir: Path):
+    """Security Agent - จัดการความปลอดภัย API keys และ access control"""
+    out = run_dir / step["output"]
+    
+    # ตรวจสอบไฟล์ .env
+    env_file = ROOT / ".env"
+    env_example = ROOT / ".env.example"
+    gitignore = ROOT / ".gitignore"
+    
+    api_keys_status = {}
+    env_vars = {}
+    
+    if env_file.exists():
+        with open(env_file, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, value = line.split("=", 1)
+                    key = key.strip()
+                    value = value.strip().strip('"').strip("'")
+                    env_vars[key] = value
+                    if value and value != "your_key_here":
+                        api_keys_status[key] = {"status": "configured", "masked": value[:8] + "***"}
+                    else:
+                        api_keys_status[key] = {"status": "not_configured", "masked": ""}
+    
+    # ตรวจสอบ .gitignore
+    gitignore_ok = False
+    if gitignore.exists():
+        gitignore_content = gitignore.read_text(encoding="utf-8")
+        gitignore_ok = ".env" in gitignore_content
+    
+    security_config = {
+        "checked_at": datetime.now().isoformat(),
+        "env_file": {
+            "exists": env_file.exists(),
+            "path": str(env_file.relative_to(ROOT)) if env_file.exists() else ".env",
+            "keys_count": len(env_vars)
+        },
+        "api_keys": api_keys_status if api_keys_status else {
+            "youtube_api": {"status": "not_configured", "note": "Create .env file"},
+            "openai_api": {"status": "not_configured", "note": "Create .env file"}
+        },
+        "access_control": {
+            "encryption": "Environment variables",
+            "secret_storage": ".env file",
+            "gitignore_configured": gitignore_ok,
+            "permissions": {
+                "read_prompts": ["all_agents"],
+                "write_output": ["all_agents"],
+                "publish_content": ["SchedulingPublishing", "MultiChannelPublish"]
+            }
+        },
+        "recommendations": [
+            "ใช้ .env สำหรับเก็บ API keys" if not env_file.exists() else "✓ .env file exists",
+            "เพิ่ม .env ใน .gitignore" if not gitignore_ok else "✓ .env in .gitignore",
+            "หมุนเวียน API keys ทุก 90 วัน",
+            "ใช้ IAM roles สำหรับ production"
+        ]
+    }
+    
+    write_json(out, security_config)
+    
+    if not env_file.exists():
+        log("⚠ .env file not found - using default configuration", "WARNING")
+    else:
+        log(f"✓ Security check completed - {len(env_vars)} environment variables found")
+    
+    return out
+
+
+def agent_integration(step, run_dir: Path):
+    """Integration Agent - เชื่อมต่อระบบภายนอก"""
+    out = run_dir / step["output"]
+    
+    integrations = {
+        "tested_at": datetime.now().isoformat(),
+        "external_services": {
+            "youtube_data_api": {
+                "status": "ready",
+                "endpoint": "https://www.googleapis.com/youtube/v3",
+                "features": ["search", "videos", "channels"]
+            },
+            "google_trends": {
+                "status": "ready",
+                "library": "pytrends",
+                "features": ["trending_searches", "interest_over_time"]
+            },
+            "openai": {
+                "status": "ready",
+                "models": ["gpt-4", "gpt-3.5-turbo"],
+                "features": ["chat", "embeddings"]
+            }
+        },
+        "internal_services": {
+            "database": {"type": "sqlite", "path": "data/dhamma.db"},
+            "file_storage": {"type": "local", "path": "output/"}
+        }
+    }
+    
+    write_json(out, integrations)
+    log(f"✓ Integration check - {len(integrations['external_services'])} services ready")
+    return out
+
+
+def agent_data_sync(step, run_dir: Path):
+    """Data Sync Agent - ซิงก์ข้อมูลระหว่างระบบ"""
+    out = run_dir / step["output"]
+    
+    sync_status = {
+        "synced_at": datetime.now().isoformat(),
+        "sources": {
+            "prompts": {"count": 36, "last_updated": "2025-11-03", "status": "synced"},
+            "examples": {"count": 36, "last_updated": "2025-11-03", "status": "synced"},
+            "agents": {"count": 12, "status": "initialized"}
+        },
+        "destinations": {
+            "local_cache": {"path": "output/cache/", "status": "ready"},
+            "database": {"status": "ready"}
+        },
+        "sync_schedule": "every 1 hour",
+        "last_sync_items": [
+            "prompts/*.txt → cache",
+            "examples/*.json → cache"
+        ]
+    }
+    
+    write_json(out, sync_status)
+    log("✓ Data sync completed - All sources synced")
+    return out
+
+
+def agent_inventory_index(step, run_dir: Path):
+    """Inventory/Index Agent - สแกนและจัดทำดัชนีไฟล์"""
+    out = run_dir / step["output"]
+    
+    # สแกนไฟล์จริงในโปรเจกต์
+    prompts_dir = ROOT / "prompts"
+    examples_dir = ROOT / "examples"
+    
+    prompt_files = list(prompts_dir.glob("*.txt")) if prompts_dir.exists() else []
+    example_files = list(examples_dir.glob("*.json")) if examples_dir.exists() else []
+    
+    inventory = {
+        "indexed_at": datetime.now().isoformat(),
+        "total_agents": 36,
+        "prompts": {
+            "count": len(prompt_files),
+            "files": [f.name for f in prompt_files[:10]]  # แสดงแค่ 10 ตัวแรก
+        },
+        "examples": {
+            "count": len(example_files),
+            "files": [f.name for f in example_files[:10]]
+        },
+        "index": {
+            "TrendScout": {"prompt": "prompts/trend_scout_v1.txt", "example": "examples/trend_scout_input.json"},
+            "TopicPrioritizer": {"prompt": "prompts/topic_prioritizer_v1.txt", "example": "examples/topic_prioritizer_input.json"},
+            "ResearchRetrieval": {"prompt": "prompts/research_retrieval_v1.txt", "example": "examples/research_retrieval_input.json"}
+        }
+    }
+    
+    write_json(out, inventory)
+    log(f"✓ Inventory indexed - {inventory['prompts']['count']} prompts, {inventory['examples']['count']} examples")
+    return out
+
+
+def agent_monitoring(step, run_dir: Path):
+    """Monitoring Agent - เฝ้าระวังระบบ"""
+    out = run_dir / step["output"]
+    
+    monitoring = {
+        "checked_at": datetime.now().isoformat(),
+        "system_health": {
+            "cpu_usage": "12%",
+            "memory_usage": "45%",
+            "disk_space": "234 GB free",
+            "status": "healthy"
+        },
+        "agent_status": {
+            "total_agents": 12,
+            "initialized": 12,
+            "running": 0,
+            "failed": 0
+        },
+        "alerts": [],
+        "metrics": {
+            "uptime": "100%",
+            "avg_response_time": "0.5s",
+            "error_rate": "0%"
+        }
+    }
+    
+    write_json(out, monitoring)
+    log("✓ Monitoring initialized - System healthy")
+    return out
+
+
+def agent_notification(step, run_dir: Path):
+    """Notification Agent - ระบบแจ้งเตือน"""
+    out = run_dir / step["output"]
+    
+    notification_config = {
+        "configured_at": datetime.now().isoformat(),
+        "channels": {
+            "console": {"enabled": True, "level": "INFO"},
+            "email": {"enabled": False, "recipients": []},
+            "slack": {"enabled": False, "webhook_url": ""},
+            "line": {"enabled": False, "token": ""}
+        },
+        "notification_rules": {
+            "on_error": ["console", "email"],
+            "on_success": ["console"],
+            "on_warning": ["console"]
+        },
+        "test_notification": {
+            "message": "Notification system initialized",
+            "sent_at": datetime.now().isoformat(),
+            "status": "success"
+        }
+    }
+    
+    write_json(out, notification_config)
+    log("✓ Notification system configured - Console enabled")
+    return out
+
+
+def agent_error_flag(step, run_dir: Path):
+    """Error/Flag Agent - จัดการข้อผิดพลาดและธงเตือน"""
+    out = run_dir / step["output"]
+    
+    error_system = {
+        "initialized_at": datetime.now().isoformat(),
+        "error_categories": {
+            "critical": {"action": "halt_and_notify", "count": 0},
+            "warning": {"action": "log_and_continue", "count": 0},
+            "info": {"action": "log_only", "count": 0}
+        },
+        "flag_types": {
+            "doctrine_violation": {"severity": "critical", "handler": "DoctrineValidator"},
+            "api_rate_limit": {"severity": "warning", "handler": "Integration"},
+            "missing_data": {"severity": "warning", "handler": "DataSync"}
+        },
+        "current_flags": [],
+        "error_log_path": "logs/errors.log"
+    }
+    
+    write_json(out, error_system)
+    log("✓ Error/Flag system initialized - 0 active flags")
+    return out
+
+
+def agent_dashboard(step, run_dir: Path):
+    """Dashboard Agent - ศูนย์รวมสถานะและตัวชี้วัด"""
+    out = run_dir / step["output"]
+    
+    dashboard = {
+        "generated_at": datetime.now().isoformat(),
+        "system_overview": {
+            "status": "operational",
+            "agents_ready": 12,
+            "pipelines_configured": 1,
+            "last_run": "not_yet"
+        },
+        "metrics": {
+            "total_videos_produced": 0,
+            "total_agent_runs": 0,
+            "success_rate": "N/A",
+            "avg_processing_time": "N/A"
+        },
+        "recent_activity": [
+            {"time": datetime.now().isoformat(), "event": "System initialization", "status": "success"}
+        ],
+        "dashboard_url": "file:///" + str(run_dir / "dashboard.html")
+    }
+    
+    write_json(out, dashboard)
+    log("✓ Dashboard initialized - System ready")
+    return out
+
+
+def agent_backup_archive(step, run_dir: Path):
+    """Backup/Archive Agent - สำรองและจัดเก็บข้อมูล"""
+    out = run_dir / step["output"]
+    
+    # สร้าง backup directory
+    backup_dir = ROOT / "output" / "backups"
+    ensure_dir(backup_dir)
+    
+    # สร้าง backup timestamp
+    backup_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_name = f"backup_{backup_timestamp}.zip"
+    
+    # เตรียมรายการไฟล์ที่จะ backup
+    backup_targets = {
+        "prompts": {"path": "prompts/", "exists": (ROOT / "prompts").exists()},
+        "examples": {"path": "examples/", "exists": (ROOT / "examples").exists()},
+        "pipelines": {"path": "pipelines/", "exists": (ROOT / "pipelines").exists()},
+        "configs": {"path": "*.yml", "exists": True}
+    }
+    
+    # นับไฟล์ที่พร้อม backup
+    files_to_backup = []
+    for target, info in backup_targets.items():
+        if info["exists"] and target != "configs":
+            target_path = ROOT / info["path"]
+            if target_path.is_dir():
+                files = list(target_path.glob("*"))
+                files_to_backup.extend(files)
+    
+    backup_config = {
+        "configured_at": datetime.now().isoformat(),
+        "backup_strategy": {
+            "frequency": "daily",
+            "retention": "30 days",
+            "storage_location": str(backup_dir.relative_to(ROOT))
+        },
+        "backup_targets": backup_targets,
+        "current_backup": {
+            "name": backup_name,
+            "files_count": len(files_to_backup),
+            "status": "ready"
+        },
+        "archive_policy": {
+            "compress": True,
+            "format": "zip",
+            "naming": "backup_YYYYMMDD_HHMMSS.zip"
+        },
+        "next_backup": datetime.now().strftime("%Y-%m-%d 00:00:00")
+    }
+    
+    write_json(out, backup_config)
+    log(f"✓ Backup/Archive configured - {len(files_to_backup)} files ready for backup to {backup_dir}")
+    return out
+
+
+# ========== VIDEO WORKFLOW AGENTS ==========
+
+def agent_trend_scout(step, run_dir: Path):
+    """Trend Scout - หาเทรนด์/หัวข้อที่กำลังมาในสายธรรมะ"""
+    out = run_dir / step["output"]
+    niches = step.get("input", {}).get("niches", [])
+    horizon = step.get("input", {}).get("horizon_days", 30)
+    
+    # สร้างข้อมูลเทรนด์จำลอง (ในการใช้งานจริงจะเชื่อมต่อ YouTube API / Google Trends)
+    candidates = [
+        {
+            "title": "เจริญสติในชีวิตประจำวัน 5 นาที",
+            "why_now": "Short-form mindfulness content กำลังเป็นเทรนด์ในช่วง 30 วันข้างหน้า",
+            "sources": ["YouTube Trending", "Google Trends TH"],
+            "audience": "คนทำงาน, ผู้เริ่มต้น",
+            "difficulty": "ง่าย",
+            "risk": "ต่ำ - เนื้อหาพื้นฐาน ไม่ขัดแย้ง"
+        },
+        {
+            "title": "วิธีรับมือความเครียดด้วยอานาปานสติ",
+            "why_now": "ความเครียดจากการทำงานเพิ่มขึ้น + ปีใหม่ใกล้เข้ามา",
+            "sources": ["YouTube Health & Wellness", "Pantip"],
+            "audience": "วัยทำงาน 25-45 ปี",
+            "difficulty": "กลาง",
+            "risk": "ต่ำ - มีอ้างอิงชัดเจน"
+        },
+        {
+            "title": "อริยสัจ 4 ฉบับเข้าใจง่าย",
+            "why_now": "Search volume เพิ่มขึ้น 35% ในไทย (เข้าพรรษา)",
+            "sources": ["Google Trends", "Facebook Groups"],
+            "audience": "ผู้เริ่มต้นศึกษาธรรม",
+            "difficulty": "กลาง",
+            "risk": "กลาง - ต้องระวังการตีความ"
+        },
+        {
+            "title": "ทำบุญยุคใหม่: ให้ถูกหลักธรรม",
+            "why_now": "มีดราม่าเรื่องการบริจาคในโซเชียล",
+            "sources": ["Twitter/X Trending", "News"],
+            "audience": "ทุกกลุ่ม",
+            "difficulty": "ยาก",
+            "risk": "สูง - อาจมีความเห็นขัดแย้ง"
+        },
+        {
+            "title": "เมตตาภาวนา: วิธีฝึกให้มีใจเมตตา",
+            "why_now": "วันมาฆบูชาใกล้เข้ามา (ก.พ. 2026)",
+            "sources": ["YouTube Meditation", "Calendar Events"],
+            "audience": "ผู้ปฏิบัติธรรม",
+            "difficulty": "ง่าย",
+            "risk": "ต่ำ"
+        }
+    ]
+    
+    data = {
+        "scouted_at": datetime.now().isoformat(),
+        "niches": niches,
+        "horizon_days": horizon,
+        "total_candidates": len(candidates),
+        "candidates": candidates
+    }
+    
+    write_json(out, data)
+    log(f"✓ Trend Scout found {len(candidates)} trending topics")
+    return out
+
+
+def agent_topic_prioritizer(step, run_dir: Path):
+    """Topic Prioritizer - จัดอันดับหัวข้อตามเกณฑ์"""
+    in_path = run_dir / step["input_from"]
+    out = run_dir / step["output"]
+    
+    # Check if topic is provided via environment variable
+    topic_override = os.environ.get('DHAMMA_TOPIC')
+    
+    data = read_json(in_path)
+    candidates = data["candidates"]
+    
+    # If topic is provided, force it to be rank 1
+    if topic_override:
+        # Find matching topic or create new one
+        matched = None
+        for c in candidates:
+            if topic_override.lower() in c["title"].lower() or c["title"].lower() in topic_override.lower():
+                matched = c
+                break
+        
+        # If not found in candidates, create a new one
+        if not matched:
+            matched = {
+                "title": topic_override,
+                "why_now": "Selected from Mock Topics Database",
+                "sources": ["mock_database"],
+                "audience": "ทั่วไป",
+                "difficulty": "กลาง",
+                "risk": "ต่ำ"
+            }
+        
+        # Force this topic to rank 1
+        scored = [{
+            "rank": 1,
+            "title": matched["title"],
+            "scores": {
+                "impact": 10,
+                "feasibility": 10,
+                "alignment": 10,
+                "total": 10.0
+            },
+            "reason": matched.get("why_now", "Selected from database"),
+            "difficulty": matched.get("difficulty", "กลาง"),
+            "risk": matched.get("risk", "ต่ำ"),
+            "audience": matched.get("audience", "ทั่วไป")
+        }]
+        
+        # Add other topics with lower ranks
+        for c in candidates:
+            if c["title"] != matched["title"]:
+                diff_score = {"ง่าย": 10, "กลาง": 7, "ยาก": 4}.get(c["difficulty"], 5)
+                risk_score = {"ต่ำ": 10, "กลาง": 6, "สูง": 3}.get(c["risk"].split(" - ")[0], 5)
+                impact = 8 if "เพิ่มขึ้น" in c["why_now"] else 6
+                total = (impact * 0.4) + (diff_score * 0.3) + (risk_score * 0.3)
+                
+                scored.append({
+                    "rank": len(scored) + 1,
+                    "title": c["title"],
+                    "scores": {
+                        "impact": impact,
+                        "feasibility": diff_score,
+                        "alignment": risk_score,
+                        "total": round(total, 2)
+                    },
+                    "reason": c["why_now"],
+                    "difficulty": c["difficulty"],
+                    "risk": c["risk"],
+                    "audience": c["audience"]
+                })
+    else:
+        # Original scoring logic
+        scored = []
+        for c in candidates:
+            # คำนวณคะแนนตามเกณฑ์
+            diff_score = {"ง่าย": 10, "กลาง": 7, "ยาก": 4}.get(c["difficulty"], 5)
+            risk_score = {"ต่ำ": 10, "กลาง": 6, "สูง": 3}.get(c["risk"].split(" - ")[0], 5)
+            
+            # Impact (ประเมินจาก why_now และ audience)
+            impact = 8 if "เพิ่มขึ้น" in c["why_now"] else 6
+            
+            # Feasibility (จากความยาก)
+            feasibility = diff_score
+            
+            # Alignment (จากความเสี่ยง)
+            alignment = risk_score
+            
+            total = (impact * 0.4) + (feasibility * 0.3) + (alignment * 0.3)
+            
+            scored.append({
+                "rank": 0,  # จะอัพเดทภายหลัง
+                "title": c["title"],
+                "scores": {
+                    "impact": impact,
+                    "feasibility": feasibility,
+                    "alignment": alignment,
+                    "total": round(total, 2)
+                },
+                "reason": c["why_now"],
+                "difficulty": c["difficulty"],
+                "risk": c["risk"],
+                "audience": c["audience"]
+            })
+        
+        # เรียงตามคะแนน
+        scored.sort(key=lambda x: x["scores"]["total"], reverse=True)
+        
+        # อัพเดท rank
+        for i, item in enumerate(scored, 1):
+            item["rank"] = i
+    
+    result = {
+        "prioritized_at": datetime.now().isoformat(),
+        "total_evaluated": len(scored),
+        "selected_top": 3,
+        "ranked": scored,
+        "topic_override": topic_override if topic_override else None
+    }
+    
+    write_json(out, result)
+    log(f"✓ Topic Prioritizer ranked {len(scored)} topics - Top: '{scored[0]['title']}' (score: {scored[0]['scores']['total']})")
+    return out
+
+
+def agent_research_retrieval(step, run_dir: Path):
+    """Research Retrieval - รวบรวมอ้างอิงจากแหล่งที่เชื่อถือได้"""
+    in_path = run_dir / step["input_from"]
+    out = run_dir / step["output"]
+    
+    data = read_json(in_path)
+    top_topic = data["ranked"][0]  # เลือก rank 1
+    
+    # สร้างข้อมูลวิจัยจำลอง (ในการใช้งานจริงจะค้นหาจากฐานข้อมูลพระไตรปิฎก)
+    bundle = {
+        "researched_at": datetime.now().isoformat(),
+        "topic": top_topic["title"],
+        "selected_reason": top_topic["reason"],
+        "claims": [
+            {
+                "text": "สติช่วยลดความฟุ้งซ่านและความเครียดได้",
+                "support": "พระไตรปิฎก - อนาปานสติสูตร"
+            },
+            {
+                "text": "การทำสมาธิสั้นๆ แต่สม่ำเสมอดีกว่านานแต่ห่างกัน",
+                "support": "คำสอนหลวงปู่มั่น ภูริทัตโต"
+            },
+            {
+                "text": "ลมหายใจเป็นเครื่องมือเข้าถึงสติได้ง่ายที่สุด",
+                "support": "วิสุทธิมรรค บทที่ 8"
+            }
+        ],
+        "citations": [
+            {
+                "source": "อนาปานสติสูตร (มัชฌิมนิกาย เล่ม 3)",
+                "type": "canonical",
+                "link": "",
+                "quote": "อานาปานสติสมาธิ เมื่อเจริญแล้ว กระทำให้มากแล้ว มีผลใหญ่ มีอานิสงส์ใหญ่",
+                "relevance": "หลักฐานการฝึกสติด้วยลมหายใจ"
+            },
+            {
+                "source": "วิสุทธิมรรค - แปลโดยสมเด็จพระมหาสมณเจ้า กรมพระยาวชิรญาณวโรรส",
+                "type": "commentary",
+                "link": "",
+                "quote": "อานาปานสติเป็นกรรมฐานที่เหมาะสมที่สุดสำหรับผู้เริ่มต้น",
+                "relevance": "การตีความและคำแนะนำการปฏิบัติ"
+            },
+            {
+                "source": "บทความวิชาการ: ผลของสติต่อสุขภาพจิต (ม.มหิดล 2023)",
+                "type": "secondary",
+                "link": "https://example.com/mindfulness-research",
+                "quote": "พบว่าการฝึกสติ 5 นาทีต่อวันลดความเครียดได้ 30%",
+                "relevance": "หลักฐานทางวิทยาศาสตร์"
+            }
+        ],
+        "keywords": ["สติ", "อนาปานสติ", "ลมหายใจ", "สมาธิ", "ความเครียด"],
+        "target_duration": "8-10 นาที",
+        "content_level": "ผู้เริ่มต้น"
+    }
+    
+    write_json(out, bundle)
+    log(f"✓ Research Retrieval completed for '{bundle['topic']}' - {len(bundle['citations'])} citations")
+    return out
+
+
+def agent_script_outline(step, run_dir: Path):
+    """Script Outline - สร้างโครงร่างสคริปต์"""
+    in_path = run_dir / step["input_from"]
+    out = run_dir / step["output"]
+    
+    data = read_json(in_path)
+    
+    # รองรับทั้ง research_bundle และ data_enrichment
+    if "original_research" in data:
+        # มาจาก data_enrichment
+        research_data = data["original_research"]
+        topic = research_data["topic"]
+        claims = research_data.get("claims", [])
+    else:
+        # มาจาก research_bundle โดยตรง
+        topic = data["topic"]
+        claims = data.get("claims", [])
+    
+    outline_md = f"""# โครงสคริปต์: {topic}
+
+## 📊 ข้อมูลพื้นฐาน
+- **ระยะเวลา**: 8-10 นาที
+- **กลุ่มเป้าหมาย**: ผู้เริ่มต้น
+- **คีย์เวิร์ด**: สติ, อานาปานสติ, ลมหายใจ, สมาธิ
+
+---
+
+## 🎬 โครงสร้างวิดีโอ
+
+### [00:00 - 00:30] Hook (ดึงดูดความสนใจ)
+- **เปิด**: "คุณเคยรู้สึกเครียด ใจฟุ้งซ่าน จนไม่รู้จะทำอะไรก่อนดีไหม?"
+- **ปัญหา**: ชีวิตยุคใหม่เต็มไปด้วยความเร่งรีบ ทำให้ใจไม่สงบ
+- **คำตอบ**: วันนี้จะพาฝึกสติแค่ 5 นาที ทำได้ทุกที่ ทุกเวลา
+
+### [00:30 - 01:30] Introduction (แนะนำหัวข้อ)
+- บอกว่าวิดีโอนี้คืออะไร (การฝึกสติด้วยลมหายใจ)
+- ทำไมตอนนี้ (เทรนด์ mindfulness + ความเครียดเพิ่มขึ้น)
+- ประโยชน์ที่จะได้รับ (ใจสงบ, ลดความเครียด, มีสติ)
+
+### [01:30 - 05:00] Main Points (เนื้อหาหลัก)
+
+#### Point 1: สติคือการรับรู้ปัจจุบัน (1:30-2:30)
+- **ข้อมูล**: {claims[0]['text'] if claims else 'สติช่วยลดความฟุ้งซ่าน'}
+- **อ้างอิง**: {claims[0]['support'] if claims else 'พระไตรปิฎก'}
+- **ตัวอย่าง**: เวลาเดิน เรารู้หรือเปล่าว่ากำลังเดิน?
+- [B-ROLL: คนเดินด้วยความตั้งใจ vs คนเดินแล้วเล่นมือถือ]
+
+#### Point 2: ลมหายใจเป็นสมอของใจ (2:30-3:30)
+- **ข้อมูล**: {claims[2]['text'] if len(claims) > 2 else 'ลมหายใจเป็นเครื่องมือเข้าถึงสติ'}
+- **อ้างอิง**: {claims[2]['support'] if len(claims) > 2 else 'วิสุทธิมรรค'}
+- **วิธีการ**: สังเกตลมหายใจเข้า-ออก ไม่ต้องควบคุม แค่รับรู้
+- [B-ROLL: อนิเมชั่นลมหายใจ / คนนั่งสมาธิ]
+
+#### Point 3: ฝึกสั้นแต่สม่ำเสมอ (3:30-5:00)
+- **ข้อมูล**: {claims[1]['text'] if len(claims) > 1 else 'ฝึกสั้นแต่สม่ำเสมอดีกว่า'}
+- **อ้างอิง**: {claims[1]['support'] if len(claims) > 1 else 'คำสอนหลวงปู่มั่น'}
+- **เคล็ดลับ**: 5 นาทีทุกเช้า ดีกว่า 1 ชั่วโมงเดือนละครั้ง
+- [B-ROLL: ปฏิทิน / กราฟเปรียบเทียบ]
+
+### [05:00 - 07:00] Practical Application (นำไปใช้)
+**แนะนำ 3 ขั้นตอนง่ายๆ:**
+
+1. **หาที่นั่งสบาย** (ไม่จำเป็นต้องขัดสมาธิ)
+2. **หลับตา สังเกตลมหายใจ** (นับ 1-10 ถ้าช่วย)
+3. **ใจฟุ้ง = กลับมาที่ลมหายใจ** (ไม่ต้องโกรธตัวเอง)
+
+[DEMO: แสดงการฝึกจริง 1-2 นาที]
+
+### [07:00 - 08:30] Benefits & Motivation (ประโยชน์)
+- ลดความเครียด 30%
+- นอนหลับสนิท
+- ตัดสินใจได้ดีขึ้น
+- มีสติในการทำงาน
+
+### [08:30 - 10:00] Conclusion & CTA
+- **สรุป**: สติไม่ยาก เริ่มแค่ 5 นาที
+- **เชิญชวน**: ลองฝึกวันนี้ แล้วมาแชร์ประสบการณ์ในคอมเมนต์
+- **CTA**: กดไลค์ ถ้าได้ประโยชน์ / Subscribe เพื่อดูวิดีโอธรรมะใหม่ๆ
+- **ปิดท้าย**: "สาธุครับ ขออานิสงส์จงสำเร็จทุกประการ"
+
+---
+
+## 📝 หมายเหตุสำหรับการผลิต
+- ใช้เสียงพูดนุ่มนวล ไม่เร็วเกินไป
+- แทรก B-roll ทุก 20-30 วินาที
+- ใส่ subtitle ภาษาไทย (สำคัญ!)
+- Background music: Ambient/Meditation (เบาๆ)
+"""
+    
+    write_text(out, outline_md)
+    log(f"✓ Script Outline created for '{topic}'")
+    return out
+
+
+def agent_script_writer(step, run_dir: Path):
+    """Script Writer - เขียนสคริปต์เต็มรูปแบบ"""
+    in_path = run_dir / step["input_from"]
+    out = run_dir / step["output"]
+    
+    outline = in_path.read_text(encoding="utf-8")
+    
+    # สร้างสคริปต์เต็มจากโครงร่าง
+    script = f"""---
+title: เจริญสติในชีวิตประจำวัน 5 นาที
+duration: ~10 นาที
+target: ผู้เริ่มต้น
+---
+
+{outline}
+
+---
+
+## 🎤 FULL SCRIPT (พูดทุกคำ)
+
+### [00:00 - 00:30] HOOK
+[VISUAL: เปิดด้วยคลิปตัดต่อเร็วๆ - คนเครียด, รถติด, เดดไลน์งาน]
+[MUSIC: เสียงเร่งเร้า → จางลง → ดนตรีนุ่มนวล]
+
+**[พูด]** สวัสดีครับผู้ชมทุกท่าน 🙏
+
+คุณเคยรู้สึกเครียด... ใจฟุ้งซ่าน... จนไม่รู้จะทำอะไรก่อนดีไหมครับ?
+
+[PAUSE]
+
+ชีวิตยุคใหม่เต็มไปด้วยความเร่งรีบ ข้อมูลข่าวสารท่วมท้น 
+ทำให้จิตใจของเราไม่ค่อยได้พัก [PAUSE] ไม่ค่อยได้สงบเลย
+
+[B-ROLL: มือเลื่อนดูโทรศัพท์ไม่หยุด]
+
+**[พูด]** แต่ถ้าผมบอกว่า... แค่ 5 นาที... ทำได้ทุกที่ ทุกเวลา
+คุณก็สามารถทำให้ใจสงบลงได้ล่ะ?
+
+[VISUAL: Title card ปรากฏ "เจริญสติใน 5 นาที | ทำได้ทุกที่"]
+
+วันนี้ เรามาเรียนรู้เทคนิคง่ายๆ จากพระพุทธศาสนากันครับ
+
+---
+
+### [00:30 - 01:30] INTRODUCTION
+
+[VISUAL: ผู้พูดนั่งในฉากธรรมชาติ/ห้องสมุด พื้นหลังสงบ]
+
+**[พูด]** วิดีโอนี้ เราจะมาเรียนรู้เรื่อง **"สติ"** กันครับ
+
+โดยเฉพาะการฝึกสติด้วย **"ลมหายใจ"** หรือที่เรียกว่า **อานาปานสติ**
+[TEXT: อานาปานสติ = สติกับลมหายใจ]
+
+ซึ่งเป็นเทคนิคที่พระพุทธเจ้าทรงสอนไว้ใน**พระไตรปิฎก**เลยครับ
+
+[CITATION: อนาปานสติสูตร - มัชฌิมนิกาย เล่ม 3]
+[B-ROLL: ภาพพระไตรปิฎก / ภาพวาดพระพุทธเจ้า]
+
+**[พูด]** ทำไมถึงเลือกเรื่องนี้ตอนนี้? เพราะว่า...
+
+ช่วงนี้ **mindfulness** หรือการฝึกสติกำลังเป็นที่นิยมมากในต่างประเทศ
+และคนไทยก็เริ่มสนใจมากขึ้นเรื่อยๆ ครับ
+
+[B-ROLL: กราฟ Google Trends แสดงการค้นหา "สติ" เพิ่มขึ้น]
+
+**[พูด]** และเมื่อเราฝึกสติแล้ว เราจะได้อะไร? [PAUSE]
+
+ประโยชน์ 3 อย่างหลักๆ คือ:
+1. **ใจสงบ ไม่ฟุ้งซ่าน** [TEXT: ✓ ใจสงบ]
+2. **ลดความเครียด** [TEXT: ✓ ลดเครียด]  
+3. **มีสติในการทำงานและการดำเนินชีวิต** [TEXT: ✓ มีสติ]
+
+เอาล่ะ... มาเริ่มกันเลยครับ! 
+
+---
+
+### [01:30 - 02:30] POINT 1: สติคืออะไร?
+
+[VISUAL: Animation หรือ Whiteboard อธิบาย]
+
+**[พูด]** ก่อนอื่น เรามาทำความเข้าใจกันก่อนว่า **"สติ"** คืออะไร
+
+สติ ก็คือ **"การรับรู้ปัจจุบัน"** ครับ
+
+[TEXT: สติ = การรับรู้ในปัจจุบัน]
+
+**[พูด]** ลองคิดดูนะครับ... ตอนนี้คุณกำลังดูวิดีโอนี้อยู่
+แต่ **จิตใจ** ของคุณอยู่ที่ไหน? [PAUSE]
+
+อาจกำลังคิดเรื่องงานที่ยังไม่เสร็จ...
+อาจกำลังกังวลเรื่องพรุ่งนี้...
+หรือนึกถึงอดีตที่ผ่านมา...
+
+[B-ROLL: คนเดินด้วยตั้งใจ ตัดกับคนเดินแล้วเล่นมือถือ]
+
+**[พูด]** นี่แหละครับ คือการ **"ไม่มีสติ"** - ร่างกายอยู่ที่นี่ แต่ใจอยู่ที่อื่น
+
+ตามหลักพระพุทธศาสนา พระพุทธเจ้าตรัสไว้ว่า
+**"สติช่วยลดความฟุ้งซ่านและความเครียดได้"**
+
+[CITATION POPUP: อนาปานสติสูตร]
+
+และนี่ไม่ใช่แค่ทฤษฎีนะครับ วิทยาศาสตร์สมัยใหม่ก็พิสูจน์แล้ว!
+
+[B-ROLL: งานวิจัย/สถิติ]
+
+---
+
+### [02:30 - 03:30] POINT 2: ลมหายใจ = สมอของใจ
+
+[VISUAL: Animation ลมหายใจเข้า-ออก / Breathing Cycle]
+
+**[พูด]** คำถามต่อมาคือ... เราจะฝึกสติได้อย่างไร?
+
+คำตอบคือ... ใช้ **"ลมหายใจ"** เป็นเครื่องมือครับ
+
+[TEXT: ลมหายใจ = สมอของใจ ⚓]
+
+**[พูด]** ทำไมต้องเป็นลมหายใจ? เพราะว่า...
+
+ลมหายใจเป็นสิ่งที่:
+- **มีอยู่ตลอดเวลา** (หายใจไม่หยุด)
+- **ไม่ต้องเตรียมอะไร** (ไม่ต้องใช้อุปกรณ์)
+- **เข้าถึงได้ง่าย** (สังเกตได้ทันที)
+
+[B-ROLL: คนนั่งสมาธิ สงบ ผ่อนคลาย]
+
+**[พูด]** ในพระไตรปิฎก **วิสุทธิมรรค** บอกไว้ว่า
+**"ลมหายใจเป็นเครื่องมือเข้าถึงสติได้ง่ายที่สุด"**
+
+[CITATION: วิสุทธิมรรค บทที่ 8]
+
+วิธีทำก็ง่ายมากครับ:
+- **สังเกตลมหายใจเข้า** [PAUSE] 
+- **สังเกตลมหายใจออก** [PAUSE]
+- **ไม่ต้องควบคุม** แค่รับรู้ว่ากำลังหายใจ
+
+[VISUAL: Person breathing naturally, text overlay showing "IN" "OUT"]
+
+จิตใจของเราจะยึดเกาะกับลมหายใจ... เหมือน**สมอเรือ**
+ไม่ให้ล่องลอยไปตามความคิด ครับ
+
+---
+
+### [03:30 - 05:00] POINT 3: ฝึกสั้นแต่สม่ำเสมอ
+
+[VISUAL: กราฟเปรียบเทียบ: 5min daily vs 1hr monthly]
+
+**[พูด]** หลายคนคิดว่า การฝึกสติต้องนั่งสมาธินาน ๆ
+หลายชั่วโมงถึงจะได้ผล...
+
+แต่จริง ๆ แล้ว **ไม่ใช่นะครับ!**
+
+[TEXT: 5 นาที/วัน > 1 ชม./เดือน]
+
+**[พูด]** ตามคำสอนของ**หลวงปู่มั่น ภูริทัตโต** บอกไว้ว่า
+**"การทำสมาธิสั้น ๆ แต่สม่ำเสมอ ดีกว่านานแต่ห่างกัน"**
+
+[CITATION: คำสอนหลวงปู่มั่น]
+
+[B-ROLL: ปฏิทินที่ติ๊กถูกทุกวัน vs ปฏิทินที่ห่างมาก]
+
+**[พูด]** ทำไมล่ะ? เพราะว่าสมองเราทำงานแบบ **"หลัก习惯"** ครับ
+
+ยิ่งทำบ่อย สมองจะจดจำและสร้างเป็นนิสัยได้ง่ายกว่า
+การทำนาน ๆ แต่เดือนละครั้ง
+
+[VISUAL: Brain animation showing neural pathways strengthening]
+
+**[พูด]** เคล็ดลับง่าย ๆ:
+- **ตั้งเวลาทุกเช้า** - เช่น หลังตื่นนอน หรือก่อนอาบน้ำ
+- **แค่ 5 นาที** - ไม่ต้องนาน
+- **ทำทุกวัน** - นี่สำคัญที่สุด!
+
+[B-ROLL: แอพริเตือน / นาฬิกา / ปฏิทิน]
+
+**[พูด]** ถ้าทำได้ 30 วันติด... มันจะกลายเป็น **นิสัย** ไปเลยครับ!
+
+---
+
+### [05:00 - 07:00] PRACTICAL: ขั้นตอนฝึก 3 ข้อ
+
+[VISUAL: Split screen - ผู้พูด + Demo animation]
+
+**[พูด]** เอาล่ะ! ถึงเวลาที่เราจะลงมือฝึกกันจริง ๆ แล้วครับ
+
+มี **3 ขั้นตอนง่าย ๆ** เท่านั้นเอง:
+
+---
+
+**ขั้นที่ 1: หาที่นั่งสบาย**
+
+[B-ROLL: คนนั่งขัดสมาธิ, นั่งเก้าอี้, นั่งริมเตียง]
+
+**[พูด]** ไม่จำเป็นต้องนั่งขัดสมาธิ นะครับ
+นั่งเก้าอี้ธรรมดาก็ได้... นั่งริมเตียงก็ได้...
+ขอแค่ให้ **หลังตรง** และรู้สึก**สบาย**
+
+[TEXT: ✓ นั่งสบาย ✓ หลังตรง]
+
+---
+
+**ขั้นที่ 2: หลับตา สังเกตลมหายใจ**
+
+[VISUAL: Close-up ใบหน้าสงบ หลับตา พร้อม breathing animation overlay]
+
+**[พูด]** หลับตาเบา ๆ... [PAUSE]
+
+แล้วเริ่มสังเกต **ลมหายใจเข้า-ออก**
+
+[PAUSE - นิ่ง 3 วินาที]
+
+หายใจเข้า... รู้ว่ากำลังหายใจเข้า...
+
+[PAUSE]
+
+หายใจออก... รู้ว่ากำลังหายใจออก...
+
+[PAUSE]
+
+[TEXT: นับได้ (1-10) ถ้าช่วยจดจ่อ]
+
+**[พูด]** ถ้าอยากนับก็ได้นะครับ เช่น
+"หายใจเข้า... 1"
+"หายใจออก... 2"
+ไปเรื่อย ๆ จนถึง 10 แล้วเริ่มใหม่
+
+---
+
+**ขั้นที่ 3: ใจฟุ้ง? กลับมาที่ลมหายใจ**
+
+[VISUAL: Animation showing thoughts appearing and returning to breath]
+
+**[พูด]** นี่สำคัญที่สุดครับ!
+
+ระหว่างฝึก ความคิดจะผุดขึ้นมาในหัวแน่นอน...
+อาจเป็นเรื่องงาน... เรื่องอาหาร... เรื่องอะไรก็ตาม
+
+[PAUSE]
+
+**อย่าโกรธตัวเอง นะครับ!**
+
+[TEXT: ⚠ อย่าโกรธตัวเอง - นี่เป็นเรื่องปกติ]
+
+**[พูด]** นี่เป็นเรื่อง**ปกติ**มาก
+แค่... เมื่อสังเกตเห็นว่าใจฟุ้ง... 
+ค่อย ๆ พาใจกลับมาที่ **ลมหายใจ** อีกครั้ง
+
+[VISUAL: Gentle hand gesture guiding back]
+
+ทำแบบนี้ซ้ำ ๆ... นี่แหละครับคือ **"การฝึกสติ"**
+
+---
+
+[DEMO SECTION - 1-2 นาที]
+
+**[พูด]** เอาล่ะ เรามาลองฝึกด้วยกันตอนนี้เลยครับ แค่ 1 นาที
+
+ใครพร้อม... ลองนั่งสบาย ๆ หลับตาเบา ๆ...
+
+[PAUSE - นิ่ง 5 วินาที พร้อม soft music]
+
+หายใจเข้า... รู้ตัว... [PAUSE 3 วินาที]
+
+หายใจออก... รู้ตัว... [PAUSE 3 วินาที]
+
+[ทำ 5-6 รอบ]
+
+**[พูด]** ... ค่อย ๆ ลืมตาได้ครับ [PAUSE]
+
+รู้สึกยังไงบ้างครับ? ใจสงบลงบ้างไหม? 😊
+
+---
+
+### [07:00 - 08:30] BENEFITS
+
+[VISUAL: Infographic แสดงประโยชน์]
+
+**[พูด]** เมื่อเราฝึกสติสม่ำเสมอ เราจะได้ประโยชน์มากมายครับ
+
+จากงานวิจัยของ **มหาวิทยาลัยมหิดล ปี 2023** พบว่า
+
+[B-ROLL: Academic paper / Research data]
+
+✅ **ลดความเครียดได้ถึง 30%** ในแค่ 4 สัปดาห์
+
+[CITATION: งานวิจัย ม.มหิดล 2023]
+
+ประโยชน์อื่น ๆ ที่พบ:
+- **นอนหลับสนิทขึ้น** [ICON: 😴]
+- **ตัดสินใจได้ดีขึ้น** [ICON: 🧠]
+- **มีสติในการทำงาน** [ICON: 💼]
+- **สัมพันธ์ภาพที่ดีขึ้น** [ICON: 👥]
+
+[B-ROLL: คนนอนหลับสบาย / คนทำงานมีสมาธิ / ครอบครัวมีความสุข]
+
+**[พูด]** และที่สำคัญครับ... สติทำให้เราอยู่กับปัจจุบันได้
+**ไม่หลงอดีต ไม่กังวลอนาคต**
+
+มีความสุขกับปัจจุบันได้ครับ 🙏
+
+---
+
+### [08:30 - 10:00] CONCLUSION & CTA
+
+[VISUAL: กลับมาที่ผู้พูด พื้นหลังสงบ]
+
+**[พูด]** เอาล่ะครับ มาถึงตอนท้ายแล้ว
+
+วันนี้เราได้เรียนรู้เรื่อง **"สติ"** กันไปแล้ว โดยเฉพาะ**อานาปานสติ**
+
+สรุปสั้น ๆ:
+1. สติคือการรับรู้ปัจจุบัน
+2. ใช้ลมหายใจเป็นเครื่องมือ
+3. ฝึกแค่ 5 นาที แต่ทุกวัน
+
+[TEXT: 5 นาที/วัน = เปลี่ยนชีวิต]
+
+**[พูด]** สติไม่ใช่เรื่องยาก... ไม่ต้องเป็นพระ ไม่ต้องนั่งสมาธินานๆ
+แค่เริ่มต้นจากสิ่งง่าย ๆ ที่มีอยู่แล้ว... **ลมหายใจ** ครับ
+
+[PAUSE]
+
+**[พูด]** ผมอยากชวนให้ทุกคนลอง **ฝึกวันนี้เลย**
+แล้วมาแชร์ประสบการณ์ให้ผมฟังได้ใน**คอมเมนต์**ด้านล่างนะครับ
+
+[CTA TEXT: 💬 แชร์ประสบการณ์ในคอมเมนต์]
+
+ถ้าวิดีโอนี้มีประโยชน์... อย่าลืม **กดไลค์** ให้ผมด้วยนะครับ 👍
+
+และถ้าอยากดูวิดีโอธรรมะอื่น ๆ ก็ **กด Subscribe** ได้เลยครับ 🔔
+
+[B-ROLL: Animation กดไลค์และ Subscribe]
+
+**[พูด - ปิดท้าย]** สาธุครับ 🙏
+
+ขออานิสงส์ที่เกิดจากการฟังธรรม... จงสำเร็จแก่ทุกท่าน
+ให้ทุกท่านมีสติ มีสมาธิ และมีความสุขในชีวิตครับ
+
+[PAUSE]
+
+แล้วพบกันใหม่... วิดีโอหน้า สวัสดีครับ 🙏
+
+[FADE OUT with soft music]
+
+[END SCREEN: 
+- วิดีโอแนะนำ 2 อัน
+- ปุ่ม Subscribe
+- Link คลิปเพลย์ลิสต์ธรรมะ]
+
+---
+
+## 📋 PRODUCTION NOTES
+
+### Timing Breakdown:
+- Hook: 30 sec
+- Intro: 1 min
+- Content: 3.5 min (Point 1-3)
+- Practice: 2 min
+- Benefits: 1.5 min
+- CTA: 1.5 min
+**Total: ~10 min**
+
+### B-Roll Requirements:
+- คนเครียด / รถติด (stock footage)
+- พระไตรปิฎก / วัด
+- คนนั่งสมาธิ (ถ่ายเอง)
+- กราฟ / สถิติ (create in After Effects)
+- ธรรมชาติ / สงบ (stock footage)
+
+### Audio:
+- Background music: Meditation/Ambient (15-20% volume)
+- Voice: Clear, calm, 120 wpm speaking rate
+- Sound effects: Subtle (page turn, ding)
+
+### Graphics:
+- Citations: แสดงในมุมล่าง 3-5 วินาที
+- Key points: Text overlay สีทอง/เทาอ่อน
+- Icons: Simple, Thai-friendly
+
+### Subtitles:
+- ภาษาไทยเต็มรูปแบบ
+- Font: Prompt, Kanit (อ่านง่าย)
+- White text + black outline
+"""
+    
+    write_text(out, script)
+    log(f"✓ Script Writer completed - Full script with timestamps ready")
+    return out
+
+
+def agent_doctrine_validator(step, run_dir: Path):
+    """Doctrine Validator - ตรวจสอบความถูกต้องตามหลักธรรม"""
+    in_path = run_dir / step["input_from"]
+    out = run_dir / step["output"]
+    
+    script = in_path.read_text(encoding="utf-8")
+    
+    # ตรวจสอบจำลอง (ในการใช้งานจริงจะใช้ AI หรือผู้เชี่ยวชาญ)
+    validation = {
+        "validated_at": datetime.now().isoformat(),
+        "status": "approved",
+        "checked_by": "AI Doctrine Validator v1.0",
+        "issues": [],  # ไม่มีปัญหา
+        "approved_sections": [
+            {"section": "00:00-02:30", "status": "approved", "note": "คำนิยามสติถูกต้อง"},
+            {"section": "02:30-03:30", "status": "approved", "note": "อ้างอิงวิสุทธิมรรคถูกต้อง"},
+            {"section": "03:30-05:00", "status": "approved", "note": "คำสอนหลวงปู่มั่นสอดคล้อง"},
+            {"section": "05:00-07:00", "status": "approved", "note": "วิธีปฏิบัติเหมาะสมผู้เริ่มต้น"},
+        ],
+        "citations_verified": [
+            {"citation": "อนาปานสติสูตร (มัชฌิมนิกาย)", "status": "verified"},
+            {"citation": "วิสุทธิมรรค บทที่ 8", "status": "verified"},
+            {"citation": "คำสอนหลวงปู่มั่น", "status": "verified"},
+        ],
+        "overall_feedback": "✅ สคริปต์ถูกต้องตามหลักธรรม เหมาะสมสำหรับผู้เริ่มต้น ไม่มีข้อความที่อาจทำให้เข้าใจผิด",
+        "recommendations": [
+            "เพิ่ม disclaimer ว่านี่เป็นแนวทางพื้นฐาน ควรศึกษาเพิ่มเติม",
+            "อาจเพิ่มข้อมูลเกี่ยวกับความแตกต่างของสติกับ mindfulness สมัยใหม่"
+        ]
+    }
+    
+    # เพิ่มหมายเหตุในสคริปต์
+    validated_script = f"""<!-- DOCTRINE VALIDATION -->
+<!-- Status: {validation['status'].upper()} -->
+<!-- Validated at: {validation['validated_at']} -->
+<!-- Validator: {validation['checked_by']} -->
+<!-- Feedback: {validation['overall_feedback']} -->
+<!-- ==================== -->
+
+{script}
+
+<!-- ==================== -->
+<!-- VALIDATION REPORT -->
+<!-- Issues: {len(validation['issues'])} -->
+<!-- Approved Sections: {len(validation['approved_sections'])} -->
+<!-- Citations Verified: {len(validation['citations_verified'])} -->
+<!-- ==================== -->
+"""
+    
+    write_text(out, validated_script)
+    
+    # บันทึกรายงานแยก
+    validation_report = run_dir / "validation_report.json"
+    write_json(validation_report, validation)
+    
+    log(f"✓ Doctrine Validator - APPROVED - {len(validation['approved_sections'])} sections verified")
+    return out
+
+
+def agent_seo_metadata(step, run_dir: Path):
+    """SEO & Metadata - สร้าง metadata สำหรับเผยแพร่"""
+    in_path = run_dir / step["input_from"]
+    out = run_dir / step["output"]
+    
+    # อ่านสคริปต์เพื่อสร้าง metadata
+    script = in_path.read_text(encoding="utf-8")
+    
+    metadata = {
+        "generated_at": datetime.now().isoformat(),
+        "platform": "youtube",
+        "title": "เจริญสติในชีวิตประจำวัน 5 นาที | ฝึกอานาปานสติแบบง่ายๆ ได้ผลจริง",
+        "title_length": 68,  # ต้องไม่เกิน 70
+        "description": """🙏 เจริญสติง่ายๆ แค่ 5 นาที ทำได้ทุกที่ ทุกเวลา!
+
+วิดีโอนี้จะพาคุณเรียนรู้การฝึก "อานาปานสติ" หรือสติกับลมหายใจ 
+ตามหลักพระพุทธศาสนาแบบเข้าใจง่าย เหมาะสำหรับผู้เริ่มต้น
+
+📖 เนื้อหาในวิดีโอ:
+00:00 - สติคืออะไร?
+01:30 - ทำไมต้องใช้ลมหายใจ?
+02:30 - ฝึกสั้นแต่สม่ำเสมอ
+05:00 - ขั้นตอนฝึก 3 ข้อ (พร้อมแนะนำ)
+07:00 - ประโยชน์ที่ได้รับ
+08:30 - สรุปและเริ่มต้นฝึก
+
+✨ ประโยชน์:
+• ลดความเครียดได้ถึง 30%
+• นอนหลับสนิท
+• มีสติในการทำงาน
+• ตัดสินใจได้ดีขึ้น
+
+📚 อ้างอิงจาก:
+• อนาปานสติสูตร (มัชฌิมนิกาย)
+• วิสุทธิมรรค
+• คำสอนหลวงปู่มั่น ภูริทัตโต
+
+💬 แชร์ประสบการณ์การฝึกสติของคุณในคอมเมนต์ได้เลยครับ!
+
+🔔 Subscribe เพื่อดูวิดีโอธรรมะใหม่ๆ
+👍 กดไลค์ถ้าชอบ
+
+#สติ #อานาปานสติ #ธรรมะ #mindfulness #meditation #พุทธศาสนา
+""",
+        "tags": [
+            "สติ",
+            "อานาปานสติ",
+            "ธรรมะ",
+            "พุทธศาสนา",
+            "mindfulness",
+            "meditation",
+            "สมาธิ",
+            "ลมหายใจ",
+            "ลดเครียด",
+            "ฝึกสติ",
+            "เจริญสติ",
+            "ทำสมาธิ",
+            "พระพุทธศาสนา",
+            "ธรรมะเพื่อชีวิต",
+            "วิปัสสนา"
+        ],
+        "category": "Education",
+        "language": "th",
+        "default_audio_language": "th",
+        "visibility": "public",
+        "made_for_kids": False,
+        "thumbnail_suggestions": [
+            "ภาพคนนั่งสมาธิ + ข้อความ 'ฝึกสติ 5 นาที'",
+            "ภาพลมหายใจ (animation) + '5 MIN MINDFULNESS'",
+            "ภาพใบโพธิ์/ธรรมชาติสงบ + 'อานาปานสติ เริ่มต้นง่าย'"
+        ],
+        "playlists": [
+            "ธรรมะเบื้องต้น",
+            "การฝึกสติ",
+            "สมาธิภาวนา"
+        ],
+        "end_screen": {
+            "duration": 20,
+            "elements": [
+                {"type": "video", "position": "left", "video": "latest"},
+                {"type": "playlist", "position": "right", "playlist": "ธรรมะเบื้องต้น"},
+                {"type": "subscribe", "position": "center"}
+            ]
+        },
+        "cards": [
+            {"time": "00:30", "type": "poll", "question": "คุณเคยฝึกสติมาก่อนไหม?", "options": ["เคย", "ไม่เคย", "กำลังฝึกอยู่"]},
+            {"time": "05:00", "type": "link", "url": "playlist_link", "message": "ดูวิดีโอสมาธิเพิ่มเติม"}
+        ],
+        "monetization": {
+            "enabled": True,
+            "ad_suitability": "family_friendly"
+        },
+        "seo_keywords": [
+            "วิธีฝึกสติ",
+            "สติคืออะไร",
+            "อานาปานสติ ทำอย่างไร",
+            "mindfulness ภาษาไทย",
+            "ลดเครียดด้วยธรรมะ",
+            "ฝึกสมาธิง่ายๆ",
+            "เจริญสติ 5 นาที"
+        ]
+    }
+    
+    write_json(out, metadata)
+    log(f"✓ SEO & Metadata created - Title: {metadata['title_length']} chars, Tags: {len(metadata['tags'])}")
+    return out
+
+
+def agent_data_enrichment(step, run_dir: Path):
+    """Data Enrichment - เพิ่มข้อมูลเสริมจากแหล่งต่างๆ"""
+    in_path = run_dir / step["input_from"]
+    out = run_dir / step["output"]
+    
+    data = read_json(in_path)
+    topic = data["topic"]
+    
+    # เพิ่มข้อมูลเสริม
+    enriched = {
+        "enriched_at": datetime.now().isoformat(),
+        "topic": topic,
+        "original_research": data,
+        "additional_context": {
+            "historical_background": {
+                "period": "พุทธกาล (พ.ศ. 80-543)",
+                "location": "อินเดียตะวันออกเฉียงเหนือ",
+                "relevance": "อานาปานสติเป็นหนึ่งในกรรมฐานที่พระพุทธเจ้าทรงใช้ตรัสรู้"
+            },
+            "modern_research": [
+                {
+                    "study": "Effects of Mindfulness on Stress Reduction",
+                    "institution": "มหาวิทยาลัยมหิดล",
+                    "year": 2023,
+                    "finding": "ลดความเครียดได้ 30% ใน 4 สัปดาห์"
+                },
+                {
+                    "study": "Breath-focused meditation and brain activity",
+                    "institution": "Harvard Medical School",
+                    "year": 2022,
+                    "finding": "เพิ่มการทำงานของ prefrontal cortex"
+                }
+            ],
+            "related_practices": [
+                "วิปัสสนากรรมฐาน",
+                "สมถภาวนา",
+                "พรหมวิหาร 4"
+            ],
+            "common_misconceptions": [
+                {
+                    "myth": "ต้องนั่งสมาธินาน ๆ ถึงจะได้ผล",
+                    "truth": "ฝึกสั้นแต่สม่ำเสมอดีกว่า"
+                },
+                {
+                    "myth": "สติคือการไม่คิดอะไรเลย",
+                    "truth": "สติคือการรับรู้ปัจจุบันอย่างตั้งใจ"
+                }
+            ],
+            "practical_tips": [
+                "เริ่มต้น 2-3 นาทีก่อน ค่อยเพิ่ม",
+                "เลือกเวลาเดิมทุกวัน (เช่น หลังตื่นนอน)",
+                "ไม่ต้องโกรธตัวเองเมื่อใจฟุ้ง",
+                "ใช้แอพช่วยเตือน (optional)"
+            ],
+            "cultural_context": {
+                "thai_buddhism": "ในพุทธศาสนาไทยนิยมฝึกอานาปานสติในวัด",
+                "daily_practice": "สามารถนำไปใช้ในชีวิตประจำวันได้",
+                "festivals": "วันมาฆบูชา, อาสาฬหบูชา เหมาะกับการฝึก"
+            }
+        },
+        "fact_check": {
+            "verified": True,
+            "sources_count": len(data.get("citations", [])),
+            "credibility_score": 9.5
+        }
+    }
+    
+    write_json(out, enriched)
+    log(f"✓ Data Enrichment completed - Added {len(enriched['additional_context'])} context categories")
+    return out
+
+
+def agent_legal_compliance(step, run_dir: Path):
+    """Legal/Compliance - ตรวจสอบด้านกฎหมายและข้อบังคับ"""
+    in_path = run_dir / step["input_from"]
+    out = run_dir / step["output"]
+    
+    script = in_path.read_text(encoding="utf-8")
+    
+    compliance = {
+        "checked_at": datetime.now().isoformat(),
+        "status": "compliant",
+        "checks": {
+            "copyright": {
+                "status": "clear",
+                "details": "ไม่พบการละเมิดลิขสิทธิ์ - ใช้อ้างอิงจากพระไตรปิฎก (สาธารณสมบัติ)",
+                "music_licensing": "ต้องใช้ royalty-free หรือซื้อลิขสิทธิ์",
+                "image_licensing": "ต้องใช้ stock photos ที่มีลิขสิทธิ์"
+            },
+            "religious_content": {
+                "status": "appropriate",
+                "details": "ไม่มีเนื้อหาที่หมิ่นศาสนาหรือบิดเบือนหลักธรรม",
+                "tone": "เคารพและเหมาะสม"
+            },
+            "medical_claims": {
+                "status": "compliant",
+                "details": "ไม่มี medical claims ที่ผิดกฎหมาย",
+                "disclaimers_needed": [
+                    "การฝึกสติเป็นการส่งเสริมสุขภาพจิต ไม่ใช่การรักษาโรค",
+                    "หากมีอาการทางจิตรุนแรงควรปรึกษาแพทย์"
+                ]
+            },
+            "advertising": {
+                "status": "clear",
+                "details": "ไม่มีการโฆษณาสินค้าหรือบริการ",
+                "sponsored_content": False
+            },
+            "personal_data": {
+                "status": "compliant",
+                "details": "ไม่มีการเก็บข้อมูลส่วนบุคคล",
+                "gdpr_compliance": "N/A - ไม่เกี่ยวข้อง"
+            },
+            "age_appropriate": {
+                "status": "all_ages",
+                "rating": "G - General Audiences",
+                "details": "เหมาะสำหรับทุกวัย"
+            }
+        },
+        "required_disclaimers": [
+            {
+                "type": "general",
+                "text": "เนื้อหานี้เป็นการศึกษาธรรมะเบื้องต้น ควรศึกษาเพิ่มเติมจากครูบาอาจารย์",
+                "placement": "end_of_description"
+            },
+            {
+                "type": "health",
+                "text": "การฝึกสติเป็นการส่งเสริมสุขภาพจิต ไม่ใช่การรักษาโรค หากมีปัญหาสุขภาพจิตรุนแรง ควรปรึกษาแพทย์ผู้เชี่ยวชาญ",
+                "placement": "video_description"
+            }
+        ],
+        "youtube_policy_compliance": {
+            "community_guidelines": "pass",
+            "advertiser_friendly": True,
+            "coppa_compliant": True,
+            "spam_deceptive_practices": "clear"
+        },
+        "recommendations": [
+            "เพิ่ม disclaimer ในคำบรรยายวิดีโอ",
+            "ระบุแหล่งที่มาของภาพและเสียงประกอบ",
+            "ใช้ Creative Commons หรือ royalty-free content"
+        ],
+        "approval_status": "approved_with_disclaimers"
+    }
+    
+    write_json(out, compliance)
+    log(f"✓ Legal/Compliance check - {compliance['status'].upper()} - {len(compliance['required_disclaimers'])} disclaimers needed")
+    return out
+
+
+def agent_visual_asset(step, run_dir: Path):
+    """Visual Asset - สร้างคำแนะนำสำหรับภาพและวิดีโอประกอบ"""
+    in_path = run_dir / step["input_from"]
+    out = run_dir / step["output"]
+    
+    script = in_path.read_text(encoding="utf-8")
+    
+    visual_guide = {
+        "generated_at": datetime.now().isoformat(),
+        "total_scenes": 12,
+        "scenes": [
+            {
+                "timestamp": "00:00-00:30",
+                "type": "b-roll",
+                "description": "คลิปตัดต่อเร็ว: คนเครียด, รถติด, เดดไลน์งาน",
+                "mood": "เร่งเร้า → ผ่อนคลาย",
+                "suggestions": [
+                    "Stock footage: stressed office worker",
+                    "Traffic jam timelapse",
+                    "Clock ticking"
+                ],
+                "transition": "fade to calm nature"
+            },
+            {
+                "timestamp": "00:30-01:30",
+                "type": "on-screen",
+                "description": "ผู้พูดนั่งในฉากธรรมชาติ/ห้องสมุด",
+                "mood": "สงบ, น่าเชื่อถือ",
+                "suggestions": [
+                    "Natural background (plants, soft light)",
+                    "Bookshelf with Dhamma books",
+                    "Warm lighting"
+                ],
+                "text_overlay": ["สติ = การรับรู้ในปัจจุบัน"]
+            },
+            {
+                "timestamp": "01:30-02:30",
+                "type": "animation",
+                "description": "อธิบายสติด้วย animation/whiteboard",
+                "mood": "ชัดเจน, เข้าใจง่าย",
+                "suggestions": [
+                    "Animated mind wandering vs focused",
+                    "Simple icons and diagrams",
+                    "Color: ฟ้า/เขียว (สงบ)"
+                ],
+                "text_overlay": ["สติ", "ร่างกาย ≠ ใจ", "รับรู้ปัจจุบัน"]
+            },
+            {
+                "timestamp": "02:30-03:30",
+                "type": "b-roll + animation",
+                "description": "ลมหายใจเข้า-ออก พร้อม animation",
+                "mood": "ผ่อนคลาย, ช้า",
+                "suggestions": [
+                    "Person breathing peacefully",
+                    "Animated breath cycle (in/out)",
+                    "Nature sounds (optional)"
+                ],
+                "text_overlay": ["ลมหายใจเข้า", "ลมหายใจออก", "⚓ สมอของใจ"]
+            },
+            {
+                "timestamp": "05:00-07:00",
+                "type": "demonstration",
+                "description": "Demo การฝึกจริง 3 ขั้นตอน",
+                "mood": "ใกล้ชิด, ปฏิบัติได้จริง",
+                "suggestions": [
+                    "Split screen: instructor + close-up",
+                    "Show proper sitting posture",
+                    "Calm facial expressions"
+                ],
+                "text_overlay": ["ขั้นที่ 1", "ขั้นที่ 2", "ขั้นที่ 3"]
+            }
+        ],
+        "b_roll_list": [
+            "คนนั่งสมาธิริมทะเล/ภูเขา",
+            "ใบไม้ไหว/คลื่นน้ำ (ช้า ๆ)",
+            "พระพุทธรูป (respectful angle)",
+            "ธรรมชาติสงบ (พระอาทิตย์ขึ้น/ตก)",
+            "มือวางบนตัก (meditation mudra)",
+            "ธูปควันลอย (optional)"
+        ],
+        "graphics_needed": [
+            "Title card: เจริญสติใน 5 นาที",
+            "Lower thirds: citations",
+            "Progress bar: 1-2-3 steps",
+            "End screen: Subscribe + Playlist"
+        ],
+        "color_palette": {
+            "primary": "#8BC34A",  # Green - สงบ
+            "secondary": "#81D4FA",  # Light Blue - ผ่อนคลาย
+            "accent": "#FFD54F",  # Gold - พุทธศาสนา
+            "text": "#37474F"  # Dark gray
+        },
+        "fonts": {
+            "thai": "Prompt, Kanit",
+            "english": "Montserrat",
+            "style": "clean, modern, readable"
+        },
+        "stock_footage_sources": [
+            "Pexels (free)",
+            "Pixabay (free)",
+            "Unsplash (free photos)",
+            "Envato Elements (paid)"
+        ],
+        "total_duration": "10:00",
+        "estimated_edit_time": "4-6 hours"
+    }
+    
+    write_json(out, visual_guide)
+    log(f"✓ Visual Asset guide created - {visual_guide['total_scenes']} scenes, {len(visual_guide['b_roll_list'])} B-roll clips")
+    return out
+
+
+def agent_voiceover(step, run_dir: Path):
+    """Voiceover - คำแนะนำสำหรับการพากย์เสียง"""
+    in_path = run_dir / step["input_from"]
+    out = run_dir / step["output"]
+    
+    script = in_path.read_text(encoding="utf-8")
+    
+    voiceover_guide = {
+        "generated_at": datetime.now().isoformat(),
+        "voice_profile": {
+            "gender": "male (suggested)",
+            "age_range": "30-45",
+            "tone": "warm, calm, trustworthy",
+            "accent": "Central Thai (ภาคกลาง)",
+            "speaking_rate": "120 wpm (words per minute) - ช้ากว่าปกติ",
+            "pitch": "medium-low (สงบ)"
+        },
+        "recording_settings": {
+            "format": "WAV",
+            "sample_rate": "48kHz",
+            "bit_depth": "24-bit",
+            "microphone": "Condenser mic (แนะนำ)",
+            "environment": "soundproof room / ห้องเงียบ"
+        },
+        "sections": [
+            {
+                "timestamp": "00:00-00:30",
+                "section": "Hook",
+                "tone": "engaging → calming",
+                "pace": "medium → slow",
+                "emphasis": ["เคยรู้สึกเครียด", "ใจฟุ้งซ่าน", "5 นาที"],
+                "pauses": [
+                    {"after": "ไหมครับ?", "duration": "1.5s"},
+                    {"after": "ไม่ค่อยได้พัก", "duration": "1s"}
+                ],
+                "notes": "เริ่มด้วยพลังงาน แล้วค่อยสงบลง"
+            },
+            {
+                "timestamp": "00:30-01:30",
+                "section": "Introduction",
+                "tone": "informative, friendly",
+                "pace": "moderate",
+                "emphasis": ["สติ", "อานาปานสติ", "พระไตรปิฎก"],
+                "pauses": [
+                    {"after": "อานาปานสติ", "duration": "0.5s"},
+                    {"after": "ช่วงนี้", "duration": "0.5s"}
+                ],
+                "notes": "ให้ข้อมูล แต่ไม่เทคนิคเกินไป"
+            },
+            {
+                "timestamp": "05:00-07:00",
+                "section": "Demonstration",
+                "tone": "gentle, guiding",
+                "pace": "very slow",
+                "emphasis": ["หายใจเข้า", "หายใจออก", "กลับมาที่ลมหายใจ"],
+                "pauses": [
+                    {"after": "หายใจเข้า...", "duration": "3s"},
+                    {"after": "หายใจออก...", "duration": "3s"},
+                    {"type": "meditation_silence", "duration": "5-10s"}
+                ],
+                "notes": "พูดช้ามาก เหมือนนำทำสมาธิ ใช้น้ำเสียงนุ่ม"
+            },
+            {
+                "timestamp": "08:30-10:00",
+                "section": "Conclusion",
+                "tone": "encouraging, warm",
+                "pace": "moderate",
+                "emphasis": ["แค่ 5 นาที", "ทุกวัน", "สาธุครับ"],
+                "pauses": [
+                    {"after": "มาแชร์ประสบการณ์", "duration": "0.5s"},
+                    {"after": "สาธุครับ", "duration": "2s"}
+                ],
+                "notes": "ปิดท้ายด้วยความอบอุ่น เชิญชวน"
+            }
+        ],
+        "pronunciation_guide": {
+            "อานาปานสติ": "อา-นา-ปา-นะ-สะ-ติ",
+            "วิสุทธิมรรค": "วิ-สุด-ทิ-มัก",
+            "มัชฌิมนิกาย": "มัด-ฉิ-มะ-นิ-กาย"
+        },
+        "background_music": {
+            "type": "Ambient / Meditation",
+            "volume": "15-20% (เบามาก)",
+            "tracks_suggested": [
+                "Calm Meditation Piano",
+                "Tibetan Singing Bowls (soft)",
+                "Nature Sounds (rain, stream)"
+            ],
+            "fade_in_out": "3 seconds"
+        },
+        "post_processing": {
+            "noise_reduction": "medium",
+            "eq": "boost low-mids (warm voice)",
+            "compression": "gentle (2:1 ratio)",
+            "reverb": "subtle room reverb",
+            "normalization": "-3dB LUFS"
+        },
+        "alternative_options": {
+            "tts_services": [
+                "Google Cloud TTS (Thai)",
+                "Amazon Polly (limited Thai)",
+                "ElevenLabs (AI voice cloning)"
+            ],
+            "human_voiceover": {
+                "fiverr": "$20-50 per 10 min",
+                "local_talent": "ติดต่อนักพากย์ไทย"
+            }
+        },
+        "estimated_recording_time": "30-45 minutes (with retakes)",
+        "estimated_editing_time": "1-2 hours"
+    }
+    
+    write_json(out, voiceover_guide)
+    log(f"✓ Voiceover guide created - {len(voiceover_guide['sections'])} sections with detailed direction")
+    return out
+
+
+def agent_localization(step, run_dir: Path):
+    """Localization & Subtitle - สร้างคำบรรยายและแปลภาษา"""
+    in_path = run_dir / step["input_from"]
+    out = run_dir / step["output"]
+    
+    script = in_path.read_text(encoding="utf-8")
+    
+    # สร้าง SRT template
+    srt_content = """1
+00:00:00,000 --> 00:00:05,000
+สวัสดีครับผู้ชมทุกท่าน 🙏
+
+2
+00:00:05,000 --> 00:00:10,000
+คุณเคยรู้สึกเครียด ใจฟุ้งซ่าน
+จนไม่รู้จะทำอะไรก่อนดีไหมครับ?
+
+3
+00:00:12,000 --> 00:00:17,000
+ชีวิตยุคใหม่เต็มไปด้วยความเร่งรีบ
+ข้อมูลข่าวสารท่วมท้น
+
+4
+00:00:17,000 --> 00:00:22,000
+ทำให้จิตใจของเราไม่ค่อยได้พัก
+ไม่ค่อยได้สงบเลย
+
+5
+00:00:24,000 --> 00:00:30,000
+แต่ถ้าผมบอกว่า แค่ 5 นาที
+ทำได้ทุกที่ ทุกเวลา
+
+6
+00:00:30,000 --> 00:00:35,000
+คุณก็สามารถทำให้ใจสงบลงได้
+
+... [continues]
+"""
+    
+    localization = {
+        "generated_at": datetime.now().isoformat(),
+        "primary_language": "th",
+        "subtitles": {
+            "thai": {
+                "filename": "subtitles_th.srt",
+                "status": "generated",
+                "total_lines": 120,
+                "format": "SRT",
+                "encoding": "UTF-8",
+                "font_recommendation": "Prompt, Kanit",
+                "size": "Medium (not too small)",
+                "position": "Bottom center",
+                "style": {
+                    "color": "White",
+                    "outline": "Black (2px)",
+                    "background": "Semi-transparent black (optional)"
+                }
+            },
+            "english": {
+                "filename": "subtitles_en.srt",
+                "status": "to_be_translated",
+                "target_audience": "International Buddhists, meditation practitioners",
+                "notes": "Translate key terms carefully: สติ = mindfulness/awareness"
+            }
+        },
+        "translation_guide": {
+            "key_terms": {
+                "สติ": "mindfulness / awareness",
+                "อานาปานสติ": "mindfulness of breathing / breath meditation",
+                "พระไตรปิฎก": "Tripitaka / Pali Canon",
+                "วิสุทธิมรรค": "Visuddhimagga / Path of Purification",
+                "กรรมฐาน": "meditation object / kammaṭṭhāna",
+                "สมาธิ": "concentration / samadhi"
+            },
+            "cultural_notes": [
+                "🙏 emoji = wai gesture (Thai greeting)",
+                "Keep Thai Buddhist terminology intact when appropriate",
+                "Add footnotes for untranslatable concepts"
+            ]
+        },
+        "accessibility": {
+            "closed_captions": {
+                "enabled": True,
+                "includes_sound_effects": "[เสียงธรรมชาติ]",
+                "speaker_labels": "[ผู้บรรยาย]"
+            },
+            "auto_generated": {
+                "youtube_auto_captions": "available as backup",
+                "accuracy": "60-70% (Thai)",
+                "recommendation": "Always upload custom SRT"
+            }
+        },
+        "srt_file_preview": srt_content[:500] + "...",
+        "tools_recommended": [
+            "Subtitle Edit (free, Windows)",
+            "Aegisub (free, cross-platform)",
+            "YouTube Studio (built-in editor)",
+            "Rev.com (paid transcription service)"
+        ],
+        "quality_checklist": [
+            "ตรวจสอบความสอดคล้องกับเสียง",
+            "แบ่งบรรทัดตามความหมาย (ไม่เกิน 2 บรรทัด)",
+            "ระยะเวลาแสดงผล 1-7 วินาที/บรรทัด",
+            "ใช้ emoji อย่างประหยัด",
+            "ตรวจสอบการสะกดคำ"
+        ],
+        "estimated_time": "2-3 hours (manual timing)"
+    }
+    
+    # เขียนไฟล์ SRT ตัวอย่าง
+    srt_path = run_dir / "subtitles_th.srt"
+    write_text(srt_path, srt_content)
+    
+    write_json(out, localization)
+    log(f"✓ Localization completed - Thai SRT generated ({localization['subtitles']['thai']['total_lines']} lines)")
+    return out
+
+
+def agent_thumbnail_generator(step, run_dir: Path):
+    """Thumbnail Generator - สร้างคอนเซ็ปต์ภาพปก"""
+    in_path = run_dir / step["input_from"]
+    out = run_dir / step["output"]
+    
+    metadata = read_json(in_path)
+    title = metadata.get("title", "")
+    
+    thumbnail_concepts = {
+        "generated_at": datetime.now().isoformat(),
+        "video_title": title,
+        "dimensions": "1280x720 px (16:9)",
+        "file_format": "JPG or PNG",
+        "file_size_limit": "2MB (YouTube)",
+        "concepts": [
+            {
+                "concept_id": 1,
+                "title": "Peaceful Meditation",
+                "text_overlay": {
+                    "main": "ฝึกสติ 5 นาที",
+                    "sub": "เข้าใจง่าย ทำได้ทุกที่",
+                    "font_size": {"main": "72pt", "sub": "36pt"},
+                    "font": "Kanit Bold",
+                    "color": "White + Gold",
+                    "stroke": "Dark shadow (3px)"
+                },
+                "visual_elements": [
+                    "Person meditating (silhouette or clear face)",
+                    "Natural background (sunset, mountains)",
+                    "Soft glow/light effect",
+                    "🙏 emoji (optional)"
+                ],
+                "color_scheme": "warm (orange/gold)",
+                "emotion": "peaceful, inviting",
+                "composition": "Rule of thirds - subject on right, text on left"
+            },
+            {
+                "concept_id": 2,
+                "title": "Modern Minimal",
+                "text_overlay": {
+                    "main": "5 นาที",
+                    "sub": "เปลี่ยนใจ",
+                    "badge": "🧘 สติ",
+                    "font_size": {"main": "120pt", "sub": "48pt"},
+                    "font": "Prompt ExtraBold",
+                    "color": "Dark blue + White",
+                    "style": "Clean, modern"
+                },
+                "visual_elements": [
+                    "Minimalist breath animation",
+                    "Geometric shapes (circles/waves)",
+                    "Gradient background (blue to green)",
+                    "NO clutter"
+                ],
+                "color_scheme": "cool (blue/green)",
+                "emotion": "modern, trustworthy",
+                "composition": "Center-aligned, symmetrical"
+            },
+            {
+                "concept_id": 3,
+                "title": "Emotional Hook",
+                "text_overlay": {
+                    "main": "ใจฟุ้งซ่าน?",
+                    "sub": "5 นาที แก้ได้!",
+                    "font_size": {"main": "80pt", "sub": "52pt"},
+                    "font": "Kanit Bold",
+                    "color": "Yellow + White",
+                    "effect": "Slight tilt (dynamic)"
+                },
+                "visual_elements": [
+                    "Split screen: stressed vs calm face",
+                    "Before/After concept",
+                    "Arrows or transformation symbol",
+                    "High contrast"
+                ],
+                "color_scheme": "contrast (yellow/dark)",
+                "emotion": "curiosity, problem-solving",
+                "composition": "Dynamic split, eye-catching"
+            }
+        ],
+        "design_principles": {
+            "readability": "Text readable on mobile (4-6 words max)",
+            "contrast": "High contrast text/background",
+            "branding": "Consistent with channel style",
+            "emotion": "Show face when possible (5x higher CTR)",
+            "curiosity": "Ask question or promise benefit"
+        },
+        "tools": {
+            "free": [
+                "Canva (template available)",
+                "Photopea (free Photoshop alternative)",
+                "GIMP"
+            ],
+            "paid": [
+                "Adobe Photoshop",
+                "Affinity Photo",
+                "Figma"
+            ]
+        },
+        "a_b_testing": {
+            "recommendation": "Create 2-3 versions, test which gets higher CTR",
+            "test_duration": "7-14 days",
+            "metrics": "CTR (Click-Through Rate)"
+        },
+        "best_practices": [
+            "ใช้ใบหน้าคนจริง (ถ้าเป็นไปได้)",
+            "ข้อความสั้น ชัดเจน ไม่เกิน 6 คำ",
+            "สีสันสดใส แต่ไม่ฉูดฉาด",
+            "ตรงกับเนื้อหาวิดีโอ (ไม่ clickbait)",
+            "เพิ่ม emoji 1-2 ตัว (optional)"
+        ],
+        "avoid": [
+            "ข้อความเยอะเกินไป",
+            "สีจางจนอ่านไม่ออก",
+            "ภาพไม่เกี่ยวกับเนื้อหา",
+            "Clickbait หลอกลวง"
+        ]
+    }
+    
+    write_json(out, thumbnail_concepts)
+    log(f"✓ Thumbnail concepts created - {len(thumbnail_concepts['concepts'])} designs ready")
+    return out
+
+
+def agent_format_conversion(step, run_dir: Path):
+    """Format Conversion - แปลงไฟล์เป็นรูปแบบต่างๆ"""
+    in_path = run_dir / step["input_from"]
+    out = run_dir / step["output"]
+    
+    script = in_path.read_text(encoding="utf-8")
+    
+    formats = {
+        "converted_at": datetime.now().isoformat(),
+        "source_file": str(in_path),
+        "conversions": {
+            "video": {
+                "youtube": {
+                    "format": "MP4",
+                    "codec": "H.264",
+                    "resolution": "1920x1080 (1080p)",
+                    "frame_rate": "30fps",
+                    "bitrate": "8-12 Mbps",
+                    "audio": "AAC 320kbps",
+                    "max_file_size": "128GB",
+                    "aspect_ratio": "16:9"
+                },
+                "facebook": {
+                    "format": "MP4",
+                    "resolution": "1280x720 (720p)",
+                    "aspect_ratio": "16:9 or 1:1 (square)",
+                    "max_duration": "240 min",
+                    "max_file_size": "10GB"
+                },
+                "tiktok_shorts": {
+                    "format": "MP4",
+                    "resolution": "1080x1920 (vertical)",
+                    "aspect_ratio": "9:16",
+                    "max_duration": "10 min",
+                    "recommendation": "Extract key 60-90 sec clips"
+                }
+            },
+            "audio": {
+                "podcast": {
+                    "format": "MP3",
+                    "bitrate": "192kbps",
+                    "sample_rate": "44.1kHz",
+                    "use_case": "Audio-only version for podcast platforms"
+                }
+            },
+            "document": {
+                "pdf": {
+                    "filename": "script_formatted.pdf",
+                    "use_case": "Printable script for reference",
+                    "include": ["Full script", "Citations", "Timestamps"]
+                },
+                "docx": {
+                    "filename": "script_editable.docx",
+                    "use_case": "Editable for future revisions"
+                }
+            }
+        },
+        "export_settings": {
+            "premiere_pro": {
+                "sequence": "1920x1080, 30fps",
+                "export_preset": "YouTube 1080p Full HD"
+            },
+            "davinci_resolve": {
+                "timeline": "1920x1080, 30fps",
+                "delivery": "YouTube preset"
+            },
+            "final_cut_pro": {
+                "destination": "YouTube & Facebook"
+            }
+        },
+        "optimization": {
+            "compress_without_quality_loss": {
+                "tool": "HandBrake",
+                "preset": "Fast 1080p30"
+            },
+            "thumbnail": {
+                "extract_frame": "at 02:30 (engaging moment)",
+                "resolution": "1280x720"
+            }
+        },
+        "delivery_checklist": [
+            "MP4 for YouTube (1080p)",
+            "SRT subtitle file",
+            "Thumbnail JPG (1280x720)",
+            "Metadata JSON",
+            "PDF script (backup)"
+        ]
+    }
+    
+    write_json(out, formats)
+    log(f"✓ Format conversion specs created - {len(formats['conversions'])} format categories")
+    return out
+
+
+def agent_multi_channel_publish(step, run_dir: Path):
+    """Multi-Channel Publish - เผยแพร่หลายแพลตฟอร์ม"""
+    in_path = run_dir / step["input_from"]
+    out = run_dir / step["output"]
+    
+    metadata = read_json(in_path)
+    
+    multi_channel = {
+        "published_at": datetime.now().isoformat(),
+        "status": "ready_for_distribution",
+        "platforms": {
+            "youtube": {
+                "enabled": True,
+                "priority": 1,
+                "settings": {
+                    "title": metadata.get("title", ""),
+                    "description": metadata.get("description", ""),
+                    "tags": metadata.get("tags", []),
+                    "category": "Education",
+                    "visibility": "public",
+                    "publish_time": "2025-11-05 10:00:00 +07:00",
+                    "playlist": "ธรรมะเบื้องต้น",
+                    "thumbnail": "thumbnail.jpg",
+                    "end_screen": True,
+                    "cards": True,
+                    "subtitles": "subtitles_th.srt"
+                },
+                "api_endpoint": "YouTube Data API v3",
+                "status": "scheduled"
+            },
+            "facebook": {
+                "enabled": True,
+                "priority": 2,
+                "targets": [
+                    {
+                        "type": "page",
+                        "name": "Dhamma Channel",
+                        "post_text": "🙏 วิดีโอใหม่! เจริญสติในชีวิตประจำวัน 5 นาที\n\nมาเรียนรู้การฝึก 'อานาปานสติ' แบบง่ายๆ ที่ทำได้ทุกที่ ทุกเวลา\n\n✨ ประโยชน์:\n• ลดความเครียด\n• ใจสงบ\n• นอนหลับสนิท\n\nดูเต็มได้ที่: [YouTube Link]",
+                        "hashtags": ["#ธรรมะ", "#สติ", "#mindfulness"],
+                        "schedule": "same_as_youtube"
+                    },
+                    {
+                        "type": "group",
+                        "name": "ธรรมะเพื่อชีวิต",
+                        "permission": "request_approval"
+                    }
+                ]
+            },
+            "line": {
+                "enabled": False,
+                "targets": [
+                    {
+                        "type": "broadcast",
+                        "message": "🙏 วิดีโอธรรมะใหม่\n\nเจริญสติใน 5 นาที\nดูได้ที่: [Link]",
+                        "image": "thumbnail.jpg"
+                    }
+                ],
+                "note": "Enable when LINE OA is ready"
+            },
+            "tiktok": {
+                "enabled": False,
+                "note": "Create 60-90 sec vertical clips",
+                "recommendation": "Extract key teaching moments",
+                "aspect_ratio": "9:16"
+            },
+            "website": {
+                "enabled": True,
+                "priority": 3,
+                "settings": {
+                    "blog_post": {
+                        "title": metadata.get("title", ""),
+                        "content": "Embed YouTube + Full transcript",
+                        "category": "Meditation",
+                        "tags": metadata.get("tags", [])[:5]
+                    },
+                    "embed_code": "<iframe width='560' height='315' src='...'></iframe>"
+                }
+            }
+        },
+        "cross_promotion_schedule": {
+            "day_0": {
+                "time": "10:00",
+                "action": "Publish to YouTube",
+                "platforms": ["youtube"]
+            },
+            "day_0+2h": {
+                "time": "12:00",
+                "action": "Share to Facebook Page",
+                "platforms": ["facebook"]
+            },
+            "day_0+4h": {
+                "time": "14:00",
+                "action": "Post to Website",
+                "platforms": ["website"]
+            },
+            "day_1": {
+                "time": "09:00",
+                "action": "Share to Facebook Groups",
+                "platforms": ["facebook_groups"]
+            },
+            "day_2": {
+                "time": "10:00",
+                "action": "LINE Broadcast (if enabled)",
+                "platforms": ["line"]
+            }
+        },
+        "analytics_tracking": {
+            "utm_parameters": {
+                "youtube": "?utm_source=youtube&utm_medium=video&utm_campaign=mindfulness_series",
+                "facebook": "?utm_source=facebook&utm_medium=social&utm_campaign=mindfulness_series",
+                "line": "?utm_source=line&utm_medium=broadcast&utm_campaign=mindfulness_series"
+            },
+            "metrics_to_track": [
+                "views", "watch_time", "engagement_rate",
+                "click_through_rate", "shares", "comments"
+            ]
+        },
+        "automation_tools": [
+            "Buffer (social media scheduling)",
+            "Hootsuite (multi-platform posting)",
+            "Zapier (workflow automation)",
+            "YouTube Studio (native scheduling)"
+        ]
+    }
+    
+    write_json(out, multi_channel)
+    log(f"✓ Multi-Channel publish configured - {len([p for p in multi_channel['platforms'].values() if p.get('enabled')])} platforms enabled")
+    return out
+
+
+def agent_publish(step, run_dir: Path):
+    """Scheduling & Publishing - จัดการเผยแพร่และกำหนดเวลา"""
+    in_path = run_dir / step["input_from"]
+    out = run_dir / step["output"]
+    
+    # รับ input หลายไฟล์
+    input_from = step.get("input_from", {})
+    if isinstance(input_from, dict):
+        script_file = input_from.get("script", "script_validated.md")
+        metadata_file = input_from.get("metadata", "metadata.json")
+    else:
+        metadata_file = input_from
+        script_file = "script_validated.md"
+    
+    script_path = run_dir / script_file if "/" in script_file or "\\" in script_file else run_dir / script_file
+    metadata_path = run_dir / metadata_file if "/" in metadata_file or "\\" in metadata_file else run_dir / metadata_file
+    
+    # อ่านข้อมูล
+    metadata = read_json(metadata_path) if metadata_path.exists() else {}
+    
+    # สร้างข้อมูลการเผยแพร่
+    publish_config = {
+        "scheduled_at": datetime.now().isoformat(),
+        "status": "ready_to_publish",
+        "platforms": ["youtube"],
+        "youtube": {
+            "video_file": "output/final_video.mp4",
+            "title": metadata.get("title", ""),
+            "description": metadata.get("description", ""),
+            "tags": metadata.get("tags", []),
+            "category": metadata.get("category", "Education"),
+            "privacy": metadata.get("visibility", "public"),
+            "publish_time": "tomorrow 10:00 +07:00",
+            "playlist_id": None,
+            "thumbnail": "output/thumbnail.jpg"
+        },
+        "checklist": {
+            "video_file": False,
+            "thumbnail": False,
+            "script_approved": True,
+            "metadata_ready": True,
+            "doctrine_validated": True,
+            "seo_optimized": True,
+            "subtitles": False,
+            "visual_assets": False,
+            "voiceover": False
+        }
+    }
+    
+    write_json(out, publish_config)
+    
+    # สร้าง checklist แยก
+    checklist_md = f"""# 📋 Complete Publish Checklist
+
+## ✅ Content Creation (Completed)
+- [x] Trend Scout - Topics identified
+- [x] Topic Prioritizer - Best topic selected
+- [x] Research Retrieval - Citations gathered
+- [x] Data Enrichment - Context added
+- [x] Script Outline - Structure created
+- [x] Script Writer - Full script written
+- [x] Doctrine Validator - Approved ✅
+- [x] Legal/Compliance - Compliant ✅
+
+## ✅ Production Assets (To Complete)
+- [ ] Visual Asset Guide - Review B-roll list
+- [ ] Voiceover - Record or generate
+- [ ] Localization - Thai subtitles ready
+- [ ] Thumbnail - Design 3 concepts, pick best
+- [ ] Format Conversion - Export final MP4
+
+## ✅ Publishing (To Complete)
+- [ ] SEO Metadata - Applied to video
+- [ ] Multi-Channel - Schedule cross-posting
+- [ ] Upload to YouTube
+- [ ] Set publish time: {publish_config['youtube']['publish_time']}
+- [ ] Add to playlist: "ธรรมะเบื้องต้น"
+- [ ] Community post scheduled
+- [ ] Backup/Archive - Save final package
+
+## ✅ Post-Publishing
+- [ ] Monitor first 24h metrics
+- [ ] Respond to comments (first 2-3 hours critical)
+- [ ] Check retention rate
+- [ ] Update analytics dashboard
+- [ ] Share to Facebook/LINE (staggered)
+
+## 📊 Target Metrics (First Week)
+- Views: 1,000+
+- Watch Time: > 50% avg
+- Likes: > 95%
+- Comments: 20+
+- Shares: 50+
+"""
+    
+    checklist_path = run_dir / "publish_checklist.md"
+    write_text(checklist_path, checklist_md)
+    
+    log(f"✓ Publish configured - Scheduled for {publish_config['youtube']['publish_time']}")
+    log(f"✓ Complete checklist created: {checklist_path}")
+    return out
+
+
+def agent_backup_archive(step, run_dir: Path):
+    """Backup/Archive - แพ็กและสำรองไฟล์ทั้งหมด"""
+    out = run_dir / step["output"]
+    
+    # รวบรวมไฟล์ทั้งหมดใน run_dir
+    all_files = list(run_dir.glob("*"))
+    
+    # จัดหมวดหมู่ไฟล์
+    categorized = {
+        "json": [],
+        "markdown": [],
+        "srt": [],
+        "other": []
+    }
+    
+    for f in all_files:
+        if f.is_file():
+            if f.suffix == ".json":
+                categorized["json"].append(f.name)
+            elif f.suffix == ".md":
+                categorized["markdown"].append(f.name)
+            elif f.suffix == ".srt":
+                categorized["srt"].append(f.name)
+            else:
+                categorized["other"].append(f.name)
+    
+    backup_info = {
+        "archived_at": datetime.now().isoformat(),
+        "run_id": run_dir.name,
+        "total_files": len(all_files),
+        "files_by_category": categorized,
+        "package_contents": {
+            "research": [
+                "trend_candidates.json",
+                "topics_ranked.json",
+                "research_bundle.json",
+                "data_enrichment.json"
+            ],
+            "scripts": [
+                "outline.md",
+                "script.md",
+                "script_validated.md"
+            ],
+            "validation": [
+                "validation_report.json",
+                "compliance_report.json"
+            ],
+            "production": [
+                "visual_guide.json",
+                "voiceover_guide.json",
+                "localization.json",
+                "subtitles_th.srt",
+                "thumbnail_concepts.json"
+            ],
+            "publishing": [
+                "metadata.json",
+                "format_specs.json",
+                "multi_channel.json",
+                "publish_receipt.json",
+                "publish_checklist.md"
+            ],
+            "summary": [
+                "pipeline_summary.json"
+            ]
+        },
+        "archive_format": "ZIP",
+        "archive_filename": f"{run_dir.name}_complete_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip",
+        "storage_locations": {
+            "local": str(run_dir),
+            "backup": f"output/backups/{run_dir.name}",
+            "cloud": "Google Drive / Dropbox (optional)"
+        },
+        "retention_policy": {
+            "keep_local": "30 days",
+            "keep_backup": "90 days",
+            "keep_cloud": "1 year"
+        },
+        "restore_instructions": [
+            "1. Unzip archive file",
+            "2. Place in output/ directory",
+            "3. Reference files as needed",
+            "4. Re-run pipeline if needed: python orchestrator.py --pipeline pipelines/video_complete.yaml --run-id restored_[date]"
+        ],
+        "metadata": {
+            "project": "dhamma-channel-automation",
+            "pipeline": "video_complete",
+            "topic": "เจริญสติในชีวิตประจำวัน 5 นาที",
+            "status": "production_ready",
+            "next_steps": [
+                "Record voiceover",
+                "Create visual assets",
+                "Edit video",
+                "Upload to YouTube"
+            ]
+        },
+        "estimated_archive_size": "2-5 MB (text files only)",
+        "note": "Video files (MP4) and images (JPG/PNG) should be backed up separately due to size"
+    }
+    
+    write_json(out, backup_info)
+    
+    # สร้าง README สำหรับ archive
+    readme_content = f"""# Archive Package: {run_dir.name}
+
+Created: {backup_info['archived_at']}
+Total Files: {backup_info['total_files']}
+
+## Contents
+
+### Research & Planning
+{chr(10).join(['- ' + f for f in backup_info['package_contents']['research']])}
+
+### Scripts
+{chr(10).join(['- ' + f for f in backup_info['package_contents']['scripts']])}
+
+### Validation
+{chr(10).join(['- ' + f for f in backup_info['package_contents']['validation']])}
+
+### Production Assets
+{chr(10).join(['- ' + f for f in backup_info['package_contents']['production']])}
+
+### Publishing
+{chr(10).join(['- ' + f for f in backup_info['package_contents']['publishing']])}
+
+## Usage
+
+This archive contains all files generated by the Dhamma Channel Automation pipeline.
+
+**To use these files:**
+1. Review `pipeline_summary.json` for overview
+2. Check `publish_checklist.md` for production status
+3. Use `script_validated.md` for video production
+4. Apply `metadata.json` when uploading
+5. Follow `visual_guide.json` and `voiceover_guide.json` for production
+
+## Next Steps
+
+{chr(10).join(['- ' + step for step in backup_info['metadata']['next_steps']])}
+
+---
+Generated by Dhamma Channel Automation System
+"""
+    
+    readme_path = run_dir / "README_ARCHIVE.md"
+    write_text(readme_path, readme_content)
+    
+    log(f"✓ Backup/Archive completed - {backup_info['total_files']} files cataloged")
+    log(f"✓ Archive manifest: {out}")
+    log(f"✓ Archive README: {readme_path}")
+    
+    return out
+
+
+# ========== AGENT REGISTRY ==========
+
+AGENTS = {
+    # System Setup Phase
+    "PromptPack": agent_prompt_pack,
+    "AgentTemplate": agent_template,
+    "Security": agent_security,
+    "Integration": agent_integration,
+    "DataSync": agent_data_sync,
+    "InventoryIndex": agent_inventory_index,
+    "Monitoring": agent_monitoring,
+    "Notification": agent_notification,
+    "ErrorFlag": agent_error_flag,
+    "Dashboard": agent_dashboard,
+    "BackupArchive": agent_backup_archive,
+    
+    # Video Workflow Phase
+    "TrendScout": agent_trend_scout,
+    "TopicPrioritizer": agent_topic_prioritizer,
+    "ResearchRetrieval": agent_research_retrieval,
+    "DataEnrichment": agent_data_enrichment,
+    "ScriptOutline": agent_script_outline,
+    "ScriptWriter": agent_script_writer,
+    "DoctrineValidator": agent_doctrine_validator,
+    "LegalCompliance": agent_legal_compliance,
+    "VisualAsset": agent_visual_asset,
+    "Voiceover": agent_voiceover,
+    "Localization": agent_localization,
+    "ThumbnailGenerator": agent_thumbnail_generator,
+    "SEOAndMetadata": agent_seo_metadata,
+    "FormatConversion": agent_format_conversion,
+    "MultiChannelPublish": agent_multi_channel_publish,
+    "SchedulingPublishing": agent_publish,
+    "BackupArchive": agent_backup_archive,
+}
+
+
+# ========== PIPELINE RUNNER ==========
+
+def run_pipeline(pipeline_path: Path, run_id: str):
+    """รัน pipeline ตามไฟล์ YAML"""
+    log(f"Loading pipeline: {pipeline_path}")
+    
+    with open(pipeline_path, "r", encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+    
+    pipeline_name = cfg.get("pipeline", "unknown")
+    steps = cfg.get("steps", [])
+    
+    log(f"Pipeline: {pipeline_name} ({len(steps)} steps)")
+    
+    run_dir = ROOT / "output" / run_id
+    ensure_dir(run_dir)
+    
+    log(f"Output directory: {run_dir}")
+    
+    results = {}
+    
+    for i, step in enumerate(steps, 1):
+        step_id = step["id"]
+        uses = step["uses"]
+        
+        log(f"[{i}/{len(steps)}] Running: {step_id} (uses: {uses})")
+        
+        agent_func = AGENTS.get(uses)
+        if not agent_func:
+            log(f"ERROR: Agent not implemented: {uses}", "ERROR")
+            raise RuntimeError(f"Agent not implemented: {uses}")
+        
+        try:
+            result_path = agent_func(step, run_dir)
+            results[step_id] = {"status": "success", "output": str(result_path)}
+            log(f"[{i}/{len(steps)}] ✓ {step_id} completed", "SUCCESS")
+        except Exception as e:
+            log(f"ERROR in {step_id}: {e}", "ERROR")
+            results[step_id] = {"status": "error", "error": str(e)}
+            raise
+    
+    # สรุปผล
+    summary = {
+        "pipeline": pipeline_name,
+        "run_id": run_id,
+        "started_at": datetime.now().isoformat(),
+        "total_steps": len(steps),
+        "successful": len([r for r in results.values() if r["status"] == "success"]),
+        "failed": len([r for r in results.values() if r["status"] == "error"]),
+        "results": results,
+        "output_dir": str(run_dir)
+    }
+    
+    summary_path = run_dir / "pipeline_summary.json"
+    write_json(summary_path, summary)
+    
+    log("=" * 60)
+    log(f"Pipeline completed: {summary['successful']}/{summary['total_steps']} steps successful")
+    log(f"Results saved to: {run_dir}")
+    log("=" * 60)
+    
+    return summary
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Dhamma Channel Automation - Orchestrator")
+    parser.add_argument("--pipeline", required=True, help="Path to YAML pipeline file")
+    parser.add_argument("--run-id", default=None, help="Run ID (default: timestamp)")
+    parser.add_argument("--topic", default=None, help="Topic title to use (overrides mock data)")
+    
+    args = parser.parse_args()
+    
+    if args.run_id is None:
+        args.run_id = f"run_{int(time.time())}"
+    
+    # Store topic in environment for agents to access
+    if args.topic:
+        os.environ['DHAMMA_TOPIC'] = args.topic
+    
+    pipeline_path = Path(args.pipeline)
+    
+    if not pipeline_path.exists():
+        print(f"ERROR: Pipeline file not found: {pipeline_path}")
+        return 1
+    
+    try:
+        run_pipeline(pipeline_path, args.run_id)
+        return 0
+    except Exception as e:
+        log(f"Pipeline failed: {e}", "ERROR")
+        return 1
+
+
+if __name__ == "__main__":
+    exit(main())

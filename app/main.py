@@ -1,5 +1,13 @@
-from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+import asyncio
+import json
+import os
+import subprocess
+import time
+from pathlib import Path
+import sys
+
+from fastapi import BackgroundTasks, FastAPI, Form, Request
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -99,9 +107,17 @@ async def dashboard(request: Request):
         warnings.append(
             "โปรดเปลี่ยนชื่อผู้ใช้/รหัสผ่านเริ่มต้น (ADMIN_USERNAME/ADMIN_PASSWORD) ใน .env"
         )
+    # Optional success banner after restart
+    restart_ok = request.query_params.get("restarted") in {"1", "true", "yes"}
     return templates.TemplateResponse(
         "dashboard.html",
-        {"request": request, "agents": job_states, "warnings": warnings},
+        {
+            "request": request,
+            "agents": job_states,
+            "warnings": warnings,
+            "cfg": config,
+            "restart_ok": restart_ok,
+        },
     )
 
 
@@ -139,7 +155,124 @@ async def agent_action(request: Request, agent_key: str, action: str = Form(...)
         JOB_MANAGER.stop(agent_key)
     elif action == "reset":
         JOB_MANAGER.reset(agent_key)
+    elif action == "restart":
+        # หยุด -> รีเซ็ต -> เริ่มใหม่
+        JOB_MANAGER.stop(agent_key)
+        JOB_MANAGER.reset(agent_key)
+        await JOB_MANAGER.start(agent_key)
     return _redirect(f"/agents/{agent_key}")
+
+
+@app.get("/agents/{agent_key}/logs/stream")
+async def agent_logs_stream(request: Request, agent_key: str):
+    """SSE stream ของสถานะและ log แบบเรียลไทม์สำหรับเอเจนต์ที่เลือก"""
+    require_login(request)
+
+    job = JOB_MANAGER.get(agent_key)
+
+    async def event_gen():
+        last_idx = 0
+        # ส่งสถานะเริ่มต้นทันที
+        initial = {"status": job.status, "progress": job.progress}
+        yield f"event: status\ndata: {json.dumps(initial, ensure_ascii=False)}\n\n"
+        try:
+            while True:
+                # ส่ง log ใหม่ตั้งแต่ last_idx
+                if last_idx < len(job.log):
+                    for line in job.log[last_idx:]:
+                        # ส่งทีละบรรทัดเป็น event: log
+                        payload = json.dumps(line, ensure_ascii=False)
+                        yield f"event: log\ndata: {payload}\n\n"
+                    last_idx = len(job.log)
+
+                # อัปเดตสถานะ/ความคืบหน้าเป็นระยะ
+                status_payload = json.dumps(
+                    {"status": job.status, "progress": job.progress},
+                    ensure_ascii=False,
+                )
+                yield f"event: status\ndata: {status_payload}\n\n"
+
+                # หากงานสิ้นสุดหรือผิดพลาดแล้ว ให้ส่งสรุปแล้วจบการสตรีม
+                if job.status in ("completed", "error", "stopped"):
+                    break
+
+                await asyncio.sleep(0.5)
+        except asyncio.CancelledError:  # pragma: no cover
+            # ไคลเอนต์ยกเลิกการเชื่อมต่อ
+            return
+
+    return StreamingResponse(
+        event_gen(), media_type="text/event-stream", headers={"Cache-Control": "no-cache"}
+    )
+
+
+@app.post("/server/restart", response_class=HTMLResponse)
+async def server_restart(request: Request, background_tasks: BackgroundTasks):
+    """รีสตาร์ทเว็บเซิร์ฟเวอร์: สร้างโปรเซสใหม่ แล้วปิดตัวเดิม"""
+    require_login(request)
+
+    def _do_restart():
+        try:
+            py = os.getenv("PYTHON_BIN") or sys.executable  # type: ignore[name-defined]
+        except Exception:  # pragma: no cover
+            py = sys.executable  # type: ignore[name-defined]
+        # Launch a helper that waits for this process to release the port,
+        # then starts uvicorn with the same interpreter.
+        cmd = [
+            py,
+            "-m",
+            "app.utils.server_restart",
+            "--host",
+            config.WEB_HOST,
+            "--port",
+            str(config.WEB_PORT),
+            "--py",
+            py,
+        ]
+        try:
+            creationflags = 0
+            if os.name == "nt":
+                creationflags = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+            subprocess.Popen(
+                cmd,
+                cwd=str(Path.cwd()),
+                creationflags=creationflags,
+            )
+        except Exception:
+            pass
+        # เว้นเวลาเล็กน้อยให้ helper เริ่มทำงาน แล้วปิดโปรเซสปัจจุบัน
+        time.sleep(0.2)
+        os._exit(0)
+
+    background_tasks.add_task(_do_restart)
+    # แจ้งผู้ใช้ให้รอ แล้วเบราว์เซอร์จะเชื่อมต่อใหม่ที่เดิม
+    html = (
+        "<html><head>\n"
+        "  <meta http-equiv=\"refresh\" content=\"2;url=/dashboard?restarted=1\" />\n"
+        "</head><body>\n"
+        "  <p>กำลังรีสตาร์ทเซิร์ฟเวอร์ โปรดรอสักครู่...</p>\n"
+        "  <p>หากไม่ถูกเปลี่ยนหน้าอัตโนมัติ <a href=\"/dashboard\">คลิกที่นี่</a></p>\n"
+        "</body></html>"
+    )
+    return HTMLResponse(content=html, status_code=202)
+
+
+@app.get("/server/restart", response_class=HTMLResponse)
+async def server_restart_get(request: Request):
+    """รองรับกรณีผู้ใช้เปิดด้วย GET โดยเผลอคลิกลิงก์/บุ๊กมาร์ก: แสดงปุ่มยืนยัน"""
+    require_login(request)
+    return HTMLResponse(
+        content=(
+            "<html><body>\n"
+            "<p>ต้องการรีสตาร์ทเซิร์ฟเวอร์หรือไม่?</p>\n"
+            "<form method=\"post\" action=\"/server/restart\">\n"
+            "<button type=\"submit\">ยืนยัน Restart Server</button>\n"
+            "</form>\n"
+            "<p><a href=\"/dashboard\">กลับแดชบอร์ด</a></p>\n"
+            "</body></html>"
+        ),
+        status_code=200,
+    )
 
 
 @app.get("/settings", response_class=HTMLResponse)

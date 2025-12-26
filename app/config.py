@@ -22,3 +22,7 @@ OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
 # ตัวเรียก Python สำหรับ CLI (ช่วยให้ Windows กำหนดได้แม่นยำ)
 PYTHON_BIN = os.getenv("PYTHON_BIN", "")
+
+# พารามิเตอร์เว็บเซิร์ฟเวอร์ (สำหรับปุ่ม Restart Server)
+WEB_HOST = os.getenv("WEB_HOST", "127.0.0.1")
+WEB_PORT = int(os.getenv("WEB_PORT", "8000"))

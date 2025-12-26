@@ -2,6 +2,22 @@
 {% block content %}
 <h2>แดชบอร์ด</h2>
 
+<form method="post" action="/server/restart" style="margin: 0 0 1rem 0;">
+  <button type="submit" class="contrast">Restart Server</button>
+  <small class="contrast">จะรีสตาร์ทที่ {{ cfg.WEB_HOST if cfg and cfg.WEB_HOST else '127.0.0.1' }}:{{ cfg.WEB_PORT if cfg and cfg.WEB_PORT else '8000' }}</small>
+  <p><small>หมายเหตุ: การรีสตาร์ทจะตัดการเชื่อมต่อชั่วคราว 1-2 วินาที แล้วกลับมาอัตโนมัติ</small></p>
+  <hr>
+</form>
+
+{% if restart_ok %}
+<article class="contrast">
+  <strong>รีสตาร์ทเซิร์ฟเวอร์สำเร็จ</strong>
+  <p>ระบบพร้อมใช้งานแล้ว</p>
+  <p><a href="/agents">ไปหน้าเอเจนต์</a></p>
+  <hr>
+</article>
+{% endif %}
+
 {% if warnings and warnings|length > 0 %}
 <article>
   <h4>คำแนะนำด้านความปลอดภัย</h4>
@@ -14,7 +30,7 @@
 <p>ภาพรวมสถานะเอเจนต์</p>
 <table role="grid">
   <thead>
-    <tr><th>เอเจนต์</th><th>สถานะ</th><th>ความคืบหน้า</th></tr>
+  <tr><th>เอเจนต์</th><th>สถานะ</th><th>ความคืบหน้า</th><th>การทำงาน</th></tr>
   </thead>
   <tbody>
   {% for a in agents %}
@@ -22,6 +38,9 @@
       <td><a href="/agents/{{ a.key }}">{{ a.name }}</a></td>
       <td>{{ a.status }}</td>
       <td><progress value="{{ a.progress }}" max="100">{{ a.progress }}%</progress></td>
+      <td>
+        <a href="/agents/{{ a.key }}" role="button">เปิด</a>
+      </td>
     </tr>
   {% endfor %}
   </tbody>

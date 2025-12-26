@@ -30,7 +30,10 @@ class AppConfig(BaseSettings):
     database_url: str | None = Field(default=None, description="Database URL")
 
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", case_sensitive=False
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",  # อนุญาตให้มีคีย์อื่นใน .env (เช่นของเว็บแดชบอร์ด) โดยไม่ให้ error
     )
 
 

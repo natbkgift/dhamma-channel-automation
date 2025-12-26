@@ -69,6 +69,38 @@ class ProcessJob:
                     self.progress = max(0, min(100, pct))
                 except Exception:
                     pass
+            else:
+                # additional heuristics for known messages to reflect coarse progress
+                lower = text.lower()
+                # Trend Scout Agent typical stages
+                if "กำลังโหลดข้อมูล" in text or "loading" in lower:
+                    self.progress = max(self.progress, 20)
+                if "กำลังวิเคราะห์" in text or "analyzing" in lower:
+                    self.progress = max(self.progress, 60)
+                if "กำลังบันทึกผลลัพธ์" in text or "saving" in lower:
+                    self.progress = max(self.progress, 90)
+
+                # If CLI prints the saved output path, try to append file content to logs
+                if prefix == "STDOUT" and ("บันทึกผลลัพธ์แล้ว:" in text or "saved result:" in lower):
+                    try:
+                        # Extract path after ':' and normalize
+                        path_part = text.split(":", 1)[-1].strip().strip("'\"")
+                        out_path = Path(path_part)
+                        if not out_path.is_absolute():
+                            out_path = (Path.cwd() / out_path).resolve()
+                        if out_path.suffix.lower() == ".json" and out_path.exists() and out_path.is_file():
+                            # Limit size to avoid huge logs
+                            if out_path.stat().st_size <= 1024 * 512:  # 512KB
+                                content = out_path.read_text(encoding="utf-8", errors="ignore")
+                                banner = f"RESULT_JSON ({out_path}):"
+                                self.log.append(banner)
+                                self._append_file_log(banner)
+                                for ln in content.splitlines():
+                                    self.log.append(ln)
+                                    self._append_file_log(ln)
+                    except Exception:
+                        # ignore errors while trying to include file content
+                        pass
 
     async def start(self):
         if self.status in ("running", "starting", "paused"):

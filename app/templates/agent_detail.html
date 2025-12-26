@@ -5,8 +5,8 @@
     <h3>{{ agent.name }}</h3>
     <p class="contrast">{{ agent.desc }}</p>
   </header>
-  <p>สถานะ: <strong>{{ job.status }}</strong></p>
-  <p>ความคืบหน้า: <progress value="{{ job.progress }}" max="100">{{ job.progress }}%</progress></p>
+  <p>สถานะ: <strong id="statusText">{{ job.status }}</strong> <span id="liveDot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#aaa;margin-left:6px;vertical-align:middle"></span></p>
+  <p>ความคืบหน้า: <progress id="progress" value="{{ job.progress }}" max="100">{{ job.progress }}%</progress></p>
 
   <form method="post" action="/agents/{{ agent.key }}/action" class="grid">
     <input type="hidden" name="action" value="start">
@@ -33,13 +33,54 @@
 
   <details>
     <summary>บันทึกเหตุการณ์ (Logs)</summary>
-    <pre>
+  <pre id="liveLog" style="height: 60vh; overflow: auto;">
 {% for line in job.log %}{{ line }}
 {% endfor %}
     </pre>
+    <div style="margin-top: .5rem;">
+      <button type="button" id="scrollBottomBtn">เลื่อนลงล่างสุด</button>
+    </div>
     <p>ไฟล์ log: output/logs/{{ agent.key }}.log</p>
   </details>
 
   <p><small>หมายเหตุ: Pause/Resume รองรับ Windows ผ่าน psutil และ POSIX ผ่านสัญญาณ</small></p>
+  <script>
+    (function(){
+      const statusEl = document.getElementById('statusText');
+      const progEl = document.getElementById('progress');
+      const logEl = document.getElementById('liveLog');
+      const dot = document.getElementById('liveDot');
+      function setDot(color){ if(dot) dot.style.background = color; }
+      try {
+        const es = new EventSource(`/agents/{{ agent.key }}/logs/stream`);
+        es.addEventListener('status', (e) => {
+          try {
+            const s = JSON.parse(e.data);
+            if (s.status) statusEl.textContent = s.status;
+            if (typeof s.progress === 'number') progEl.value = s.progress;
+            // green when running, gray otherwise
+            if (s.status === 'running' || s.status === 'starting') { setDot('#22c55e'); }
+            else if (s.status === 'paused') { setDot('#f59e0b'); }
+            else { setDot('#9ca3af'); }
+          } catch (_) {}
+        });
+        es.addEventListener('log', (e) => {
+          // ข้อมูล log เป็นสตริงตามบรรทัด (ไม่เลื่อนอัตโนมัติ)
+          logEl.textContent += (e.data || '') + "\n";
+        });
+        es.onerror = () => {
+          // ปิดการเชื่อมต่อเมื่อมีข้อผิดพลาดเงียบๆ เพื่อไม่ให้รก UI
+        };
+        const scrollBtn = document.getElementById('scrollBottomBtn');
+        if (scrollBtn) {
+          scrollBtn.addEventListener('click', () => {
+            logEl.scrollTop = logEl.scrollHeight;
+          });
+        }
+      } catch (err) {
+        // no-op
+      }
+    })();
+  </script>
 </article>
 {% endblock %}
