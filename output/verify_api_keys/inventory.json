@@ -1,0 +1,48 @@
+{
+  "indexed_at": "2025-11-03T20:26:32.472461",
+  "total_agents": 36,
+  "prompts": {
+    "count": 31,
+    "files": [
+      "advanced_bi_agent_v1.txt",
+      "agent_template_workflow_v1.txt",
+      "analytics_retention_agent_v1.txt",
+      "auto_labeling_agent_v1.txt",
+      "backup_archive_agent_v1.txt",
+      "dashboard_agent_v1.txt",
+      "data_enrichment_agent_v1.txt",
+      "data_sync_agent_v1.txt",
+      "doctrine_validator_v1.txt",
+      "feedback_loop_agent_v1.txt"
+    ]
+  },
+  "examples": {
+    "count": 32,
+    "files": [
+      "advanced_bi_input.json",
+      "agent_template_input.json",
+      "analytics_retention_input.json",
+      "auto_labeling_input.json",
+      "backup_archive_input.json",
+      "community_insight_input.json",
+      "dashboard_input.json",
+      "data_enrichment_input.json",
+      "data_sync_input.json",
+      "doctrine_validator_input.json"
+    ]
+  },
+  "index": {
+    "TrendScout": {
+      "prompt": "prompts/trend_scout_v1.txt",
+      "example": "examples/trend_scout_input.json"
+    },
+    "TopicPrioritizer": {
+      "prompt": "prompts/topic_prioritizer_v1.txt",
+      "example": "examples/topic_prioritizer_input.json"
+    },
+    "ResearchRetrieval": {
+      "prompt": "prompts/research_retrieval_v1.txt",
+      "example": "examples/research_retrieval_input.json"
+    }
+  }
+}

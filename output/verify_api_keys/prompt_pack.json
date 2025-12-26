@@ -1,0 +1,217 @@
+{
+  "pack_id": "dhamma_v1",
+  "created_at": "2025-11-03T20:26:32.455281",
+  "total_prompts": 31,
+  "prompts": {
+    "advanced_bi_agent_v1": {
+      "file": "prompts\\advanced_bi_agent_v1.txt",
+      "agent": "Advanced Bi Agent",
+      "size_bytes": 9301
+    },
+    "agent_template_workflow_v1": {
+      "file": "prompts\\agent_template_workflow_v1.txt",
+      "agent": "Agent Template Workflow",
+      "size_bytes": 3663
+    },
+    "analytics_retention_agent_v1": {
+      "file": "prompts\\analytics_retention_agent_v1.txt",
+      "agent": "Analytics Retention Agent",
+      "size_bytes": 9486
+    },
+    "auto_labeling_agent_v1": {
+      "file": "prompts\\auto_labeling_agent_v1.txt",
+      "agent": "Auto Labeling Agent",
+      "size_bytes": 4773
+    },
+    "backup_archive_agent_v1": {
+      "file": "prompts\\backup_archive_agent_v1.txt",
+      "agent": "Backup Archive Agent",
+      "size_bytes": 4873
+    },
+    "dashboard_agent_v1": {
+      "file": "prompts\\dashboard_agent_v1.txt",
+      "agent": "Dashboard Agent",
+      "size_bytes": 10922
+    },
+    "data_enrichment_agent_v1": {
+      "file": "prompts\\data_enrichment_agent_v1.txt",
+      "agent": "Data Enrichment Agent",
+      "size_bytes": 9672
+    },
+    "data_sync_agent_v1": {
+      "file": "prompts\\data_sync_agent_v1.txt",
+      "agent": "Data Sync Agent",
+      "size_bytes": 5825
+    },
+    "doctrine_validator_v1": {
+      "file": "prompts\\doctrine_validator_v1.txt",
+      "agent": "Doctrine Validator",
+      "size_bytes": 7691
+    },
+    "feedback_loop_agent_v1": {
+      "file": "prompts\\feedback_loop_agent_v1.txt",
+      "agent": "Feedback Loop Agent",
+      "size_bytes": 8882
+    },
+    "format_conversion_agent_v1": {
+      "file": "prompts\\format_conversion_agent_v1.txt",
+      "agent": "Format Conversion Agent",
+      "size_bytes": 9549
+    },
+    "growth_forecast_agent_v1": {
+      "file": "prompts\\growth_forecast_agent_v1.txt",
+      "agent": "Growth Forecast Agent",
+      "size_bytes": 6211
+    },
+    "integration_agent_v1": {
+      "file": "prompts\\integration_agent_v1.txt",
+      "agent": "Integration Agent",
+      "size_bytes": 6440
+    },
+    "legal_compliance_agent_v1": {
+      "file": "prompts\\legal_compliance_agent_v1.txt",
+      "agent": "Legal Compliance Agent",
+      "size_bytes": 8431
+    },
+    "localization_subtitle_v2": {
+      "file": "prompts\\localization_subtitle_v2.txt",
+      "agent": "Localization Subtitle V2",
+      "size_bytes": 600
+    },
+    "monitoring_agent_v1": {
+      "file": "prompts\\monitoring_agent_v1.txt",
+      "agent": "Monitoring Agent",
+      "size_bytes": 8964
+    },
+    "multi_channel_publish_agent_v1": {
+      "file": "prompts\\multi_channel_publish_agent_v1.txt",
+      "agent": "Multi Channel Publish Agent",
+      "size_bytes": 9770
+    },
+    "notification_agent_v1": {
+      "file": "prompts\\notification_agent_v1.txt",
+      "agent": "Notification Agent",
+      "size_bytes": 8745
+    },
+    "personalization_agent_v1": {
+      "file": "prompts\\personalization_agent_v1.txt",
+      "agent": "Personalization Agent",
+      "size_bytes": 8081
+    },
+    "research_retrieval_v1": {
+      "file": "prompts\\research_retrieval_v1.txt",
+      "agent": "Research Retrieval",
+      "size_bytes": 10092
+    },
+    "script_outline_v1": {
+      "file": "prompts\\script_outline_v1.txt",
+      "agent": "Script Outline",
+      "size_bytes": 12743
+    },
+    "script_writer_v1": {
+      "file": "prompts\\script_writer_v1.txt",
+      "agent": "Script Writer",
+      "size_bytes": 7779
+    },
+    "security_agent_v1": {
+      "file": "prompts\\security_agent_v1.txt",
+      "agent": "Security Agent",
+      "size_bytes": 6501
+    },
+    "thumbnail_generator_agent_v1": {
+      "file": "prompts\\thumbnail_generator_agent_v1.txt",
+      "agent": "Thumbnail Generator Agent",
+      "size_bytes": 5299
+    },
+    "topic_prioritizer_v1": {
+      "file": "prompts\\topic_prioritizer_v1.txt",
+      "agent": "Topic Prioritizer",
+      "size_bytes": 9648
+    },
+    "training_data_agent_v1": {
+      "file": "prompts\\training_data_agent_v1.txt",
+      "agent": "Training Data Agent",
+      "size_bytes": 6395
+    },
+    "trend_scout_v1": {
+      "file": "prompts\\trend_scout_v1.txt",
+      "agent": "Trend Scout",
+      "size_bytes": 7528
+    },
+    "trend_scout_v1_backup": {
+      "file": "prompts\\trend_scout_v1_backup.txt",
+      "agent": "Trend Scout Backup",
+      "size_bytes": 5618
+    },
+    "user_feedback_collector_agent_v1": {
+      "file": "prompts\\user_feedback_collector_agent_v1.txt",
+      "agent": "User Feedback Collector Agent",
+      "size_bytes": 16556
+    },
+    "visual_asset_agent_v1": {
+      "file": "prompts\\visual_asset_agent_v1.txt",
+      "agent": "Visual Asset Agent",
+      "size_bytes": 4598
+    },
+    "voiceover_agent_v1": {
+      "file": "prompts\\voiceover_agent_v1.txt",
+      "agent": "Voiceover Agent",
+      "size_bytes": 6254
+    }
+  },
+  "workflow_diagram": {
+    "phases": [
+      "system_setup",
+      "discovery",
+      "content_creation",
+      "publishing",
+      "analytics"
+    ],
+    "agents_per_phase": {
+      "system_setup": [
+        "PromptPack",
+        "AgentTemplate",
+        "Security",
+        "Integration",
+        "DataSync",
+        "InventoryIndex",
+        "Monitoring",
+        "Notification",
+        "ErrorFlag",
+        "Dashboard",
+        "BackupArchive"
+      ],
+      "discovery": [
+        "TrendScout",
+        "TopicPrioritizer",
+        "ResearchRetrieval",
+        "DataEnrichment"
+      ],
+      "content_creation": [
+        "ScriptOutline",
+        "ScriptWriter",
+        "DoctrineValidator",
+        "LegalCompliance",
+        "VisualAsset",
+        "Voiceover",
+        "Localization",
+        "ThumbnailGenerator"
+      ],
+      "publishing": [
+        "SEOMetadata",
+        "FormatConversion",
+        "MultiChannelPublish",
+        "SchedulingPublishing"
+      ],
+      "analytics": [
+        "Analytics",
+        "AdvancedBI",
+        "ExperimentOrchestrator",
+        "GrowthForecast",
+        "FeedbackLoop",
+        "UserFeedbackCollector",
+        "CommunityInsight"
+      ]
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "agent": "topic_prioritizer",
+  "started_at": "2025-11-03T13:05:12.428518Z",
+  "status": "placeholder",
+  "message": "เอเจนต์ topic_prioritizer ยังไม่ได้เชื่อม CLI จริง — โปรดอัปเดต app/agent_commands.yml",
+  "input_preview": {
+    "topics": [
+      "นอนหลับลึก",
+      "สมาธิสั้นในวัยรุ่น",
+      "ปล่อยวางความกังวล"
+    ],
+    "criteria": [
+      "search_intent",
+      "freshness",
+      "evergreen",
+      "brand_fit"
+    ]
+  },
+  "ended_at": "2025-11-03T13:05:12.428518Z"
+}

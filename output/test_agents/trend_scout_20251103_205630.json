@@ -1,0 +1,93 @@
+{
+  "agent": "TrendScout",
+  "version": "1.0",
+  "executed_at": "2025-11-03T20:56:30.149900",
+  "input": {
+    "niches": [
+      "ธรรมะ",
+      "mindfulness",
+      "พุทธศาสนา",
+      "meditation"
+    ],
+    "horizon_days": 30,
+    "sources": [
+      "youtube",
+      "google_trends"
+    ],
+    "language": "th",
+    "max_results": 10
+  },
+  "trends_found": 5,
+  "trends": [
+    {
+      "title": "ทำสมาธิ 5 นาที ลดความเครียด",
+      "score": 92,
+      "why_now": "เทรนด์ short mindfulness กำลังมา, คนหางานสั้นๆ ทำได้ทุกวัน",
+      "sources": [
+        "YouTube Trending",
+        "Google Trends ↑45%"
+      ],
+      "audience": "วัยทำงาน 25-40 ปี",
+      "difficulty": "ง่าย",
+      "risk": "ต่ำ",
+      "estimated_views": "15,000-25,000"
+    },
+    {
+      "title": "อริยสัจ 4 ฉบับเข้าใจง่าย",
+      "score": 88,
+      "why_now": "คนค้นหาพื้นฐานธรรมะเพิ่มขึ้น",
+      "sources": [
+        "Google Search ↑30%",
+        "YouTube Suggest"
+      ],
+      "audience": "ผู้เริ่มต้นศึกษาธรรม",
+      "difficulty": "กลาง",
+      "risk": "กลาง",
+      "estimated_views": "10,000-18,000"
+    },
+    {
+      "title": "วิธีรับมือความโกรธด้วยหลักธรรม",
+      "score": 85,
+      "why_now": "Emotional regulation content กำลังฮิต",
+      "sources": [
+        "YouTube Comments",
+        "Google Trends ↑25%"
+      ],
+      "audience": "ทั่วไป",
+      "difficulty": "ง่าย-กลาง",
+      "risk": "ต่ำ",
+      "estimated_views": "12,000-20,000"
+    },
+    {
+      "title": "เจริญสติในชีวิตประจำวัน",
+      "score": 82,
+      "why_now": "Mindfulness in daily life กำลังเป็นที่สนใจ",
+      "sources": [
+        "YouTube Trending",
+        "Social Media"
+      ],
+      "audience": "วัยทำงาน",
+      "difficulty": "ง่าย",
+      "risk": "ต่ำ",
+      "estimated_views": "10,000-15,000"
+    },
+    {
+      "title": "กรรม คืออะไร? อธิบายแบบวิทยาศาสตร์",
+      "score": 78,
+      "why_now": "คนสนใจเรื่องกรรมในมุมมองใหม่",
+      "sources": [
+        "YouTube Search",
+        "Google ↑20%"
+      ],
+      "audience": "คนรุ่นใหม่ที่ชอบเหตุผล",
+      "difficulty": "กลาง-ยาก",
+      "risk": "กลาง",
+      "estimated_views": "8,000-15,000"
+    }
+  ],
+  "metadata": {
+    "total_sources_checked": 4,
+    "search_keywords": 25,
+    "processing_time": "2.3 seconds"
+  }
+}

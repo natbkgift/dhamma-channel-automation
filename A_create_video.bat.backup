@@ -1,0 +1,230 @@
+@echo off
+chcp 65001 >nul
+REM ========================================
+REM Dhamma Video Creation - Full Workflow
+REM Path A (Manual/Free)
+REM ========================================
+
+echo.
+echo ╔════════════════════════════════════════════════════════════════╗
+echo ║  🎬 Dhamma Video Creation Workflow - Path A                   ║
+echo ╚════════════════════════════════════════════════════════════════╝
+echo.
+
+REM ========================================
+REM Step 0: Check and Select Next Topic
+REM ========================================
+echo 🔍 Checking Mock Topics Database...
+echo.
+
+REM Check if mock topics exist
+if not exist "data\mock_topics.json" (
+    echo ❌ ERROR: Mock topics not found!
+    echo.
+    echo 💡 Running generate_mock_topics.bat to create new topics...
+    echo.
+    call generate_mock_topics.bat
+    if %errorlevel% neq 0 (
+        echo ❌ Failed to generate topics!
+        pause
+        exit /b 1
+    )
+)
+
+REM Get next topic (highest priority that hasn't been done)
+for /f "usebackq delims=" %%i in (`"%~dp0venv\Scripts\python.exe" scripts\topic_database.py --topics data\mock_topics.json --history data\production_history.json next --title-only`) do set "TOPIC_TITLE=%%i"
+
+if "%TOPIC_TITLE%"=="" (
+    echo 🎉 All topics completed!
+    echo.
+    echo � Generating new topics batch...
+    echo.
+    call generate_mock_topics.bat
+    if %errorlevel% neq 0 (
+        echo ❌ Failed to generate new topics!
+        pause
+        exit /b 1
+    )
+    
+    REM Get next topic from new batch
+    for /f "usebackq delims=" %%i in (`"%~dp0venv\Scripts\python.exe" scripts\topic_database.py --topics data\mock_topics.json --history data\production_history.json next --title-only`) do set "TOPIC_TITLE=%%i"
+    
+    if "%TOPIC_TITLE%"=="" (
+        echo ❌ Still no topics available!
+        pause
+        exit /b 1
+    )
+)
+
+REM Check priority of selected topic
+for /f "usebackq delims=" %%i in (`""%~dp0venv\Scripts\python.exe" scripts\get_topic_priority.py --topics data\mock_topics.json --title "%TOPIC_TITLE%""`) do set "TOPIC_PRIORITY=%%i"
+
+echo ✅ Selected Topic: %TOPIC_TITLE%
+echo � Priority: %TOPIC_PRIORITY%/10
+echo.
+
+REM If priority < 3, regenerate topics and create new report
+if %TOPIC_PRIORITY% LSS 3 (
+    echo ⚠️  All high-priority topics ^(≥3^) completed!
+    echo 💡 Generating new topics batch and creating report...
+    echo.
+    
+    REM Generate new topics and create HTML report
+    call generate_mock_topics.bat
+    if %errorlevel% neq 0 (
+        echo ❌ Failed to generate new topics!
+        pause
+        exit /b 1
+    )
+    
+    REM Get next topic from new batch
+    for /f "usebackq delims=" %%i in (`"%~dp0venv\Scripts\python.exe" scripts\topic_database.py --topics data\mock_topics.json --history data\production_history.json next --title-only`) do set "TOPIC_TITLE=%%i"
+    
+    if "%TOPIC_TITLE%"=="" (
+        echo ❌ No topics available!
+        pause
+        exit /b 1
+    )
+    
+    for /f "usebackq delims=" %%i in (`""%~dp0venv\Scripts\python.exe" scripts\get_topic_priority.py --topics data\mock_topics.json --title "%TOPIC_TITLE%""`) do set "TOPIC_PRIORITY=%%i"
+    
+    echo ✅ New Topic: %TOPIC_TITLE%
+    echo 📊 Priority: %TOPIC_PRIORITY%/10
+    echo.
+)
+echo กด Enter เพื่อเริ่มสร้างวิดีโอ...
+pause >nul
+echo.
+
+REM Generate run ID with timestamp
+for /f "tokens=2-4 delims=/ " %%a in ('date /t') do (set mydate=%%c%%a%%b)
+for /f "tokens=1-3 delims=:." %%a in ("%TIME%") do (set mytime=%%a%%b%%c)
+set mytime=%mytime: =0%
+set RUN_ID=production_%mydate%_%mytime%
+echo 🆔 Run ID: %RUN_ID%
+echo.
+
+REM ========================================
+REM Step 1: AI Content Generation (17 Agents)
+REM ========================================
+echo.
+echo ╔════════════════════════════════════════════════════════════════╗
+echo ║  STEP 1/4: AI Content Generation (17 Agents)                  ║
+echo ╚════════════════════════════════════════════════════════════════╝
+echo.
+echo 📝 Creating video content using AI agents...
+echo 📌 Topic: %TOPIC_TITLE%
+echo.
+
+"%~dp0venv\Scripts\python.exe" orchestrator.py --pipeline pipelines\video_complete.yaml --run-id %RUN_ID% --topic "%TOPIC_TITLE%"
+
+if %errorlevel% neq 0 (
+    echo.
+    echo ❌ ERROR: AI Content Generation failed!
+    echo    Check the error messages above.
+    pause
+    exit /b 1
+)
+
+echo.
+echo ✅ AI Content Generation completed!
+echo    Output: output\%RUN_ID%\
+echo.
+timeout /t 3 >nul
+
+REM ========================================
+REM Step 2: Production Assets Generation
+REM ========================================
+echo.
+echo ╔════════════════════════════════════════════════════════════════╗
+echo ║  STEP 2/4: Production Assets Generation (Path A)              ║
+echo ╚════════════════════════════════════════════════════════════════╝
+echo.
+echo 🔧 Generating production-ready files...
+echo.
+
+"%~dp0venv\Scripts\python.exe" scripts\production_orchestrator.py --input-dir output\%RUN_ID% --path A
+
+if %errorlevel% neq 0 (
+    echo.
+    echo ❌ ERROR: Production Assets Generation failed!
+    echo    Check the error messages above.
+    pause
+    exit /b 1
+)
+
+echo.
+echo ✅ Production Assets Generation completed!
+echo.
+timeout /t 3 >nul
+
+REM ========================================
+REM Step 3: Generate HTML Report
+REM ========================================
+echo.
+echo ╔════════════════════════════════════════════════════════════════╗
+echo ║  STEP 3/4: Generating Production Report                       ║
+echo ╚════════════════════════════════════════════════════════════════╝
+echo.
+
+"%~dp0venv\Scripts\python.exe" scripts\generate_production_report.py --run-id %RUN_ID%
+
+if %errorlevel% neq 0 (
+    echo.
+    echo ⚠️  WARNING: Report generation failed, but production files are ready.
+    echo    You can still proceed with manual production.
+)
+
+REM ========================================
+REM Step 4: Update Production History
+REM ========================================
+echo.
+echo ╔════════════════════════════════════════════════════════════════╗
+echo ║  STEP 4/4: Updating Production History                        ║
+echo ╚════════════════════════════════════════════════════════════════╝
+echo.
+
+REM Get topic ID from database
+for /f "usebackq delims=" %%i in (`"%~dp0venv\Scripts\python.exe" scripts\topic_database.py --topics data\mock_topics.json --history data\production_history.json next --id-only`) do set "TOPIC_ID=%%i"
+
+REM Mark as completed
+"%~dp0venv\Scripts\python.exe" scripts\topic_database.py --topics data\mock_topics.json --history data\production_history.json mark --topic-id %TOPIC_ID% --status completed --run-id %RUN_ID% --output-dir output\%RUN_ID%
+
+if %errorlevel% equ 0 (
+    echo ✅ Production history updated
+) else (
+    echo ⚠️  WARNING: Failed to update history
+)
+
+echo.
+
+REM ========================================
+REM Completion
+REM ========================================
+echo.
+echo.
+echo ╔════════════════════════════════════════════════════════════════╗
+echo ║  🎉 WORKFLOW COMPLETED SUCCESSFULLY!                          ║
+echo ╚════════════════════════════════════════════════════════════════╝
+echo.
+echo 📂 Generated Files:
+echo    • AI Content:     output\%RUN_ID%\
+echo    • Audio Scripts:  audio\%RUN_ID%\
+echo    • Video Templates: templates\%RUN_ID%\
+echo    • Thumbnail Guide: templates\canva\
+echo    • 📄 Production Report: output\%RUN_ID%\PRODUCTION_GUIDE.html
+echo.
+echo 🌐 Opening Production Report...
+echo.
+
+REM Open HTML report in default browser
+if exist "output\%RUN_ID%\PRODUCTION_GUIDE.html" (
+    start "" "output\%RUN_ID%\PRODUCTION_GUIDE.html"
+) else (
+    echo ⚠️  Report file not found. Please check output\%RUN_ID%\ folder manually.
+)
+
+echo.
+echo ✨ Next: Follow the steps in PRODUCTION_GUIDE.html
+echo.
+pause

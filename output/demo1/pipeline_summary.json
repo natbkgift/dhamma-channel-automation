@@ -1,0 +1,43 @@
+{
+  "pipeline": "dhamma-video",
+  "run_id": "demo1",
+  "started_at": "2025-11-04T08:54:16.004339",
+  "total_steps": 8,
+  "successful": 8,
+  "failed": 0,
+  "results": {
+    "trend_scout": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\demo1\\trend_candidates.json"
+    },
+    "topic_prioritizer": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\demo1\\topics_ranked.json"
+    },
+    "research_retrieval": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\demo1\\research_bundle.json"
+    },
+    "script_outline": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\demo1\\outline.md"
+    },
+    "script_writer": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\demo1\\script.md"
+    },
+    "doctrine_validator": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\demo1\\script_validated.md"
+    },
+    "seo_metadata": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\demo1\\metadata.json"
+    },
+    "publish": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\demo1\\publish_receipt.json"
+    }
+  },
+  "output_dir": "D:\\Auto Tool\\dhamma-channel-automation\\output\\demo1"
+}

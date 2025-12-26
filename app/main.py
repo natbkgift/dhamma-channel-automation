@@ -2,9 +2,9 @@ import asyncio
 import json
 import os
 import subprocess
+import sys
 import time
 from pathlib import Path
-import sys
 
 from fastapi import BackgroundTasks, FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
@@ -202,7 +202,9 @@ async def agent_logs_stream(request: Request, agent_key: str):
             return
 
     return StreamingResponse(
-        event_gen(), media_type="text/event-stream", headers={"Cache-Control": "no-cache"}
+        event_gen(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache"},
     )
 
 
@@ -248,10 +250,10 @@ async def server_restart(request: Request, background_tasks: BackgroundTasks):
     # แจ้งผู้ใช้ให้รอ แล้วเบราว์เซอร์จะเชื่อมต่อใหม่ที่เดิม
     html = (
         "<html><head>\n"
-        "  <meta http-equiv=\"refresh\" content=\"2;url=/dashboard?restarted=1\" />\n"
+        '  <meta http-equiv="refresh" content="2;url=/dashboard?restarted=1" />\n'
         "</head><body>\n"
         "  <p>กำลังรีสตาร์ทเซิร์ฟเวอร์ โปรดรอสักครู่...</p>\n"
-        "  <p>หากไม่ถูกเปลี่ยนหน้าอัตโนมัติ <a href=\"/dashboard\">คลิกที่นี่</a></p>\n"
+        '  <p>หากไม่ถูกเปลี่ยนหน้าอัตโนมัติ <a href="/dashboard">คลิกที่นี่</a></p>\n'
         "</body></html>"
     )
     return HTMLResponse(content=html, status_code=202)
@@ -265,10 +267,10 @@ async def server_restart_get(request: Request):
         content=(
             "<html><body>\n"
             "<p>ต้องการรีสตาร์ทเซิร์ฟเวอร์หรือไม่?</p>\n"
-            "<form method=\"post\" action=\"/server/restart\">\n"
-            "<button type=\"submit\">ยืนยัน Restart Server</button>\n"
+            '<form method="post" action="/server/restart">\n'
+            '<button type="submit">ยืนยัน Restart Server</button>\n'
             "</form>\n"
-            "<p><a href=\"/dashboard\">กลับแดชบอร์ด</a></p>\n"
+            '<p><a href="/dashboard">กลับแดชบอร์ด</a></p>\n'
             "</body></html>"
         ),
         status_code=200,

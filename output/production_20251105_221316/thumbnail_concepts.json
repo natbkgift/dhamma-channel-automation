@@ -1,0 +1,119 @@
+{
+  "generated_at": "2025-11-05T22:13:17.000376",
+  "video_title": "เจริญสติในชีวิตประจำวัน 5 นาที | ฝึกอานาปานสติแบบง่ายๆ ได้ผลจริง",
+  "dimensions": "1280x720 px (16:9)",
+  "file_format": "JPG or PNG",
+  "file_size_limit": "2MB (YouTube)",
+  "concepts": [
+    {
+      "concept_id": 1,
+      "title": "Peaceful Meditation",
+      "text_overlay": {
+        "main": "ฝึกสติ 5 นาที",
+        "sub": "เข้าใจง่าย ทำได้ทุกที่",
+        "font_size": {
+          "main": "72pt",
+          "sub": "36pt"
+        },
+        "font": "Kanit Bold",
+        "color": "White + Gold",
+        "stroke": "Dark shadow (3px)"
+      },
+      "visual_elements": [
+        "Person meditating (silhouette or clear face)",
+        "Natural background (sunset, mountains)",
+        "Soft glow/light effect",
+        "🙏 emoji (optional)"
+      ],
+      "color_scheme": "warm (orange/gold)",
+      "emotion": "peaceful, inviting",
+      "composition": "Rule of thirds - subject on right, text on left"
+    },
+    {
+      "concept_id": 2,
+      "title": "Modern Minimal",
+      "text_overlay": {
+        "main": "5 นาที",
+        "sub": "เปลี่ยนใจ",
+        "badge": "🧘 สติ",
+        "font_size": {
+          "main": "120pt",
+          "sub": "48pt"
+        },
+        "font": "Prompt ExtraBold",
+        "color": "Dark blue + White",
+        "style": "Clean, modern"
+      },
+      "visual_elements": [
+        "Minimalist breath animation",
+        "Geometric shapes (circles/waves)",
+        "Gradient background (blue to green)",
+        "NO clutter"
+      ],
+      "color_scheme": "cool (blue/green)",
+      "emotion": "modern, trustworthy",
+      "composition": "Center-aligned, symmetrical"
+    },
+    {
+      "concept_id": 3,
+      "title": "Emotional Hook",
+      "text_overlay": {
+        "main": "ใจฟุ้งซ่าน?",
+        "sub": "5 นาที แก้ได้!",
+        "font_size": {
+          "main": "80pt",
+          "sub": "52pt"
+        },
+        "font": "Kanit Bold",
+        "color": "Yellow + White",
+        "effect": "Slight tilt (dynamic)"
+      },
+      "visual_elements": [
+        "Split screen: stressed vs calm face",
+        "Before/After concept",
+        "Arrows or transformation symbol",
+        "High contrast"
+      ],
+      "color_scheme": "contrast (yellow/dark)",
+      "emotion": "curiosity, problem-solving",
+      "composition": "Dynamic split, eye-catching"
+    }
+  ],
+  "design_principles": {
+    "readability": "Text readable on mobile (4-6 words max)",
+    "contrast": "High contrast text/background",
+    "branding": "Consistent with channel style",
+    "emotion": "Show face when possible (5x higher CTR)",
+    "curiosity": "Ask question or promise benefit"
+  },
+  "tools": {
+    "free": [
+      "Canva (template available)",
+      "Photopea (free Photoshop alternative)",
+      "GIMP"
+    ],
+    "paid": [
+      "Adobe Photoshop",
+      "Affinity Photo",
+      "Figma"
+    ]
+  },
+  "a_b_testing": {
+    "recommendation": "Create 2-3 versions, test which gets higher CTR",
+    "test_duration": "7-14 days",
+    "metrics": "CTR (Click-Through Rate)"
+  },
+  "best_practices": [
+    "ใช้ใบหน้าคนจริง (ถ้าเป็นไปได้)",
+    "ข้อความสั้น ชัดเจน ไม่เกิน 6 คำ",
+    "สีสันสดใส แต่ไม่ฉูดฉาด",
+    "ตรงกับเนื้อหาวิดีโอ (ไม่ clickbait)",
+    "เพิ่ม emoji 1-2 ตัว (optional)"
+  ],
+  "avoid": [
+    "ข้อความเยอะเกินไป",
+    "สีจางจนอ่านไม่ออก",
+    "ภาพไม่เกี่ยวกับเนื้อหา",
+    "Clickbait หลอกลวง"
+  ]
+}

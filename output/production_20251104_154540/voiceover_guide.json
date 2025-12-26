@@ -1,0 +1,147 @@
+{
+  "generated_at": "2025-11-04T15:45:42.066354",
+  "voice_profile": {
+    "gender": "male (suggested)",
+    "age_range": "30-45",
+    "tone": "warm, calm, trustworthy",
+    "accent": "Central Thai (ภาคกลาง)",
+    "speaking_rate": "120 wpm (words per minute) - ช้ากว่าปกติ",
+    "pitch": "medium-low (สงบ)"
+  },
+  "recording_settings": {
+    "format": "WAV",
+    "sample_rate": "48kHz",
+    "bit_depth": "24-bit",
+    "microphone": "Condenser mic (แนะนำ)",
+    "environment": "soundproof room / ห้องเงียบ"
+  },
+  "sections": [
+    {
+      "timestamp": "00:00-00:30",
+      "section": "Hook",
+      "tone": "engaging → calming",
+      "pace": "medium → slow",
+      "emphasis": [
+        "เคยรู้สึกเครียด",
+        "ใจฟุ้งซ่าน",
+        "5 นาที"
+      ],
+      "pauses": [
+        {
+          "after": "ไหมครับ?",
+          "duration": "1.5s"
+        },
+        {
+          "after": "ไม่ค่อยได้พัก",
+          "duration": "1s"
+        }
+      ],
+      "notes": "เริ่มด้วยพลังงาน แล้วค่อยสงบลง"
+    },
+    {
+      "timestamp": "00:30-01:30",
+      "section": "Introduction",
+      "tone": "informative, friendly",
+      "pace": "moderate",
+      "emphasis": [
+        "สติ",
+        "อานาปานสติ",
+        "พระไตรปิฎก"
+      ],
+      "pauses": [
+        {
+          "after": "อานาปานสติ",
+          "duration": "0.5s"
+        },
+        {
+          "after": "ช่วงนี้",
+          "duration": "0.5s"
+        }
+      ],
+      "notes": "ให้ข้อมูล แต่ไม่เทคนิคเกินไป"
+    },
+    {
+      "timestamp": "05:00-07:00",
+      "section": "Demonstration",
+      "tone": "gentle, guiding",
+      "pace": "very slow",
+      "emphasis": [
+        "หายใจเข้า",
+        "หายใจออก",
+        "กลับมาที่ลมหายใจ"
+      ],
+      "pauses": [
+        {
+          "after": "หายใจเข้า...",
+          "duration": "3s"
+        },
+        {
+          "after": "หายใจออก...",
+          "duration": "3s"
+        },
+        {
+          "type": "meditation_silence",
+          "duration": "5-10s"
+        }
+      ],
+      "notes": "พูดช้ามาก เหมือนนำทำสมาธิ ใช้น้ำเสียงนุ่ม"
+    },
+    {
+      "timestamp": "08:30-10:00",
+      "section": "Conclusion",
+      "tone": "encouraging, warm",
+      "pace": "moderate",
+      "emphasis": [
+        "แค่ 5 นาที",
+        "ทุกวัน",
+        "สาธุครับ"
+      ],
+      "pauses": [
+        {
+          "after": "มาแชร์ประสบการณ์",
+          "duration": "0.5s"
+        },
+        {
+          "after": "สาธุครับ",
+          "duration": "2s"
+        }
+      ],
+      "notes": "ปิดท้ายด้วยความอบอุ่น เชิญชวน"
+    }
+  ],
+  "pronunciation_guide": {
+    "อานาปานสติ": "อา-นา-ปา-นะ-สะ-ติ",
+    "วิสุทธิมรรค": "วิ-สุด-ทิ-มัก",
+    "มัชฌิมนิกาย": "มัด-ฉิ-มะ-นิ-กาย"
+  },
+  "background_music": {
+    "type": "Ambient / Meditation",
+    "volume": "15-20% (เบามาก)",
+    "tracks_suggested": [
+      "Calm Meditation Piano",
+      "Tibetan Singing Bowls (soft)",
+      "Nature Sounds (rain, stream)"
+    ],
+    "fade_in_out": "3 seconds"
+  },
+  "post_processing": {
+    "noise_reduction": "medium",
+    "eq": "boost low-mids (warm voice)",
+    "compression": "gentle (2:1 ratio)",
+    "reverb": "subtle room reverb",
+    "normalization": "-3dB LUFS"
+  },
+  "alternative_options": {
+    "tts_services": [
+      "Google Cloud TTS (Thai)",
+      "Amazon Polly (limited Thai)",
+      "ElevenLabs (AI voice cloning)"
+    ],
+    "human_voiceover": {
+      "fiverr": "$20-50 per 10 min",
+      "local_talent": "ติดต่อนักพากย์ไทย"
+    }
+  },
+  "estimated_recording_time": "30-45 minutes (with retakes)",
+  "estimated_editing_time": "1-2 hours"
+}

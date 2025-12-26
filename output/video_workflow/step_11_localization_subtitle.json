@@ -1,0 +1,19 @@
+{
+  "subtitles": {
+    "thai": {
+      "status": "READY",
+      "format": "SRT",
+      "lines": 120,
+      "file": "subtitles_th_20251103_213723.srt"
+    },
+    "english": {
+      "status": "TODO",
+      "note": "ใช้ Google Translate API + แก้ไขด้วยมือ"
+    }
+  },
+  "accessibility": [
+    "ฟอนต์ขนาดใหญ่พอ (14-16pt)",
+    "สีพื้นหลังเข้ม ข้อความสีขาว",
+    "ตำแหน่งล่างกลางหน้าจอ"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "recommended_schedule": {
+    "youtube": {
+      "days": [
+        "อังคาร",
+        "พฤหัสบดี",
+        "เสาร์"
+      ],
+      "time": "18:00-20:00 น.",
+      "reason": "ช่วงเวลาที่คนดู YouTube มากที่สุด (หลังเลิกงาน)"
+    },
+    "facebook": {
+      "days": "ทุกวัน",
+      "time": "12:00-13:00, 19:00-21:00 น.",
+      "reason": "ช่วงพักเที่ยง และหลังเลิกงาน"
+    },
+    "tiktok": {
+      "days": "ทุกวัน",
+      "time": "20:00-22:00 น.",
+      "reason": "ช่วงก่อนนอน คนเปิด TikTok มาก"
+    }
+  },
+  "publication_plan": {
+    "youtube_main": "2025-11-04 18:00",
+    "youtube_shorts": "2025-11-05 12:00",
+    "facebook": "2025-11-04 19:00",
+    "tiktok": "2025-11-04 20:00"
+  },
+  "tools": [
+    "YouTube Studio",
+    "Facebook Creator Studio",
+    "Buffer",
+    "Hootsuite"
+  ]
+}

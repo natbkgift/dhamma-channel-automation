@@ -1,0 +1,21 @@
+{
+  "checked_at": "2025-11-03T20:23:42.170742",
+  "system_health": {
+    "cpu_usage": "12%",
+    "memory_usage": "45%",
+    "disk_space": "234 GB free",
+    "status": "healthy"
+  },
+  "agent_status": {
+    "total_agents": 12,
+    "initialized": 12,
+    "running": 0,
+    "failed": 0
+  },
+  "alerts": [],
+  "metrics": {
+    "uptime": "100%",
+    "avg_response_time": "0.5s",
+    "error_rate": "0%"
+  }
+}

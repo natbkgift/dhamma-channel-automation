@@ -81,17 +81,25 @@ class ProcessJob:
                     self.progress = max(self.progress, 90)
 
                 # If CLI prints the saved output path, try to append file content to logs
-                if prefix == "STDOUT" and ("บันทึกผลลัพธ์แล้ว:" in text or "saved result:" in lower):
+                if prefix == "STDOUT" and (
+                    "บันทึกผลลัพธ์แล้ว:" in text or "saved result:" in lower
+                ):
                     try:
                         # Extract path after ':' and normalize
                         path_part = text.split(":", 1)[-1].strip().strip("'\"")
                         out_path = Path(path_part)
                         if not out_path.is_absolute():
                             out_path = (Path.cwd() / out_path).resolve()
-                        if out_path.suffix.lower() == ".json" and out_path.exists() and out_path.is_file():
+                        if (
+                            out_path.suffix.lower() == ".json"
+                            and out_path.exists()
+                            and out_path.is_file()
+                        ):
                             # Limit size to avoid huge logs
                             if out_path.stat().st_size <= 1024 * 512:  # 512KB
-                                content = out_path.read_text(encoding="utf-8", errors="ignore")
+                                content = out_path.read_text(
+                                    encoding="utf-8", errors="ignore"
+                                )
                                 banner = f"RESULT_JSON ({out_path}):"
                                 self.log.append(banner)
                                 self._append_file_log(banner)

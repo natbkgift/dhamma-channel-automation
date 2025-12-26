@@ -1,0 +1,38 @@
+{
+  "pack_id": "dhamma_v1",
+  "created_at": "2025-11-03T20:18:16.628962",
+  "prompts": {
+    "trend_scout": "คุณคือ Trend Scout วิเคราะห์เทรนด์ธรรมะ...",
+    "topic_prioritizer": "คุณคือ Topic Prioritizer จัดอันดับหัวข้อ...",
+    "research_retrieval": "คุณคือ Research Retrieval ค้นหาอ้างอิง...",
+    "script_writer": "คุณคือ Script Writer เขียนสคริปต์วิดีโอ..."
+  },
+  "workflow_diagram": {
+    "phases": [
+      "discovery",
+      "content_creation",
+      "publishing",
+      "analytics"
+    ],
+    "agents_per_phase": {
+      "discovery": [
+        "TrendScout",
+        "TopicPrioritizer",
+        "ResearchRetrieval"
+      ],
+      "content_creation": [
+        "ScriptOutline",
+        "ScriptWriter",
+        "DoctrineValidator"
+      ],
+      "publishing": [
+        "SEOMetadata",
+        "SchedulingPublishing"
+      ],
+      "analytics": [
+        "Analytics",
+        "FeedbackLoop"
+      ]
+    }
+  }
+}

@@ -148,7 +148,9 @@ def trend_scout(
         if result.topics:
             console.print("\n📝 [bold]รายชื่อหัวข้อ (Top 10)[/bold]")
             for topic in result.topics[:10]:
-                console.print(f"{topic.rank}. [green]{topic.title}[/green] • [yellow]{topic.pillar}[/yellow] • คะแนน {topic.scores.composite:.3f}")
+                console.print(
+                    f"{topic.rank}. [green]{topic.title}[/green] • [yellow]{topic.pillar}[/yellow] • คะแนน {topic.scores.composite:.3f}"
+                )
 
         # แสดงสรุปผลลัพธ์
         console.print("\n📈 [bold]สรุปผลลัพธ์[/bold]")

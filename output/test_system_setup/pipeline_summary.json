@@ -1,0 +1,55 @@
+{
+  "pipeline": "system_setup",
+  "run_id": "test_system_setup",
+  "started_at": "2025-11-03T20:18:16.661292",
+  "total_steps": 11,
+  "successful": 11,
+  "failed": 0,
+  "results": {
+    "prompt_pack": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\test_system_setup\\prompt_pack.json"
+    },
+    "agent_template": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\test_system_setup\\agent_template.json"
+    },
+    "security": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\test_system_setup\\security_check.json"
+    },
+    "integration": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\test_system_setup\\integration_status.json"
+    },
+    "data_sync": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\test_system_setup\\data_sync_status.json"
+    },
+    "inventory_index": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\test_system_setup\\inventory.json"
+    },
+    "monitoring": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\test_system_setup\\monitoring_status.json"
+    },
+    "notification": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\test_system_setup\\notification_config.json"
+    },
+    "error_flag": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\test_system_setup\\error_system.json"
+    },
+    "dashboard": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\test_system_setup\\dashboard.json"
+    },
+    "backup_archive": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\test_system_setup\\backup_config.json"
+    }
+  },
+  "output_dir": "D:\\Auto Tool\\dhamma-channel-automation\\output\\test_system_setup"
+}

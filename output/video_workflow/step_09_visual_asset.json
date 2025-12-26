@@ -1,0 +1,36 @@
+{
+  "status": "PLANNED",
+  "assets_needed": [
+    {
+      "type": "Title Card",
+      "description": "หัวเรื่อง + ชื่อช่อง",
+      "tool": "Canva / Adobe Spark",
+      "estimated_time": "5 นาที"
+    },
+    {
+      "type": "Infographic",
+      "description": "แสดงประโยชน์ 5 ข้อ",
+      "tool": "Canva Pro",
+      "estimated_time": "10 นาที"
+    },
+    {
+      "type": "Animation",
+      "description": "ขั้นตอนการฝึก 4 ขั้น",
+      "tool": "Animaker / Vyond",
+      "estimated_time": "30 นาที"
+    },
+    {
+      "type": "B-roll footage",
+      "description": "ภาพธรรมชาติ คนนั่งสมาธิ",
+      "tool": "Pexels / Pixabay (ฟรี)",
+      "estimated_time": "15 นาที"
+    },
+    {
+      "type": "Text overlays",
+      "description": "ข้อความสำคัญ",
+      "tool": "Adobe Premiere / DaVinci Resolve",
+      "estimated_time": "20 นาที"
+    }
+  ],
+  "total_production_time": "80 นาที (1 ชั่วโมง 20 นาที)"
+}

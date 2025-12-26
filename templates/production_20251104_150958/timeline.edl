@@ -1,0 +1,23 @@
+TITLE: Dhamma Video Timeline
+FCM: NON-DROP FRAME
+
+001  AX       V     C        00:00:00:00 00:00:30:00 00:00:00:00 00:00:30:00
+* FROM CLIP NAME: b-roll_01.mp4
+* COMMENT: คลิปตัดต่อเร็ว: คนเครียด, รถติด, เดดไลน์งาน
+
+002  AX       V     C        00:00:30:00 00:01:30:00 00:00:30:00 00:01:30:00
+* FROM CLIP NAME: on-screen_02.mp4
+* COMMENT: ผู้พูดนั่งในฉากธรรมชาติ/ห้องสมุด
+
+003  AX       V     C        00:01:30:00 00:02:30:00 00:01:30:00 00:02:30:00
+* FROM CLIP NAME: animation_03.mp4
+* COMMENT: อธิบายสติด้วย animation/whiteboard
+
+004  AX       V     C        00:02:30:00 00:03:30:00 00:02:30:00 00:03:30:00
+* FROM CLIP NAME: b-roll + animation_04.mp4
+* COMMENT: ลมหายใจเข้า-ออก พร้อม animation
+
+005  AX       V     C        00:05:00:00 00:07:00:00 00:05:00:00 00:07:00:00
+* FROM CLIP NAME: demonstration_05.mp4
+* COMMENT: Demo การฝึกจริง 3 ขั้นตอน
+

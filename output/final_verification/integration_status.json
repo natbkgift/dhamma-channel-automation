@@ -1,0 +1,43 @@
+{
+  "tested_at": "2025-11-03T20:35:24.821376",
+  "external_services": {
+    "youtube_data_api": {
+      "status": "ready",
+      "endpoint": "https://www.googleapis.com/youtube/v3",
+      "features": [
+        "search",
+        "videos",
+        "channels"
+      ]
+    },
+    "google_trends": {
+      "status": "ready",
+      "library": "pytrends",
+      "features": [
+        "trending_searches",
+        "interest_over_time"
+      ]
+    },
+    "openai": {
+      "status": "ready",
+      "models": [
+        "gpt-4",
+        "gpt-3.5-turbo"
+      ],
+      "features": [
+        "chat",
+        "embeddings"
+      ]
+    }
+  },
+  "internal_services": {
+    "database": {
+      "type": "sqlite",
+      "path": "data/dhamma.db"
+    },
+    "file_storage": {
+      "type": "local",
+      "path": "output/"
+    }
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "checked_at": "2025-11-03T20:26:32.462237",
+  "env_file": {
+    "exists": true,
+    "path": ".env",
+    "keys_count": 11
+  },
+  "api_keys": {
+    "APP_NAME": {
+      "status": "configured",
+      "masked": "dhamma-a***"
+    },
+    "SECRET_KEY": {
+      "status": "configured",
+      "masked": "local-se***"
+    },
+    "SESSION_COOKIE_NAME": {
+      "status": "configured",
+      "masked": "dhamma_s***"
+    },
+    "ADMIN_USERNAME": {
+      "status": "configured",
+      "masked": "admin***"
+    },
+    "ADMIN_PASSWORD": {
+      "status": "configured",
+      "masked": "admin123***"
+    },
+    "DATA_DIR": {
+      "status": "configured",
+      "masked": "./data***"
+    },
+    "OUTPUT_DIR": {
+      "status": "configured",
+      "masked": "./output***"
+    },
+    "YOUTUBE_API_KEY": {
+      "status": "configured",
+      "masked": "your_you***"
+    },
+    "OPENAI_API_KEY": {
+      "status": "configured",
+      "masked": "your_ope***"
+    },
+    "PYTHON_BIN": {
+      "status": "configured",
+      "masked": ".\\\\venv\\***"
+    },
+    "OPENAI_MODEL": {
+      "status": "configured",
+      "masked": "gpt-4o-m***"
+    }
+  },
+  "access_control": {
+    "encryption": "Environment variables",
+    "secret_storage": ".env file",
+    "gitignore_configured": true,
+    "permissions": {
+      "read_prompts": [
+        "all_agents"
+      ],
+      "write_output": [
+        "all_agents"
+      ],
+      "publish_content": [
+        "SchedulingPublishing",
+        "MultiChannelPublish"
+      ]
+    }
+  },
+  "recommendations": [
+    "✓ .env file exists",
+    "✓ .env in .gitignore",
+    "หมุนเวียน API keys ทุก 90 วัน",
+    "ใช้ IAM roles สำหรับ production"
+  ]
+}

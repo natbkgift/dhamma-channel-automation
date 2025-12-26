@@ -1,0 +1,472 @@
+{
+  "generated_at": "2025-11-05T18:30:48.155194",
+  "total_topics": 20,
+  "version": "1.0",
+  "topics": [
+    {
+      "title": "เมตตาภาวนา ใน 15 นาทีต่อวัน",
+      "category": "Practical Meditation",
+      "difficulty": "กลาง",
+      "target_audience": "ผู้เริ่มต้น",
+      "estimated_duration": "10-12 นาที",
+      "keywords": [
+        "ปฏิบัติจริง",
+        "ลดความเครียด",
+        "mindfulness",
+        "stress relief",
+        "รู้ตัว"
+      ],
+      "season": "buddhist_lent",
+      "priority": 5,
+      "why_now": "SEO opportunity สูง - แข่งขันน้อย",
+      "risk": "กลาง",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_001"
+    },
+    {
+      "title": "มรณานุสติ ใน 20 นาทีต่อวัน",
+      "category": "Practical Meditation",
+      "difficulty": "ง่าย",
+      "target_audience": "ทั่วไป",
+      "estimated_duration": "12-15 นาที",
+      "keywords": [
+        "daily practice",
+        "ผ่อนคลาย",
+        "สติ",
+        "ปฏิบัติจริง",
+        "พุทธศาสนา"
+      ],
+      "season": "evergreen",
+      "priority": 4,
+      "why_now": "Evergreen content - ใช้ได้นาน",
+      "risk": "กลาง",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_002"
+    },
+    {
+      "title": "พุทธศาสนากับ Mindful Living",
+      "category": "Modern Context",
+      "difficulty": "กลาง",
+      "target_audience": "ผู้เริ่มต้น",
+      "estimated_duration": "12-15 นาที",
+      "keywords": [
+        "ทำสมาธิ",
+        "ธรรมะ",
+        "ลดความเครียด",
+        "stress relief",
+        "mindfulness"
+      ],
+      "season": "new_year",
+      "priority": 4,
+      "why_now": "เทรนด์ mindfulness ในไทยเติบโต",
+      "risk": "ต่ำ",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_003"
+    },
+    {
+      "title": "ธรรมะช่วยรับมือกับ การเปลี่ยนแปลง",
+      "category": "Modern Context",
+      "difficulty": "ค่อนข้างยาก",
+      "target_audience": "ผู้สูงอายุ",
+      "estimated_duration": "5-8 นาที",
+      "keywords": [
+        "ตื่นรู้",
+        "รู้ตัว",
+        "ใช้ในชีวิตจริง",
+        "stress relief",
+        "ปฏิบัติจริง"
+      ],
+      "season": "buddhist_lent",
+      "priority": 4,
+      "why_now": "ตอบโจทย์ lifestyle คนยุคใหม่",
+      "risk": "ต่ำ",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_004"
+    },
+    {
+      "title": "พุทธศาสนากับ ความเครียดในยุคดิจิทัล",
+      "category": "Modern Context",
+      "difficulty": "กลาง",
+      "target_audience": "ผู้สูงอายุ",
+      "estimated_duration": "8-10 นาที",
+      "keywords": [
+        "ธรรมะ",
+        "ผ่อนคลาย",
+        "ชีวิตประจำวัน",
+        "Buddhism",
+        "สติ"
+      ],
+      "season": "evergreen",
+      "priority": 4,
+      "why_now": "คนค้นหาหัวข้อนี้เพิ่มขึ้น 30%",
+      "risk": "กลาง",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_005"
+    },
+    {
+      "title": "พระพุทธศาสนาตอบโจทย์ ชีวิตรีบเร่ง",
+      "category": "Modern Context",
+      "difficulty": "กลาง",
+      "target_audience": "ทั่วไป",
+      "estimated_duration": "12-15 นาที",
+      "keywords": [
+        "mindfulness",
+        "Buddhism",
+        "พระพุทธศาสนา",
+        "meditation",
+        "ชีวิตประจำวัน"
+      ],
+      "season": "buddhist_lent",
+      "priority": 4,
+      "why_now": "ตอบโจทย์ lifestyle คนยุคใหม่",
+      "risk": "กลาง",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_006"
+    },
+    {
+      "title": "เรียนรู้ ไตรสิกขา ใน 10 นาที",
+      "category": "Basic Dhamma",
+      "difficulty": "กลาง",
+      "target_audience": "ผู้เริ่มต้น",
+      "estimated_duration": "5-8 นาที",
+      "keywords": [
+        "รู้ตัว",
+        "daily practice",
+        "ทำสมาธิ",
+        "ปฏิบัติจริง",
+        "mindfulness"
+      ],
+      "season": "end_of_year",
+      "priority": 3,
+      "why_now": "เทรนด์ mindfulness ในไทยเติบโต",
+      "risk": "กลาง",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_007"
+    },
+    {
+      "title": "ขันธ์ 5 สำหรับมือใหม่",
+      "category": "Basic Dhamma",
+      "difficulty": "ค่อนข้างยาก",
+      "target_audience": "ทั่วไป",
+      "estimated_duration": "10-12 นาที",
+      "keywords": [
+        "ผ่อนคลาย",
+        "ตื่นรู้",
+        "สติ",
+        "ใช้ในชีวิตจริง",
+        "รู้ตัว"
+      ],
+      "season": "new_year",
+      "priority": 3,
+      "why_now": "เทรนด์ mindfulness ในไทยเติบโต",
+      "risk": "ต่ำ",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_008"
+    },
+    {
+      "title": "มือใหม่ควรรู้เรื่อง ไตรสิกขา",
+      "category": "Basic Dhamma",
+      "difficulty": "ง่าย",
+      "target_audience": "วัยทำงาน",
+      "estimated_duration": "10-12 นาที",
+      "keywords": [
+        "daily practice",
+        "ใช้ในชีวิตจริง",
+        "ตื่นรู้",
+        "ทำสมาธิ",
+        "คลายเครียด"
+      ],
+      "season": "end_of_year",
+      "priority": 3,
+      "why_now": "Basic Dhamma content กำลังเป็นที่นิยม",
+      "risk": "ต่ำ",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_009"
+    },
+    {
+      "title": "ไตรสิกขา ฉบับเข้าใจง่าย",
+      "category": "Basic Dhamma",
+      "difficulty": "ค่อนข้างยาก",
+      "target_audience": "วัยทำงาน",
+      "estimated_duration": "8-10 นาที",
+      "keywords": [
+        "ธรรมะ",
+        "mindfulness",
+        "stress relief",
+        "ลดความเครียด",
+        "ชีวิตประจำวัน"
+      ],
+      "season": "new_year",
+      "priority": 3,
+      "why_now": "SEO opportunity สูง - แข่งขันน้อย",
+      "risk": "ต่ำ",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_010"
+    },
+    {
+      "title": "ขันธ์ 5 คืออะไร? ทำไมต้องรู้?",
+      "category": "Basic Dhamma",
+      "difficulty": "กลาง",
+      "target_audience": "วัยทำงาน",
+      "estimated_duration": "10-12 นาที",
+      "keywords": [
+        "daily practice",
+        "พระพุทธศาสนา",
+        "พุทธศาสนา",
+        "ปฏิบัติจริง",
+        "meditation"
+      ],
+      "season": "end_of_year",
+      "priority": 3,
+      "why_now": "Basic Dhamma content กำลังเป็นที่นิยม",
+      "risk": "กลาง",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_011"
+    },
+    {
+      "title": "กายคตาสติ - เริ่มต้นอย่างไร?",
+      "category": "Practical Meditation",
+      "difficulty": "กลาง",
+      "target_audience": "นักศึกษา",
+      "estimated_duration": "5-8 นาที",
+      "keywords": [
+        "สติ",
+        "ทำสมาธิ",
+        "stress relief",
+        "mindfulness",
+        "Buddhism"
+      ],
+      "season": "evergreen",
+      "priority": 3,
+      "why_now": "Evergreen content - ใช้ได้นาน",
+      "risk": "ต่ำ",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_012"
+    },
+    {
+      "title": "เทคนิค อานาปานสติ สำหรับ นักเรียน นักศึกษา",
+      "category": "Practical Meditation",
+      "difficulty": "ค่อนข้างยาก",
+      "target_audience": "ผู้สูงอายุ",
+      "estimated_duration": "10-12 นาที",
+      "keywords": [
+        "meditation",
+        "stress relief",
+        "ปฏิบัติจริง",
+        "ผ่อนคลาย",
+        "ธรรมะ"
+      ],
+      "season": "end_of_year",
+      "priority": 3,
+      "why_now": "เทรนด์ mindfulness ในไทยเติบโต",
+      "risk": "ต่ำ",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_013"
+    },
+    {
+      "title": "วิตกกังวล แก้ด้วย สมถะภาวนา",
+      "category": "Practical Meditation",
+      "difficulty": "กลาง",
+      "target_audience": "ผู้สูงอายุ",
+      "estimated_duration": "5-8 นาที",
+      "keywords": [
+        "ใช้ในชีวิตจริง",
+        "ชีวิตประจำวัน",
+        "สมาธิ",
+        "daily practice",
+        "ทำสมาธิ"
+      ],
+      "season": "new_year",
+      "priority": 3,
+      "why_now": "SEO opportunity สูง - แข่งขันน้อย",
+      "risk": "กลาง",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_014"
+    },
+    {
+      "title": "วิธีฝึก สมถะภาวนา ที่บ้าน",
+      "category": "Practical Meditation",
+      "difficulty": "ค่อนข้างยาก",
+      "target_audience": "ทั่วไป",
+      "estimated_duration": "5-8 นาที",
+      "keywords": [
+        "ลดความเครียด",
+        "สติ",
+        "ตื่นรู้",
+        "ใช้ในชีวิตจริง",
+        "ผ่อนคลาย"
+      ],
+      "season": "new_year",
+      "priority": 3,
+      "why_now": "Practical Meditation content กำลังเป็นที่นิยม",
+      "risk": "กลาง",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_015"
+    },
+    {
+      "title": "ก่อนนอน กรรม เปลี่ยนชีวิต",
+      "category": "Daily Life Practice",
+      "difficulty": "กลาง",
+      "target_audience": "วัยทำงาน",
+      "estimated_duration": "5-8 นาที",
+      "keywords": [
+        "ใช้ในชีวิตจริง",
+        "ลดความเครียด",
+        "สติ",
+        "daily practice",
+        "รู้ตัว"
+      ],
+      "season": "end_of_year",
+      "priority": 3,
+      "why_now": "ตอบโจทย์ lifestyle คนยุคใหม่",
+      "risk": "กลาง",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_016"
+    },
+    {
+      "title": "สติ - เพิ่มสมาธิ",
+      "category": "Daily Life Practice",
+      "difficulty": "ง่าย",
+      "target_audience": "ทั่วไป",
+      "estimated_duration": "10-12 นาที",
+      "keywords": [
+        "daily practice",
+        "mindfulness",
+        "meditation",
+        "รู้ตัว",
+        "ผ่อนคลาย"
+      ],
+      "season": "end_of_year",
+      "priority": 3,
+      "why_now": "ตอบโจทย์ lifestyle คนยุคใหม่",
+      "risk": "กลาง",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_017"
+    },
+    {
+      "title": "วิธีใช้ ปัญญา ทุกวัน",
+      "category": "Daily Life Practice",
+      "difficulty": "ค่อนข้างยาก",
+      "target_audience": "วัยทำงาน",
+      "estimated_duration": "12-15 นาที",
+      "keywords": [
+        "ตื่นรู้",
+        "ทำสมาธิ",
+        "Buddhism",
+        "สมาธิ",
+        "พุทธศาสนา"
+      ],
+      "season": "buddhist_lent",
+      "priority": 3,
+      "why_now": "เทรนด์ mindfulness ในไทยเติบโต",
+      "risk": "ต่ำ",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_018"
+    },
+    {
+      "title": "เคล็ดลับ ลดความเครียด แบบพุทธ",
+      "category": "Trending Topics",
+      "difficulty": "ง่าย",
+      "target_audience": "นักศึกษา",
+      "estimated_duration": "8-10 นาที",
+      "keywords": [
+        "ตื่นรู้",
+        "พุทธศาสนา",
+        "mindfulness",
+        "คลายเครียด",
+        "ทำสมาธิ"
+      ],
+      "season": "end_of_year",
+      "priority": 3,
+      "why_now": "ตอบโจทย์ lifestyle คนยุคใหม่",
+      "risk": "ต่ำ",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_019"
+    },
+    {
+      "title": "5 วิธี มีสติ ด้วยธรรมะ",
+      "category": "Trending Topics",
+      "difficulty": "กลาง",
+      "target_audience": "นักศึกษา",
+      "estimated_duration": "5-8 นาที",
+      "keywords": [
+        "ชีวิตประจำวัน",
+        "คลายเครียด",
+        "ปฏิบัติจริง",
+        "สติ",
+        "ธรรมะ"
+      ],
+      "season": "buddhist_lent",
+      "priority": 3,
+      "why_now": "Trending Topics content กำลังเป็นที่นิยม",
+      "risk": "ต่ำ",
+      "sources": [
+        "template-generated"
+      ],
+      "id": "topic_020"
+    }
+  ],
+  "statistics": {
+    "by_category": {
+      "Practical Meditation": 6,
+      "Modern Context": 4,
+      "Basic Dhamma": 5,
+      "Daily Life Practice": 3,
+      "Trending Topics": 2
+    },
+    "by_difficulty": {
+      "กลาง": 10,
+      "ง่าย": 4,
+      "ค่อนข้างยาก": 6
+    },
+    "by_season": {
+      "buddhist_lent": 5,
+      "evergreen": 3,
+      "new_year": 5,
+      "end_of_year": 7
+    },
+    "priority_distribution": {
+      "high (8-10)": 0,
+      "medium (5-7)": 1,
+      "low (1-4)": 19
+    }
+  }
+}

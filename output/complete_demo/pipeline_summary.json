@@ -1,0 +1,67 @@
+{
+  "pipeline": "dhamma-video-complete",
+  "run_id": "complete_demo",
+  "started_at": "2025-11-04T09:08:34.498278",
+  "total_steps": 14,
+  "successful": 14,
+  "failed": 0,
+  "results": {
+    "trend_scout": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\complete_demo\\trend_candidates.json"
+    },
+    "topic_prioritizer": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\complete_demo\\topics_ranked.json"
+    },
+    "research_retrieval": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\complete_demo\\research_bundle.json"
+    },
+    "data_enrichment": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\complete_demo\\data_enrichment.json"
+    },
+    "script_outline": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\complete_demo\\outline.md"
+    },
+    "script_writer": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\complete_demo\\script.md"
+    },
+    "doctrine_validator": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\complete_demo\\script_validated.md"
+    },
+    "legal_compliance": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\complete_demo\\compliance_report.json"
+    },
+    "seo_metadata": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\complete_demo\\metadata.json"
+    },
+    "thumbnail_generator": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\complete_demo\\thumbnail_concepts.json"
+    },
+    "format_conversion": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\complete_demo\\format_specs.json"
+    },
+    "multi_channel": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\complete_demo\\multi_channel.json"
+    },
+    "publish": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\complete_demo\\publish_receipt.json"
+    },
+    "backup_archive": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\complete_demo\\backup_manifest.json"
+    }
+  },
+  "output_dir": "D:\\Auto Tool\\dhamma-channel-automation\\output\\complete_demo"
+}

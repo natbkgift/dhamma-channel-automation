@@ -1,0 +1,12 @@
+{
+  "audience_segments": [
+    "วัยทำงาน 25-40",
+    "ผู้สูงอายุ 60+"
+  ],
+  "device_usage": {
+    "mobile": 78,
+    "desktop": 19,
+    "tablet": 3
+  },
+  "engagement_score": 87
+}

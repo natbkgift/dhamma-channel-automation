@@ -1,0 +1,27 @@
+{
+  "thumbnail_design": {
+    "title_text": "สมาธิภาวนา\nเบื้องต้น",
+    "subtitle": "สำหรับผู้เริ่มต้น",
+    "main_image": "คนนั่งสมาธิ + พื้นหลังธรรมชาติ",
+    "color_scheme": [
+      "#FF9933",
+      "#FFFFFF",
+      "#138808"
+    ],
+    "font": "Kanit Bold",
+    "dimensions": "1280x720px",
+    "file_format": "PNG / JPG",
+    "design_tips": [
+      "ใช้ตัวอักษรใหญ่ชัดเจน",
+      "สีสันสดใส ดึงดูดสายตา",
+      "มีหน้าคน (ถ้าเป็นไปได้) = CTR สูงขึ้น 30%",
+      "เพิ่มเงาข้อความเพื่อความชัดเจน"
+    ]
+  },
+  "tools": [
+    "Canva",
+    "Photopea",
+    "Adobe Spark"
+  ],
+  "estimated_time": "10-15 นาที"
+}

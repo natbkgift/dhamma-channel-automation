@@ -1,0 +1,45 @@
+{
+  "concept_id": 1,
+  "title": "Peaceful Meditation",
+  "canvas_size": "1280x720 px (16:9)",
+  "file_format": "JPG or PNG",
+  "file_size_limit": "2MB (YouTube)",
+  "text_layers": [
+    {
+      "type": "main",
+      "text": "ฝึกสติ 5 นาที",
+      "font": "Kanit Bold",
+      "font_size": "72pt",
+      "color": "White + Gold",
+      "effects": "Dark shadow (3px)"
+    },
+    {
+      "type": "sub",
+      "text": "เข้าใจง่าย ทำได้ทุกที่",
+      "font": "Kanit Bold",
+      "font_size": "36pt",
+      "color": "White + Gold"
+    }
+  ],
+  "visual_elements": [
+    "Person meditating (silhouette or clear face)",
+    "Natural background (sunset, mountains)",
+    "Soft glow/light effect",
+    "🙏 emoji (optional)"
+  ],
+  "color_scheme": "warm (orange/gold)",
+  "composition": "Rule of thirds - subject on right, text on left",
+  "canva_steps": [
+    "1. Go to Canva.com and create custom size: 1280x720 px (16:9)",
+    "2. Background: warm (orange/gold)",
+    "3. Add background image/gradient according to visual_elements",
+    "4. Add main text: \"ฝึกสติ 5 นาที\"",
+    "   - Font: Kanit Bold",
+    "   - Size: 72pt",
+    "   - Color: White + Gold",
+    "5. Add subtitle: \"เข้าใจง่าย ทำได้ทุกที่\" (smaller font)",
+    "6. Add visual elements (person, icons, etc.)",
+    "7. Adjust composition and spacing",
+    "8. Download as JPG (Quality: 100, Size: <2MB)"
+  ]
+}

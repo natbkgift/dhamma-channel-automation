@@ -1,0 +1,46 @@
+{
+  "total_overlays": 4,
+  "overlays": [
+    {
+      "scene": 2,
+      "timestamp": "00:30-01:30",
+      "start_sec": 30,
+      "text": "สติ = การรับรู้ในปัจจุบัน",
+      "style": "default",
+      "position": "center",
+      "font_size": "medium"
+    },
+    {
+      "scene": 3,
+      "timestamp": "01:30-02:30",
+      "start_sec": 90,
+      "text": "สติ",
+      "style": "default",
+      "position": "center",
+      "font_size": "medium"
+    },
+    {
+      "scene": 4,
+      "timestamp": "02:30-03:30",
+      "start_sec": 150,
+      "text": "ลมหายใจเข้า",
+      "style": "default",
+      "position": "center",
+      "font_size": "medium"
+    },
+    {
+      "scene": 5,
+      "timestamp": "05:00-07:00",
+      "start_sec": 300,
+      "text": "ขั้นที่ 1",
+      "style": "default",
+      "position": "center",
+      "font_size": "medium"
+    }
+  ],
+  "instructions": {
+    "davinci_resolve": "Use Fusion > Text+ node for each overlay",
+    "timing": "Match start_sec to timeline position",
+    "styling": "Adjust font size and position as specified"
+  }
+}

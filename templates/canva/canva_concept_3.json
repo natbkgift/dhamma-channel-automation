@@ -1,0 +1,45 @@
+{
+  "concept_id": 3,
+  "title": "Emotional Hook",
+  "canvas_size": "1280x720 px (16:9)",
+  "file_format": "JPG or PNG",
+  "file_size_limit": "2MB (YouTube)",
+  "text_layers": [
+    {
+      "type": "main",
+      "text": "ใจฟุ้งซ่าน?",
+      "font": "Kanit Bold",
+      "font_size": "80pt",
+      "color": "Yellow + White",
+      "effects": "None"
+    },
+    {
+      "type": "sub",
+      "text": "5 นาที แก้ได้!",
+      "font": "Kanit Bold",
+      "font_size": "52pt",
+      "color": "Yellow + White"
+    }
+  ],
+  "visual_elements": [
+    "Split screen: stressed vs calm face",
+    "Before/After concept",
+    "Arrows or transformation symbol",
+    "High contrast"
+  ],
+  "color_scheme": "contrast (yellow/dark)",
+  "composition": "Dynamic split, eye-catching",
+  "canva_steps": [
+    "1. Go to Canva.com and create custom size: 1280x720 px (16:9)",
+    "2. Background: contrast (yellow/dark)",
+    "3. Add background image/gradient according to visual_elements",
+    "4. Add main text: \"ใจฟุ้งซ่าน?\"",
+    "   - Font: Kanit Bold",
+    "   - Size: 80pt",
+    "   - Color: Yellow + White",
+    "5. Add subtitle: \"5 นาที แก้ได้!\" (smaller font)",
+    "6. Add visual elements (person, icons, etc.)",
+    "7. Adjust composition and spacing",
+    "8. Download as JPG (Quality: 100, Size: <2MB)"
+  ]
+}

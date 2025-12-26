@@ -1,0 +1,43 @@
+{
+  "run_id": "20251103_213720",
+  "total_steps": 17,
+  "phases": {
+    "Phase 1 - Discovery": "Steps 1-4 (Trend → Topic → Research → Enrich)",
+    "Phase 2 - Content Creation": "Steps 5-6 (Outline → Script)",
+    "Phase 3 - Validation": "Steps 7-8 (Doctrine → Legal)",
+    "Phase 4 - Production": "Steps 9-14 (Visual → Audio → Metadata)",
+    "Phase 5 - Publishing": "Steps 15-17 (Publish → Schedule → Backup)"
+  },
+  "estimated_total_time": {
+    "automated": "15 นาที (Discovery + Writing + Metadata)",
+    "manual": "2-3 ชั่วโมง (Visual + Voiceover + Editing)",
+    "total": "2.5-3.5 ชั่วโมง ต่อวิดีโอ 1 เรื่อง"
+  },
+  "output_files": [
+    "output\\video_workflow\\step_01_trend_scout.json",
+    "output\\video_workflow\\step_02_topic_prioritizer.json",
+    "output\\video_workflow\\step_03_research_retrieval.json",
+    "output\\video_workflow\\step_04_data_enrichment.json",
+    "output\\video_workflow\\step_05_script_outline.json",
+    "output\\video_workflow\\step_06_script_writer.json",
+    "output\\video_workflow\\step_07_doctrine_validator.json",
+    "output\\video_workflow\\step_08_legal_compliance.json",
+    "output\\video_workflow\\step_09_visual_asset.json",
+    "output\\video_workflow\\step_10_voiceover.json",
+    "output\\video_workflow\\step_11_localization_subtitle.json",
+    "output\\video_workflow\\step_12_thumbnail_generator.json",
+    "output\\video_workflow\\step_13_seo_metadata.json",
+    "output\\video_workflow\\step_14_format_conversion.json",
+    "output\\video_workflow\\step_15_multi-channel_publish.json",
+    "output\\video_workflow\\step_16_scheduling_publishing.json",
+    "output\\video_workflow\\step_17_backup_archive.json",
+    "output\\video_workflow\\full_script_20251103_213720.md"
+  ],
+  "next_actions": [
+    "1. Review สคริปต์ที่สร้าง",
+    "2. ผลิต Visual Assets (Canva/Premiere)",
+    "3. บันทึกเสียง Voiceover",
+    "4. แก้ไขวิดีโอ",
+    "5. อัพโหลด YouTube ตามตารางที่กำหนด"
+  ]
+}

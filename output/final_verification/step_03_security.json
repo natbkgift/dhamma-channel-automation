@@ -1,0 +1,9 @@
+{
+  "keys_status": {
+    "OPENAI_API_KEY": "NOT SET",
+    "YOUTUBE_API_KEY": "NOT SET"
+  },
+  "access_policy": "admin-only for .env, logging enabled, API keys masked",
+  "logs_enabled": true,
+  "last_checked": "2025-11-04T08:38:57.060076"
+}

@@ -1,0 +1,64 @@
+{
+  "checked_at": "2025-11-04T16:09:40.979148",
+  "status": "compliant",
+  "checks": {
+    "copyright": {
+      "status": "clear",
+      "details": "ไม่พบการละเมิดลิขสิทธิ์ - ใช้อ้างอิงจากพระไตรปิฎก (สาธารณสมบัติ)",
+      "music_licensing": "ต้องใช้ royalty-free หรือซื้อลิขสิทธิ์",
+      "image_licensing": "ต้องใช้ stock photos ที่มีลิขสิทธิ์"
+    },
+    "religious_content": {
+      "status": "appropriate",
+      "details": "ไม่มีเนื้อหาที่หมิ่นศาสนาหรือบิดเบือนหลักธรรม",
+      "tone": "เคารพและเหมาะสม"
+    },
+    "medical_claims": {
+      "status": "compliant",
+      "details": "ไม่มี medical claims ที่ผิดกฎหมาย",
+      "disclaimers_needed": [
+        "การฝึกสติเป็นการส่งเสริมสุขภาพจิต ไม่ใช่การรักษาโรค",
+        "หากมีอาการทางจิตรุนแรงควรปรึกษาแพทย์"
+      ]
+    },
+    "advertising": {
+      "status": "clear",
+      "details": "ไม่มีการโฆษณาสินค้าหรือบริการ",
+      "sponsored_content": false
+    },
+    "personal_data": {
+      "status": "compliant",
+      "details": "ไม่มีการเก็บข้อมูลส่วนบุคคล",
+      "gdpr_compliance": "N/A - ไม่เกี่ยวข้อง"
+    },
+    "age_appropriate": {
+      "status": "all_ages",
+      "rating": "G - General Audiences",
+      "details": "เหมาะสำหรับทุกวัย"
+    }
+  },
+  "required_disclaimers": [
+    {
+      "type": "general",
+      "text": "เนื้อหานี้เป็นการศึกษาธรรมะเบื้องต้น ควรศึกษาเพิ่มเติมจากครูบาอาจารย์",
+      "placement": "end_of_description"
+    },
+    {
+      "type": "health",
+      "text": "การฝึกสติเป็นการส่งเสริมสุขภาพจิต ไม่ใช่การรักษาโรค หากมีปัญหาสุขภาพจิตรุนแรง ควรปรึกษาแพทย์ผู้เชี่ยวชาญ",
+      "placement": "video_description"
+    }
+  ],
+  "youtube_policy_compliance": {
+    "community_guidelines": "pass",
+    "advertiser_friendly": true,
+    "coppa_compliant": true,
+    "spam_deceptive_practices": "clear"
+  },
+  "recommendations": [
+    "เพิ่ม disclaimer ในคำบรรยายวิดีโอ",
+    "ระบุแหล่งที่มาของภาพและเสียงประกอบ",
+    "ใช้ Creative Commons หรือ royalty-free content"
+  ],
+  "approval_status": "approved_with_disclaimers"
+}

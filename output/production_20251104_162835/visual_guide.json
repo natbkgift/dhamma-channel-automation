@@ -1,0 +1,113 @@
+{
+  "generated_at": "2025-11-04T16:28:36.342141",
+  "total_scenes": 12,
+  "scenes": [
+    {
+      "timestamp": "00:00-00:30",
+      "type": "b-roll",
+      "description": "คลิปตัดต่อเร็ว: คนเครียด, รถติด, เดดไลน์งาน",
+      "mood": "เร่งเร้า → ผ่อนคลาย",
+      "suggestions": [
+        "Stock footage: stressed office worker",
+        "Traffic jam timelapse",
+        "Clock ticking"
+      ],
+      "transition": "fade to calm nature"
+    },
+    {
+      "timestamp": "00:30-01:30",
+      "type": "on-screen",
+      "description": "ผู้พูดนั่งในฉากธรรมชาติ/ห้องสมุด",
+      "mood": "สงบ, น่าเชื่อถือ",
+      "suggestions": [
+        "Natural background (plants, soft light)",
+        "Bookshelf with Dhamma books",
+        "Warm lighting"
+      ],
+      "text_overlay": [
+        "สติ = การรับรู้ในปัจจุบัน"
+      ]
+    },
+    {
+      "timestamp": "01:30-02:30",
+      "type": "animation",
+      "description": "อธิบายสติด้วย animation/whiteboard",
+      "mood": "ชัดเจน, เข้าใจง่าย",
+      "suggestions": [
+        "Animated mind wandering vs focused",
+        "Simple icons and diagrams",
+        "Color: ฟ้า/เขียว (สงบ)"
+      ],
+      "text_overlay": [
+        "สติ",
+        "ร่างกาย ≠ ใจ",
+        "รับรู้ปัจจุบัน"
+      ]
+    },
+    {
+      "timestamp": "02:30-03:30",
+      "type": "b-roll + animation",
+      "description": "ลมหายใจเข้า-ออก พร้อม animation",
+      "mood": "ผ่อนคลาย, ช้า",
+      "suggestions": [
+        "Person breathing peacefully",
+        "Animated breath cycle (in/out)",
+        "Nature sounds (optional)"
+      ],
+      "text_overlay": [
+        "ลมหายใจเข้า",
+        "ลมหายใจออก",
+        "⚓ สมอของใจ"
+      ]
+    },
+    {
+      "timestamp": "05:00-07:00",
+      "type": "demonstration",
+      "description": "Demo การฝึกจริง 3 ขั้นตอน",
+      "mood": "ใกล้ชิด, ปฏิบัติได้จริง",
+      "suggestions": [
+        "Split screen: instructor + close-up",
+        "Show proper sitting posture",
+        "Calm facial expressions"
+      ],
+      "text_overlay": [
+        "ขั้นที่ 1",
+        "ขั้นที่ 2",
+        "ขั้นที่ 3"
+      ]
+    }
+  ],
+  "b_roll_list": [
+    "คนนั่งสมาธิริมทะเล/ภูเขา",
+    "ใบไม้ไหว/คลื่นน้ำ (ช้า ๆ)",
+    "พระพุทธรูป (respectful angle)",
+    "ธรรมชาติสงบ (พระอาทิตย์ขึ้น/ตก)",
+    "มือวางบนตัก (meditation mudra)",
+    "ธูปควันลอย (optional)"
+  ],
+  "graphics_needed": [
+    "Title card: เจริญสติใน 5 นาที",
+    "Lower thirds: citations",
+    "Progress bar: 1-2-3 steps",
+    "End screen: Subscribe + Playlist"
+  ],
+  "color_palette": {
+    "primary": "#8BC34A",
+    "secondary": "#81D4FA",
+    "accent": "#FFD54F",
+    "text": "#37474F"
+  },
+  "fonts": {
+    "thai": "Prompt, Kanit",
+    "english": "Montserrat",
+    "style": "clean, modern, readable"
+  },
+  "stock_footage_sources": [
+    "Pexels (free)",
+    "Pixabay (free)",
+    "Unsplash (free photos)",
+    "Envato Elements (paid)"
+  ],
+  "total_duration": "10:00",
+  "estimated_edit_time": "4-6 hours"
+}

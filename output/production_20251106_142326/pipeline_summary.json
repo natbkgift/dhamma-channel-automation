@@ -1,0 +1,79 @@
+{
+  "pipeline": "dhamma-video-complete",
+  "run_id": "production_20251106_142326",
+  "started_at": "2025-11-06T14:23:27.635027",
+  "total_steps": 17,
+  "successful": 17,
+  "failed": 0,
+  "results": {
+    "trend_scout": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251106_142326\\trend_candidates.json"
+    },
+    "topic_prioritizer": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251106_142326\\topics_ranked.json"
+    },
+    "research_retrieval": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251106_142326\\research_bundle.json"
+    },
+    "data_enrichment": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251106_142326\\data_enrichment.json"
+    },
+    "script_outline": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251106_142326\\outline.md"
+    },
+    "script_writer": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251106_142326\\script.md"
+    },
+    "doctrine_validator": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251106_142326\\script_validated.md"
+    },
+    "legal_compliance": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251106_142326\\compliance_report.json"
+    },
+    "visual_asset": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251106_142326\\visual_guide.json"
+    },
+    "voiceover": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251106_142326\\voiceover_guide.json"
+    },
+    "localization": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251106_142326\\localization.json"
+    },
+    "seo_metadata": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251106_142326\\metadata.json"
+    },
+    "thumbnail_generator": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251106_142326\\thumbnail_concepts.json"
+    },
+    "format_conversion": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251106_142326\\format_specs.json"
+    },
+    "multi_channel": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251106_142326\\multi_channel.json"
+    },
+    "publish": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251106_142326\\publish_receipt.json"
+    },
+    "backup_archive": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251106_142326\\backup_manifest.json"
+    }
+  },
+  "output_dir": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251106_142326"
+}

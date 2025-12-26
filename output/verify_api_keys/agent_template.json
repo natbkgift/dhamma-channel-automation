@@ -1,0 +1,34 @@
+{
+  "agent_template_version": "1.0",
+  "template": {
+    "name": "{{AGENT_NAME}}",
+    "version": "1.0",
+    "description": "{{DESCRIPTION}}",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "result": {
+          "type": "object"
+        }
+      }
+    },
+    "error_handling": {
+      "retry_count": 3,
+      "timeout_seconds": 300,
+      "fallback_action": "notify_and_halt"
+    }
+  },
+  "example_agents": [
+    "TrendScout",
+    "TopicPrioritizer",
+    "ResearchRetrieval"
+  ]
+}

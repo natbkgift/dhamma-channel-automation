@@ -1,0 +1,33 @@
+{
+  "initialized_at": "2025-11-03T20:18:16.649426",
+  "error_categories": {
+    "critical": {
+      "action": "halt_and_notify",
+      "count": 0
+    },
+    "warning": {
+      "action": "log_and_continue",
+      "count": 0
+    },
+    "info": {
+      "action": "log_only",
+      "count": 0
+    }
+  },
+  "flag_types": {
+    "doctrine_violation": {
+      "severity": "critical",
+      "handler": "DoctrineValidator"
+    },
+    "api_rate_limit": {
+      "severity": "warning",
+      "handler": "Integration"
+    },
+    "missing_data": {
+      "severity": "warning",
+      "handler": "DataSync"
+    }
+  },
+  "current_flags": [],
+  "error_log_path": "logs/errors.log"
+}

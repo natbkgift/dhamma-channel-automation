@@ -1,0 +1,29 @@
+{
+  "scheduled_at": "2025-11-04T15:06:04.705426",
+  "status": "ready_to_publish",
+  "platforms": [
+    "youtube"
+  ],
+  "youtube": {
+    "video_file": "output/final_video.mp4",
+    "title": "",
+    "description": "",
+    "tags": [],
+    "category": "Education",
+    "privacy": "public",
+    "publish_time": "tomorrow 10:00 +07:00",
+    "playlist_id": null,
+    "thumbnail": "output/thumbnail.jpg"
+  },
+  "checklist": {
+    "video_file": false,
+    "thumbnail": false,
+    "script_approved": true,
+    "metadata_ready": true,
+    "doctrine_validated": true,
+    "seo_optimized": true,
+    "subtitles": false,
+    "visual_assets": false,
+    "voiceover": false
+  }
+}

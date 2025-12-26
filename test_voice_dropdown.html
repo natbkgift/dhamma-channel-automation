@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Voice Dropdown</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #667eea;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+        .info {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            border-radius: 4px;
+        }
+        .success {
+            background: #e8f5e9;
+            border-left-color: #4CAF50;
+        }
+        .error {
+            background: #ffebee;
+            border-left-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Voice Dropdown Test</h1>
+        
+        <div class="test-section">
+            <label><strong>TTS Provider:</strong></label>
+            <select id="ttsProvider" onchange="updateVoiceOptions()">
+                <option value="google">Google Cloud TTS (แนะนำสำหรับภาษาไทย)</option>
+                <option value="openai">OpenAI TTS</option>
+            </select>
+        </div>
+        
+        <div class="test-section">
+            <label><strong>Voice:</strong></label>
+            <select id="ttsVoice">
+                <!-- Will be populated by updateVoiceOptions() -->
+            </select>
+            <div id="voiceInfo" class="info"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Debug Info:</h3>
+            <div id="debugInfo" class="info"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Voice options for both providers
+        const voiceOptions = {
+            google: [
+                // Journey voices - ธรรมชาติที่สุด (⭐ แนะนำ!)
+                { value: 'th-TH-Journey-D', label: '🧘‍♂️ ผู้ชาย - อบอุ่น เป็นธรรมชาติ (⭐⭐⭐ แนะนำที่สุด!)' },
+                { value: 'th-TH-Journey-F', label: '👩 ผู้หญิง - นุ่มนวล เป็นมิตร (⭐⭐ แนะนำ!)' },
+                { value: 'th-TH-Journey-O', label: '🧘‍♂️ ผู้ชาย - สงบ เหมาะกับธรรมะ (⭐ แนะนำ)' },
+                
+                // Chirp3-HD - คุณภาพดี
+                { value: 'th-TH-Chirp3-HD-Schedar', label: '🧘‍♂️ ผู้ชาย - Schedar (นุ่มสงบ)' },
+                { value: 'th-TH-Chirp3-HD-Achird', label: '🧘‍♂️ ผู้ชาย - Achird (ธรรมชาติ)' },
+                { value: 'th-TH-Chirp3-HD-Umbriel', label: '🧘‍♂️ ผู้ชาย - Umbriel (เสียงลึก)' },
+                { value: 'th-TH-Chirp3-HD-Alnilam', label: '🧘‍♂️ ผู้ชาย - Alnilam (ชัดเจน)' },
+                { value: 'th-TH-Chirp3-HD-Charon', label: '🧘‍♂️ ผู้ชาย - Charon (มั่นคง)' },
+                { value: 'th-TH-Chirp3-HD-Achernar', label: '👩 ผู้หญิง - Achernar (นุ่มนวล)' },
+                
+                // Neural2 - คุณภาพสูง
+                { value: 'th-TH-Neural2-C', label: '👩 ผู้หญิง - Neural2-C (คุณภาพสูง)' },
+                
+                // Wavenet - คลาสสิก
+                { value: 'th-TH-Wavenet-B', label: '🧘‍♂️ ผู้ชาย - Wavenet-B (เป็นกันเอง)' },
+                { value: 'th-TH-Wavenet-D', label: '🧘‍♂️ ผู้ชาย - Wavenet-D (มั่นใจ)' },
+                { value: 'th-TH-Standard-A', label: '👩 ผู้หญิง - Standard (ฟรี)' }
+            ],
+            openai: [
+                { value: 'alloy', label: 'Alloy - เสียงกลาง' },
+                { value: 'echo', label: 'Echo - เสียงผู้ชาย' },
+                { value: 'fable', label: 'Fable - เสียงอังกฤษ' },
+                { value: 'onyx', label: 'Onyx - เสียงลึก' },
+                { value: 'nova', label: 'Nova - เสียงหญิง' },
+                { value: 'shimmer', label: 'Shimmer - เสียงนุ่มนวล' }
+            ]
+        };
+        
+        function updateVoiceOptions() {
+            const provider = document.getElementById('ttsProvider').value;
+            const voiceSelect = document.getElementById('ttsVoice');
+            const debugInfo = document.getElementById('debugInfo');
+            const voiceInfo = document.getElementById('voiceInfo');
+            
+            // Clear existing options
+            voiceSelect.innerHTML = '';
+            
+            // Add new options based on provider
+            const voices = voiceOptions[provider] || [];
+            voices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = voice.value;
+                option.textContent = voice.label;
+                // Select Chirp3-HD-Schedar for Google or alloy for OpenAI as default
+                if ((provider === 'google' && voice.value === 'th-TH-Chirp3-HD-Schedar') || 
+                    (provider === 'openai' && voice.value === 'alloy')) {
+                    option.selected = true;
+                }
+                voiceSelect.appendChild(option);
+            });
+            
+            console.log('Voice options updated:', provider, 'Total voices:', voices.length);
+            
+            // Update debug info
+            debugInfo.innerHTML = `
+                <strong>✅ Success!</strong><br>
+                Provider: ${provider}<br>
+                Total voices loaded: ${voices.length}<br>
+                Options in dropdown: ${voiceSelect.options.length}<br>
+                Selected: ${voiceSelect.value}
+            `;
+            debugInfo.className = 'info success';
+            
+            // Update voice info
+            voiceInfo.innerHTML = `
+                Selected voice: <strong>${voiceSelect.options[voiceSelect.selectedIndex].text}</strong>
+            `;
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, initializing voices...');
+            updateVoiceOptions();
+        });
+        
+        // Update info when selection changes
+        document.getElementById('ttsVoice').addEventListener('change', function() {
+            const voiceInfo = document.getElementById('voiceInfo');
+            voiceInfo.innerHTML = `
+                Selected voice: <strong>${this.options[this.selectedIndex].text}</strong>
+            `;
+        });
+    </script>
+</body>
+</html>

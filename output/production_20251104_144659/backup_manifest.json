@@ -1,0 +1,99 @@
+{
+  "archived_at": "2025-11-04T14:46:59.934239",
+  "run_id": "production_20251104_144659",
+  "total_files": 19,
+  "files_by_category": {
+    "json": [
+      "compliance_report.json",
+      "data_enrichment.json",
+      "format_specs.json",
+      "localization.json",
+      "metadata.json",
+      "multi_channel.json",
+      "publish_receipt.json",
+      "research_bundle.json",
+      "thumbnail_concepts.json",
+      "topics_ranked.json",
+      "trend_candidates.json",
+      "validation_report.json",
+      "visual_guide.json",
+      "voiceover_guide.json"
+    ],
+    "markdown": [
+      "outline.md",
+      "publish_checklist.md",
+      "script.md",
+      "script_validated.md"
+    ],
+    "srt": [
+      "subtitles_th.srt"
+    ],
+    "other": []
+  },
+  "package_contents": {
+    "research": [
+      "trend_candidates.json",
+      "topics_ranked.json",
+      "research_bundle.json",
+      "data_enrichment.json"
+    ],
+    "scripts": [
+      "outline.md",
+      "script.md",
+      "script_validated.md"
+    ],
+    "validation": [
+      "validation_report.json",
+      "compliance_report.json"
+    ],
+    "production": [
+      "visual_guide.json",
+      "voiceover_guide.json",
+      "localization.json",
+      "subtitles_th.srt",
+      "thumbnail_concepts.json"
+    ],
+    "publishing": [
+      "metadata.json",
+      "format_specs.json",
+      "multi_channel.json",
+      "publish_receipt.json",
+      "publish_checklist.md"
+    ],
+    "summary": [
+      "pipeline_summary.json"
+    ]
+  },
+  "archive_format": "ZIP",
+  "archive_filename": "production_20251104_144659_complete_20251104_144659.zip",
+  "storage_locations": {
+    "local": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251104_144659",
+    "backup": "output/backups/production_20251104_144659",
+    "cloud": "Google Drive / Dropbox (optional)"
+  },
+  "retention_policy": {
+    "keep_local": "30 days",
+    "keep_backup": "90 days",
+    "keep_cloud": "1 year"
+  },
+  "restore_instructions": [
+    "1. Unzip archive file",
+    "2. Place in output/ directory",
+    "3. Reference files as needed",
+    "4. Re-run pipeline if needed: python orchestrator.py --pipeline pipelines/video_complete.yaml --run-id restored_[date]"
+  ],
+  "metadata": {
+    "project": "dhamma-channel-automation",
+    "pipeline": "video_complete",
+    "topic": "เจริญสติในชีวิตประจำวัน 5 นาที",
+    "status": "production_ready",
+    "next_steps": [
+      "Record voiceover",
+      "Create visual assets",
+      "Edit video",
+      "Upload to YouTube"
+    ]
+  },
+  "estimated_archive_size": "2-5 MB (text files only)",
+  "note": "Video files (MP4) and images (JPG/PNG) should be backed up separately due to size"
+}

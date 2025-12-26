@@ -1,0 +1,21 @@
+{
+  "backup_location": "output/backups/video_20251103_213723/",
+  "files_backed_up": [
+    "full_script_20251103_213723.md",
+    "step_01_trend_scout.json",
+    "step_06_script_writer.json",
+    "step_13_seo_metadata.json",
+    "video_final.mp4",
+    "thumbnail.png",
+    "subtitles_th.srt"
+  ],
+  "total_files": 7,
+  "backup_date": "2025-11-03T21:37:23.664421",
+  "storage_options": [
+    "Google Drive (ฟรี 15 GB)",
+    "Dropbox (ฟรี 2 GB)",
+    "OneDrive (ฟรี 5 GB)",
+    "External HDD"
+  ],
+  "retention_policy": "เก็บไว้ 6 เดือน → ย้ายไป Archive → ลบหลัง 2 ปี"
+}

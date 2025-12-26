@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Topics Database - Dhamma Channel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+        
+        .progress-bar-container {
+            background: #f0f0f0;
+            height: 40px;
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        @media screen and (max-width: 768px) {
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .charts {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media screen and (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+        
+        .badge-priority {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .badge-category {
+            background: #667eea;
+            color: white;
+        }
+        
+        .badge-difficulty-easy {
+            background: #43e97b;
+            color: white;
+        }
+        
+        .badge-difficulty-medium {
+            background: #ffa726;
+            color: white;
+        }
+        
+        .badge-difficulty-hard {
+            background: #f5576c;
+            color: white;
+        }
+        
+        .badge-completed {
+            background: #43e97b;
+            color: white;
+        }
+        
+        .badge-pending {
+            background: #ffa726;
+            color: white;
+        }
+        
+        .upcoming-card {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 5px solid #667eea;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .upcoming-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .upcoming-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .upcoming-meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .filter-bar {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filter-bar input,
+        .filter-bar select {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .filter-bar input:focus,
+        .filter-bar select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .charts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .chart-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+        }
+        
+        .chart-card h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .chart-bar {
+            margin: 10px 0;
+        }
+        
+        .chart-bar-label {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .chart-bar-fill {
+            height: 30px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Mock Topics Database</h1>
+            <div class="subtitle">Dhamma Channel Content Library</div>
+            <div style="margin-top: 15px; opacity: 0.8;">
+                สร้างเมื่อ: 06/11/2025 10:23:50
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- Statistics Overview -->
+            <div class="section">
+                <h2>📊 สถิติภาพรวม</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">หัวข้อทั้งหมด</div>
+                        <div class="stat-number">20</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">ทำเสร็จแล้ว</div>
+                        <div class="stat-number">3</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">กำลังทำ</div>
+                        <div class="stat-number">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">เหลืออีก</div>
+                        <div class="stat-number">17</div>
+                    </div>
+                </div>
+                
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: 15.0%">
+                        15.0% Complete
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Charts -->
+            <div class="charts">
+                <div class="chart-card">
+                    <h3>📂 หัวข้อตาม Category</h3>
+                    <div class="chart-bar">
+                        <div class="chart-bar-label">
+                            <span>Practical Meditation</span>
+                            <span>6</span>
+                        </div>
+                        <div class="chart-bar-fill" style="width: 100.0%">
+                            6
+                        </div>
+                    </div>
+                    <div class="chart-bar">
+                        <div class="chart-bar-label">
+                            <span>Modern Context</span>
+                            <span>4</span>
+                        </div>
+                        <div class="chart-bar-fill" style="width: 66.66666666666666%">
+                            4
+                        </div>
+                    </div>
+                    <div class="chart-bar">
+                        <div class="chart-bar-label">
+                            <span>Basic Dhamma</span>
+                            <span>5</span>
+                        </div>
+                        <div class="chart-bar-fill" style="width: 83.33333333333334%">
+                            5
+                        </div>
+                    </div>
+                    <div class="chart-bar">
+                        <div class="chart-bar-label">
+                            <span>Daily Life Practice</span>
+                            <span>3</span>
+                        </div>
+                        <div class="chart-bar-fill" style="width: 50.0%">
+                            3
+                        </div>
+                    </div>
+                    <div class="chart-bar">
+                        <div class="chart-bar-label">
+                            <span>Trending Topics</span>
+                            <span>2</span>
+                        </div>
+                        <div class="chart-bar-fill" style="width: 33.33333333333333%">
+                            2
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <h3>📊 ระดับความยาก</h3>
+                    <div class="chart-bar">
+                        <div class="chart-bar-label">
+                            <span>กลาง</span>
+                            <span>10</span>
+                        </div>
+                        <div class="chart-bar-fill" style="width: 100.0%">
+                            10
+                        </div>
+                    </div>
+                    <div class="chart-bar">
+                        <div class="chart-bar-label">
+                            <span>ง่าย</span>
+                            <span>4</span>
+                        </div>
+                        <div class="chart-bar-fill" style="width: 40.0%">
+                            4
+                        </div>
+                    </div>
+                    <div class="chart-bar">
+                        <div class="chart-bar-label">
+                            <span>ค่อนข้างยาก</span>
+                            <span>6</span>
+                        </div>
+                        <div class="chart-bar-fill" style="width: 60.0%">
+                            6
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Upcoming Topics -->
+            <div class="section">
+                <h2>⏭️ หัวข้อถัดไปที่จะทำ (Top 5)</h2>
+                <div class="upcoming-card">
+                    <div class="upcoming-title">1. ธรรมะช่วยรับมือกับ การเปลี่ยนแปลง</div>
+                    <div class="upcoming-meta">
+                        <span class="badge badge-priority">Priority: 4/10</span>
+                        <span class="badge badge-category">Modern Context</span>
+                        <span class="badge badge-difficulty-hard">ค่อนข้างยาก</span>
+                        <span>🎯 ผู้สูงอายุ</span>
+                        <span>⏱️ 5-8 นาที</span>
+                    </div>
+                    <div style="margin-top: 10px; color: #666; font-size: 0.95em;">
+                        💡 ตอบโจทย์ lifestyle คนยุคใหม่
+                    </div>
+                </div>
+                <div class="upcoming-card">
+                    <div class="upcoming-title">2. พุทธศาสนากับ ความเครียดในยุคดิจิทัล</div>
+                    <div class="upcoming-meta">
+                        <span class="badge badge-priority">Priority: 4/10</span>
+                        <span class="badge badge-category">Modern Context</span>
+                        <span class="badge badge-difficulty-medium">กลาง</span>
+                        <span>🎯 ผู้สูงอายุ</span>
+                        <span>⏱️ 8-10 นาที</span>
+                    </div>
+                    <div style="margin-top: 10px; color: #666; font-size: 0.95em;">
+                        💡 คนค้นหาหัวข้อนี้เพิ่มขึ้น 30%
+                    </div>
+                </div>
+                <div class="upcoming-card">
+                    <div class="upcoming-title">3. พระพุทธศาสนาตอบโจทย์ ชีวิตรีบเร่ง</div>
+                    <div class="upcoming-meta">
+                        <span class="badge badge-priority">Priority: 4/10</span>
+                        <span class="badge badge-category">Modern Context</span>
+                        <span class="badge badge-difficulty-medium">กลาง</span>
+                        <span>🎯 ทั่วไป</span>
+                        <span>⏱️ 12-15 นาที</span>
+                    </div>
+                    <div style="margin-top: 10px; color: #666; font-size: 0.95em;">
+                        💡 ตอบโจทย์ lifestyle คนยุคใหม่
+                    </div>
+                </div>
+                <div class="upcoming-card">
+                    <div class="upcoming-title">4. เรียนรู้ ไตรสิกขา ใน 10 นาที</div>
+                    <div class="upcoming-meta">
+                        <span class="badge badge-priority">Priority: 3/10</span>
+                        <span class="badge badge-category">Basic Dhamma</span>
+                        <span class="badge badge-difficulty-medium">กลาง</span>
+                        <span>🎯 ผู้เริ่มต้น</span>
+                        <span>⏱️ 5-8 นาที</span>
+                    </div>
+                    <div style="margin-top: 10px; color: #666; font-size: 0.95em;">
+                        💡 เทรนด์ mindfulness ในไทยเติบโต
+                    </div>
+                </div>
+                <div class="upcoming-card">
+                    <div class="upcoming-title">5. ขันธ์ 5 สำหรับมือใหม่</div>
+                    <div class="upcoming-meta">
+                        <span class="badge badge-priority">Priority: 3/10</span>
+                        <span class="badge badge-category">Basic Dhamma</span>
+                        <span class="badge badge-difficulty-hard">ค่อนข้างยาก</span>
+                        <span>🎯 ทั่วไป</span>
+                        <span>⏱️ 10-12 นาที</span>
+                    </div>
+                    <div style="margin-top: 10px; color: #666; font-size: 0.95em;">
+                        💡 เทรนด์ mindfulness ในไทยเติบโต
+                    </div>
+                </div>
+            </div>
+            
+            <!-- All Topics Table -->
+            <div class="section">
+                <h2>📋 หัวข้อทั้งหมด</h2>
+                
+                <div class="filter-bar">
+                    <input type="text" id="searchBox" placeholder="🔍 ค้นหาหัวข้อ..." style="flex: 1; min-width: 200px;">
+                    <select id="categoryFilter">
+                        <option value="">ทุก Category</option>
+                        <option value="Basic Dhamma">Basic Dhamma</option>
+                        <option value="Daily Life Practice">Daily Life Practice</option>
+                        <option value="Modern Context">Modern Context</option>
+                        <option value="Practical Meditation">Practical Meditation</option>
+                        <option value="Trending Topics">Trending Topics</option>
+                    </select>
+                    <select id="statusFilter">
+                        <option value="">ทุกสถานะ</option>
+                        <option value="completed">เสร็จแล้ว</option>
+                        <option value="pending">ยังไม่ทำ</option>
+                    </select>
+                    <select id="difficultyFilter">
+                        <option value="">ทุกระดับ</option>
+                        <option value="กลาง">กลาง</option>
+                        <option value="ค่อนข้างยาก">ค่อนข้างยาก</option>
+                        <option value="ง่าย">ง่าย</option>
+                    </select>
+                </div>
+                
+                <table id="topicsTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable(0)">#</th>
+                            <th onclick="sortTable(1)">หัวข้อ</th>
+                            <th onclick="sortTable(2)">Category</th>
+                            <th onclick="sortTable(3)">Priority</th>
+                            <th onclick="sortTable(4)">ความยาก</th>
+                            <th onclick="sortTable(5)">ระยะเวลา</th>
+                            <th onclick="sortTable(6)">สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-category="Practical Meditation" data-status="completed" data-difficulty="กลาง">
+                            <td>1</td>
+                            <td>เมตตาภาวนา ใน 15 นาทีต่อวัน</td>
+                            <td><span class="badge badge-category">Practical Meditation</span></td>
+                            <td><span class="badge badge-priority">5/10</span></td>
+                            <td><span class="badge badge-difficulty-medium">กลาง</span></td>
+                            <td>10-12 นาที</td>
+                            <td><span class="badge badge-completed">เสร็จแล้ว</span></td>
+                        </tr>
+                        <tr data-category="Practical Meditation" data-status="completed" data-difficulty="ง่าย">
+                            <td>2</td>
+                            <td>มรณานุสติ ใน 20 นาทีต่อวัน</td>
+                            <td><span class="badge badge-category">Practical Meditation</span></td>
+                            <td><span class="badge badge-priority">4/10</span></td>
+                            <td><span class="badge badge-difficulty-easy">ง่าย</span></td>
+                            <td>12-15 นาที</td>
+                            <td><span class="badge badge-completed">เสร็จแล้ว</span></td>
+                        </tr>
+                        <tr data-category="Modern Context" data-status="completed" data-difficulty="กลาง">
+                            <td>3</td>
+                            <td>พุทธศาสนากับ Mindful Living</td>
+                            <td><span class="badge badge-category">Modern Context</span></td>
+                            <td><span class="badge badge-priority">4/10</span></td>
+                            <td><span class="badge badge-difficulty-medium">กลาง</span></td>
+                            <td>12-15 นาที</td>
+                            <td><span class="badge badge-completed">เสร็จแล้ว</span></td>
+                        </tr>
+                        <tr data-category="Modern Context" data-status="pending" data-difficulty="ค่อนข้างยาก">
+                            <td>4</td>
+                            <td>ธรรมะช่วยรับมือกับ การเปลี่ยนแปลง</td>
+                            <td><span class="badge badge-category">Modern Context</span></td>
+                            <td><span class="badge badge-priority">4/10</span></td>
+                            <td><span class="badge badge-difficulty-hard">ค่อนข้างยาก</span></td>
+                            <td>5-8 นาที</td>
+                            <td><span class="badge badge-pending">ยังไม่ทำ</span></td>
+                        </tr>
+                        <tr data-category="Modern Context" data-status="pending" data-difficulty="กลาง">
+                            <td>5</td>
+                            <td>พุทธศาสนากับ ความเครียดในยุคดิจิทัล</td>
+                            <td><span class="badge badge-category">Modern Context</span></td>
+                            <td><span class="badge badge-priority">4/10</span></td>
+                            <td><span class="badge badge-difficulty-medium">กลาง</span></td>
+                            <td>8-10 นาที</td>
+                            <td><span class="badge badge-pending">ยังไม่ทำ</span></td>
+                        </tr>
+                        <tr data-category="Modern Context" data-status="pending" data-difficulty="กลาง">
+                            <td>6</td>
+                            <td>พระพุทธศาสนาตอบโจทย์ ชีวิตรีบเร่ง</td>
+                            <td><span class="badge badge-category">Modern Context</span></td>
+                            <td><span class="badge badge-priority">4/10</span></td>
+                            <td><span class="badge badge-difficulty-medium">กลาง</span></td>
+                            <td>12-15 นาที</td>
+                            <td><span class="badge badge-pending">ยังไม่ทำ</span></td>
+                        </tr>
+                        <tr data-category="Basic Dhamma" data-status="pending" data-difficulty="กลาง">
+                            <td>7</td>
+                            <td>เรียนรู้ ไตรสิกขา ใน 10 นาที</td>
+                            <td><span class="badge badge-category">Basic Dhamma</span></td>
+                            <td><span class="badge badge-priority">3/10</span></td>
+                            <td><span class="badge badge-difficulty-medium">กลาง</span></td>
+                            <td>5-8 นาที</td>
+                            <td><span class="badge badge-pending">ยังไม่ทำ</span></td>
+                        </tr>
+                        <tr data-category="Basic Dhamma" data-status="pending" data-difficulty="ค่อนข้างยาก">
+                            <td>8</td>
+                            <td>ขันธ์ 5 สำหรับมือใหม่</td>
+                            <td><span class="badge badge-category">Basic Dhamma</span></td>
+                            <td><span class="badge badge-priority">3/10</span></td>
+                            <td><span class="badge badge-difficulty-hard">ค่อนข้างยาก</span></td>
+                            <td>10-12 นาที</td>
+                            <td><span class="badge badge-pending">ยังไม่ทำ</span></td>
+                        </tr>
+                        <tr data-category="Basic Dhamma" data-status="pending" data-difficulty="ง่าย">
+                            <td>9</td>
+                            <td>มือใหม่ควรรู้เรื่อง ไตรสิกขา</td>
+                            <td><span class="badge badge-category">Basic Dhamma</span></td>
+                            <td><span class="badge badge-priority">3/10</span></td>
+                            <td><span class="badge badge-difficulty-easy">ง่าย</span></td>
+                            <td>10-12 นาที</td>
+                            <td><span class="badge badge-pending">ยังไม่ทำ</span></td>
+                        </tr>
+                        <tr data-category="Basic Dhamma" data-status="pending" data-difficulty="ค่อนข้างยาก">
+                            <td>10</td>
+                            <td>ไตรสิกขา ฉบับเข้าใจง่าย</td>
+                            <td><span class="badge badge-category">Basic Dhamma</span></td>
+                            <td><span class="badge badge-priority">3/10</span></td>
+                            <td><span class="badge badge-difficulty-hard">ค่อนข้างยาก</span></td>
+                            <td>8-10 นาที</td>
+                            <td><span class="badge badge-pending">ยังไม่ทำ</span></td>
+                        </tr>
+                        <tr data-category="Basic Dhamma" data-status="pending" data-difficulty="กลาง">
+                            <td>11</td>
+                            <td>ขันธ์ 5 คืออะไร? ทำไมต้องรู้?</td>
+                            <td><span class="badge badge-category">Basic Dhamma</span></td>
+                            <td><span class="badge badge-priority">3/10</span></td>
+                            <td><span class="badge badge-difficulty-medium">กลาง</span></td>
+                            <td>10-12 นาที</td>
+                            <td><span class="badge badge-pending">ยังไม่ทำ</span></td>
+                        </tr>
+                        <tr data-category="Practical Meditation" data-status="pending" data-difficulty="กลาง">
+                            <td>12</td>
+                            <td>กายคตาสติ - เริ่มต้นอย่างไร?</td>
+                            <td><span class="badge badge-category">Practical Meditation</span></td>
+                            <td><span class="badge badge-priority">3/10</span></td>
+                            <td><span class="badge badge-difficulty-medium">กลาง</span></td>
+                            <td>5-8 นาที</td>
+                            <td><span class="badge badge-pending">ยังไม่ทำ</span></td>
+                        </tr>
+                        <tr data-category="Practical Meditation" data-status="pending" data-difficulty="ค่อนข้างยาก">
+                            <td>13</td>
+                            <td>เทคนิค อานาปานสติ สำหรับ นักเรียน นักศึกษา</td>
+                            <td><span class="badge badge-category">Practical Meditation</span></td>
+                            <td><span class="badge badge-priority">3/10</span></td>
+                            <td><span class="badge badge-difficulty-hard">ค่อนข้างยาก</span></td>
+                            <td>10-12 นาที</td>
+                            <td><span class="badge badge-pending">ยังไม่ทำ</span></td>
+                        </tr>
+                        <tr data-category="Practical Meditation" data-status="pending" data-difficulty="กลาง">
+                            <td>14</td>
+                            <td>วิตกกังวล แก้ด้วย สมถะภาวนา</td>
+                            <td><span class="badge badge-category">Practical Meditation</span></td>
+                            <td><span class="badge badge-priority">3/10</span></td>
+                            <td><span class="badge badge-difficulty-medium">กลาง</span></td>
+                            <td>5-8 นาที</td>
+                            <td><span class="badge badge-pending">ยังไม่ทำ</span></td>
+                        </tr>
+                        <tr data-category="Practical Meditation" data-status="pending" data-difficulty="ค่อนข้างยาก">
+                            <td>15</td>
+                            <td>วิธีฝึก สมถะภาวนา ที่บ้าน</td>
+                            <td><span class="badge badge-category">Practical Meditation</span></td>
+                            <td><span class="badge badge-priority">3/10</span></td>
+                            <td><span class="badge badge-difficulty-hard">ค่อนข้างยาก</span></td>
+                            <td>5-8 นาที</td>
+                            <td><span class="badge badge-pending">ยังไม่ทำ</span></td>
+                        </tr>
+                        <tr data-category="Daily Life Practice" data-status="pending" data-difficulty="กลาง">
+                            <td>16</td>
+                            <td>ก่อนนอน กรรม เปลี่ยนชีวิต</td>
+                            <td><span class="badge badge-category">Daily Life Practice</span></td>
+                            <td><span class="badge badge-priority">3/10</span></td>
+                            <td><span class="badge badge-difficulty-medium">กลาง</span></td>
+                            <td>5-8 นาที</td>
+                            <td><span class="badge badge-pending">ยังไม่ทำ</span></td>
+                        </tr>
+                        <tr data-category="Daily Life Practice" data-status="pending" data-difficulty="ง่าย">
+                            <td>17</td>
+                            <td>สติ - เพิ่มสมาธิ</td>
+                            <td><span class="badge badge-category">Daily Life Practice</span></td>
+                            <td><span class="badge badge-priority">3/10</span></td>
+                            <td><span class="badge badge-difficulty-easy">ง่าย</span></td>
+                            <td>10-12 นาที</td>
+                            <td><span class="badge badge-pending">ยังไม่ทำ</span></td>
+                        </tr>
+                        <tr data-category="Daily Life Practice" data-status="pending" data-difficulty="ค่อนข้างยาก">
+                            <td>18</td>
+                            <td>วิธีใช้ ปัญญา ทุกวัน</td>
+                            <td><span class="badge badge-category">Daily Life Practice</span></td>
+                            <td><span class="badge badge-priority">3/10</span></td>
+                            <td><span class="badge badge-difficulty-hard">ค่อนข้างยาก</span></td>
+                            <td>12-15 นาที</td>
+                            <td><span class="badge badge-pending">ยังไม่ทำ</span></td>
+                        </tr>
+                        <tr data-category="Trending Topics" data-status="pending" data-difficulty="ง่าย">
+                            <td>19</td>
+                            <td>เคล็ดลับ ลดความเครียด แบบพุทธ</td>
+                            <td><span class="badge badge-category">Trending Topics</span></td>
+                            <td><span class="badge badge-priority">3/10</span></td>
+                            <td><span class="badge badge-difficulty-easy">ง่าย</span></td>
+                            <td>8-10 นาที</td>
+                            <td><span class="badge badge-pending">ยังไม่ทำ</span></td>
+                        </tr>
+                        <tr data-category="Trending Topics" data-status="pending" data-difficulty="กลาง">
+                            <td>20</td>
+                            <td>5 วิธี มีสติ ด้วยธรรมะ</td>
+                            <td><span class="badge badge-category">Trending Topics</span></td>
+                            <td><span class="badge badge-priority">3/10</span></td>
+                            <td><span class="badge badge-difficulty-medium">กลาง</span></td>
+                            <td>5-8 นาที</td>
+                            <td><span class="badge badge-pending">ยังไม่ทำ</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="section">
+                <h2>🔗 Quick Actions</h2>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <a href="file:///D:/Auto Tool/dhamma-channel-automation/data/mock_topics.json" class="btn">📄 เปิด Topics JSON</a>
+                    <a href="file:///D:/Auto Tool/dhamma-channel-automation/data/production_history.json" class="btn">📊 เปิด History JSON</a>
+                    <button onclick="window.print()" class="btn">🖨️ Print Report</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>🎬 Dhamma Channel Automation</strong></p>
+            <p>Mock Topics Database • Generated: 2025-11-06 10:23:50</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">
+                Total Topics: 20 | Completed: 3 | Remaining: 17
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        // Search filter
+        document.getElementById('searchBox').addEventListener('input', filterTable);
+        document.getElementById('categoryFilter').addEventListener('change', filterTable);
+        document.getElementById('statusFilter').addEventListener('change', filterTable);
+        document.getElementById('difficultyFilter').addEventListener('change', filterTable);
+        
+        function filterTable() {
+            const search = document.getElementById('searchBox').value.toLowerCase();
+            const category = document.getElementById('categoryFilter').value;
+            const status = document.getElementById('statusFilter').value;
+            const difficulty = document.getElementById('difficultyFilter').value;
+            
+            const rows = document.querySelectorAll('#topicsTable tbody tr');
+            
+            rows.forEach(row => {
+                const title = row.cells[1].textContent.toLowerCase();
+                const rowCategory = row.dataset.category;
+                const rowStatus = row.dataset.status;
+                const rowDifficulty = row.dataset.difficulty;
+                
+                const matchSearch = title.includes(search);
+                const matchCategory = !category || rowCategory === category;
+                const matchStatus = !status || rowStatus === status;
+                const matchDifficulty = !difficulty || rowDifficulty === difficulty;
+                
+                if (matchSearch && matchCategory && matchStatus && matchDifficulty) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        // Table sorting
+        function sortTable(columnIndex) {
+            const table = document.getElementById('topicsTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            rows.sort((a, b) => {
+                const aText = a.cells[columnIndex].textContent;
+                const bText = b.cells[columnIndex].textContent;
+                
+                // Try numeric sort first
+                const aNum = parseFloat(aText);
+                const bNum = parseFloat(bText);
+                
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return aNum - bNum;
+                }
+                
+                return aText.localeCompare(bText, 'th');
+            });
+            
+            rows.forEach(row => tbody.appendChild(row));
+        }
+    </script>
+</body>
+</html>

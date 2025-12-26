@@ -1,0 +1,27 @@
+{
+  "errors": [
+    {
+      "type": "API Key Missing",
+      "severity": "critical",
+      "agent": "Security"
+    },
+    {
+      "type": "Quota Exceeded",
+      "severity": "warning",
+      "agent": "YouTube"
+    }
+  ],
+  "notifications": [
+    {
+      "triggered": true,
+      "message": "[CRITICAL] API Key Missing detected by Security agent",
+      "timestamp": "2025-11-04T08:38:57.060076"
+    },
+    {
+      "triggered": true,
+      "message": "[WARNING] Quota Exceeded detected by YouTube agent",
+      "timestamp": "2025-11-04T08:38:57.060076"
+    }
+  ],
+  "status": "ALERTED"
+}

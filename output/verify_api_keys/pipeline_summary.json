@@ -1,0 +1,55 @@
+{
+  "pipeline": "system_setup",
+  "run_id": "verify_api_keys",
+  "started_at": "2025-11-03T20:26:32.490273",
+  "total_steps": 11,
+  "successful": 11,
+  "failed": 0,
+  "results": {
+    "prompt_pack": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\verify_api_keys\\prompt_pack.json"
+    },
+    "agent_template": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\verify_api_keys\\agent_template.json"
+    },
+    "security": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\verify_api_keys\\security_check.json"
+    },
+    "integration": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\verify_api_keys\\integration_status.json"
+    },
+    "data_sync": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\verify_api_keys\\data_sync_status.json"
+    },
+    "inventory_index": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\verify_api_keys\\inventory.json"
+    },
+    "monitoring": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\verify_api_keys\\monitoring_status.json"
+    },
+    "notification": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\verify_api_keys\\notification_config.json"
+    },
+    "error_flag": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\verify_api_keys\\error_system.json"
+    },
+    "dashboard": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\verify_api_keys\\dashboard.json"
+    },
+    "backup_archive": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\verify_api_keys\\backup_config.json"
+    }
+  },
+  "output_dir": "D:\\Auto Tool\\dhamma-channel-automation\\output\\verify_api_keys"
+}

@@ -1,0 +1,88 @@
+{
+  "agent": "TopicPrioritizer",
+  "version": "1.0",
+  "executed_at": "2025-11-03T20:56:21.416972",
+  "total_topics": 5,
+  "recommended": 4,
+  "prioritized_topics": [
+    {
+      "rank": 1,
+      "title": "ทำสมาธิ 5 นาที ลดความเครียด",
+      "priority_score": 132.48,
+      "original_score": 92,
+      "reasons": [
+        "Trend score: 92/100",
+        "Difficulty: ง่าย (×1.2)",
+        "Risk: ต่ำ (×1.2)",
+        "เทรนด์ short mindfulness กำลังมา, คนหางานสั้นๆ ทำได้ทุกวัน"
+      ],
+      "recommendation": "แนะนำทำ",
+      "estimated_effort": "ต่ำ"
+    },
+    {
+      "rank": 2,
+      "title": "เจริญสติในชีวิตประจำวัน",
+      "priority_score": 118.08,
+      "original_score": 82,
+      "reasons": [
+        "Trend score: 82/100",
+        "Difficulty: ง่าย (×1.2)",
+        "Risk: ต่ำ (×1.2)",
+        "Mindfulness in daily life กำลังเป็นที่สนใจ"
+      ],
+      "recommendation": "แนะนำทำ",
+      "estimated_effort": "ต่ำ"
+    },
+    {
+      "rank": 3,
+      "title": "วิธีรับมือความโกรธด้วยหลักธรรม",
+      "priority_score": 102.0,
+      "original_score": 85,
+      "reasons": [
+        "Trend score: 85/100",
+        "Difficulty: ง่าย-กลาง (×1.0)",
+        "Risk: ต่ำ (×1.2)",
+        "Emotional regulation content กำลังฮิต"
+      ],
+      "recommendation": "แนะนำทำ",
+      "estimated_effort": "สูง"
+    },
+    {
+      "rank": 4,
+      "title": "อริยสัจ 4 ฉบับเข้าใจง่าย",
+      "priority_score": 88.0,
+      "original_score": 88,
+      "reasons": [
+        "Trend score: 88/100",
+        "Difficulty: กลาง (×1.0)",
+        "Risk: กลาง (×1.0)",
+        "คนค้นหาพื้นฐานธรรมะเพิ่มขึ้น"
+      ],
+      "recommendation": "แนะนำทำ",
+      "estimated_effort": "กลาง"
+    },
+    {
+      "rank": 5,
+      "title": "กรรม คืออะไร? อธิบายแบบวิทยาศาสตร์",
+      "priority_score": 62.4,
+      "original_score": 78,
+      "reasons": [
+        "Trend score: 78/100",
+        "Difficulty: กลาง-ยาก (×0.8)",
+        "Risk: กลาง (×1.0)",
+        "คนสนใจเรื่องกรรมในมุมมองใหม่"
+      ],
+      "recommendation": "รอก่อน",
+      "estimated_effort": "สูง"
+    }
+  ],
+  "metadata": {
+    "criteria": [
+      "trend_score",
+      "difficulty",
+      "risk",
+      "audience_fit"
+    ],
+    "processing_time": "0.5 seconds"
+  }
+}

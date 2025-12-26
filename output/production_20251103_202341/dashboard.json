@@ -1,0 +1,23 @@
+{
+  "generated_at": "2025-11-03T20:23:42.178874",
+  "system_overview": {
+    "status": "operational",
+    "agents_ready": 12,
+    "pipelines_configured": 1,
+    "last_run": "not_yet"
+  },
+  "metrics": {
+    "total_videos_produced": 0,
+    "total_agent_runs": 0,
+    "success_rate": "N/A",
+    "avg_processing_time": "N/A"
+  },
+  "recent_activity": [
+    {
+      "time": "2025-11-03T20:23:42.178874",
+      "event": "System initialization",
+      "status": "success"
+    }
+  ],
+  "dashboard_url": "file:///D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251103_202341\\dashboard.html"
+}

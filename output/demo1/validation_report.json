@@ -1,0 +1,47 @@
+{
+  "validated_at": "2025-11-04T08:54:15.993330",
+  "status": "approved",
+  "checked_by": "AI Doctrine Validator v1.0",
+  "issues": [],
+  "approved_sections": [
+    {
+      "section": "00:00-02:30",
+      "status": "approved",
+      "note": "คำนิยามสติถูกต้อง"
+    },
+    {
+      "section": "02:30-03:30",
+      "status": "approved",
+      "note": "อ้างอิงวิสุทธิมรรคถูกต้อง"
+    },
+    {
+      "section": "03:30-05:00",
+      "status": "approved",
+      "note": "คำสอนหลวงปู่มั่นสอดคล้อง"
+    },
+    {
+      "section": "05:00-07:00",
+      "status": "approved",
+      "note": "วิธีปฏิบัติเหมาะสมผู้เริ่มต้น"
+    }
+  ],
+  "citations_verified": [
+    {
+      "citation": "อนาปานสติสูตร (มัชฌิมนิกาย)",
+      "status": "verified"
+    },
+    {
+      "citation": "วิสุทธิมรรค บทที่ 8",
+      "status": "verified"
+    },
+    {
+      "citation": "คำสอนหลวงปู่มั่น",
+      "status": "verified"
+    }
+  ],
+  "overall_feedback": "✅ สคริปต์ถูกต้องตามหลักธรรม เหมาะสมสำหรับผู้เริ่มต้น ไม่มีข้อความที่อาจทำให้เข้าใจผิด",
+  "recommendations": [
+    "เพิ่ม disclaimer ว่านี่เป็นแนวทางพื้นฐาน ควรศึกษาเพิ่มเติม",
+    "อาจเพิ่มข้อมูลเกี่ยวกับความแตกต่างของสติกับ mindfulness สมัยใหม่"
+  ]
+}

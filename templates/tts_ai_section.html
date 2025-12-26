@@ -1,0 +1,101 @@
+<!-- TTS AI Section with Voice Selection -->
+<div class="ai-section">
+    <h4 style="margin-top: 0; color: #667eea;">🤖 สร้างเสียงบรรยายด้วย AI (Text-to-Speech)</h4>
+    <p>เลือก TTS Provider และเสียงที่ต้องการ</p>
+    
+    <div style="margin: 15px 0;">
+        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Provider:</label>
+        <select id="ttsProvider" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ddd;" onchange="updateVoiceOptions()">
+            <option value="google">Google Cloud TTS (เสียงไทยชัด - แนะนำ!) 🇹🇭</option>
+            <option value="openai">OpenAI TTS (เสียงหลากหลาย)</option>
+        </select>
+    </div>
+    
+    <div style="margin: 15px 0;">
+        <label style="display: block; margin-bottom: 5px; font-weight: bold;">เสียง:</label>
+        <select id="ttsVoice" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ddd;">
+            <!-- Will be populated by updateVoiceOptions() -->
+        </select>
+    </div>
+    
+    <div style="margin: 15px 0;">
+        <label style="display: block; margin-bottom: 5px; font-weight: bold;">ความเร็ว:</label>
+        <input type="range" id="ttsSpeed" min="0.5" max="2.0" step="0.1" value="1.0" 
+               style="width: 100%;" oninput="document.getElementById('speedValue').textContent = this.value + 'x'">
+        <span id="speedValue" style="font-size: 14px; color: #666;">1.0x</span>
+    </div>
+    
+    <button class="btn-ai" onclick="generateTTS()">
+        <span>🎙️</span>
+        <span>สร้างเสียงด้วย AI</span>
+    </button>
+    
+    <div id="ttsProgress" class="progress-container">
+        <div class="progress-bar">
+            <div id="progressFill" class="progress-fill" style="width: 0%">0%</div>
+        </div>
+        <div id="progressStatus" class="progress-status">กำลังเตรียมข้อมูล...</div>
+    </div>
+    
+    <div id="downloadLink" class="download-link">
+        <a href="file:///{abs_audio}" class="btn btn-success">📁 เปิดโฟลเดอร์ Audio</a>
+    </div>
+</div>
+
+<script>
+// Voice options for each provider
+const voiceOptions = {
+    google: [
+        { group: 'ผู้ชาย (WaveNet - คุณภาพสูง)', voices: [
+            { value: 'th-TH-Wavenet-B', label: 'ผู้ชาย - โทนเป็นกันเอง (แนะนำ!)' },
+            { value: 'th-TH-Wavenet-D', label: 'ผู้ชาย - โทนมั่นใจ' }
+        ]},
+        { group: 'ผู้หญิง (Neural2 - คุณภาพสูง)', voices: [
+            { value: 'th-TH-Neural2-A', label: 'ผู้หญิง - โทนนุ่มนวล' },
+            { value: 'th-TH-Neural2-C', label: 'ผู้หญิง - โทนกลาง' }
+        ]},
+        { group: 'Standard (ประหยัด)', voices: [
+            { value: 'th-TH-Standard-A', label: 'ผู้หญิง - มาตรฐาน (ถูกกว่า)' }
+        ]}
+    ],
+    openai: [
+        { group: 'เสียงทั้งหมด', voices: [
+            { value: 'alloy', label: 'Alloy - ผู้ชายหนุ่ม กลางๆ สบายๆ' },
+            { value: 'echo', label: 'Echo - ผู้ชายโทนลึก มั่นใจ' },
+            { value: 'fable', label: 'Fable - ผู้ชายโทนสูง พูดชัด' },
+            { value: 'onyx', label: 'Onyx - ผู้ชายโทนต่ำ น่าเชื่อถือ' },
+            { value: 'nova', label: 'Nova - ผู้หญิงโทนกลาง เป็นมิตร' },
+            { value: 'shimmer', label: 'Shimmer - ผู้หญิงโทนสูง สดใส' }
+        ]}
+    ]
+};
+
+function updateVoiceOptions() {
+    const provider = document.getElementById('ttsProvider').value;
+    const voiceSelect = document.getElementById('ttsVoice');
+    
+    // Clear current options
+    voiceSelect.innerHTML = '';
+    
+    // Add new options based on provider
+    const options = voiceOptions[provider];
+    options.forEach(group => {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = group.group;
+        
+        group.voices.forEach(voice => {
+            const option = document.createElement('option');
+            option.value = voice.value;
+            option.textContent = voice.label;
+            optgroup.appendChild(option);
+        });
+        
+        voiceSelect.appendChild(optgroup);
+    });
+}
+
+// Initialize voice options on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateVoiceOptions();
+});
+</script>

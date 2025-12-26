@@ -1,0 +1,27 @@
+{
+  "trending_topics": [
+    {
+      "topic": "สมาธิภาวนา เบื้องต้น",
+      "trend_score": 95,
+      "avg_views": 150000,
+      "videos_count": 234,
+      "growth_rate": "+45%"
+    },
+    {
+      "topic": "วิธีรับมือความโกรธ",
+      "trend_score": 88,
+      "avg_views": 120000,
+      "videos_count": 189,
+      "growth_rate": "+38%"
+    },
+    {
+      "topic": "กรรม ผล วิบาก",
+      "trend_score": 82,
+      "avg_views": 95000,
+      "videos_count": 156,
+      "growth_rate": "+25%"
+    }
+  ],
+  "analysis": "หัวข้อสมาธิมีความนิยมสูงสุด เหมาะสำหรับผู้เริ่มต้น",
+  "recommendation": "ควรสร้างคอนเทนต์ระดับพื้นฐาน ง่ายต่อความเข้าใจ"
+}

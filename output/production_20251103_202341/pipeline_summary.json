@@ -1,0 +1,55 @@
+{
+  "pipeline": "system_setup",
+  "run_id": "production_20251103_202341",
+  "started_at": "2025-11-03T20:23:42.189075",
+  "total_steps": 11,
+  "successful": 11,
+  "failed": 0,
+  "results": {
+    "prompt_pack": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251103_202341\\prompt_pack.json"
+    },
+    "agent_template": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251103_202341\\agent_template.json"
+    },
+    "security": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251103_202341\\security_check.json"
+    },
+    "integration": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251103_202341\\integration_status.json"
+    },
+    "data_sync": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251103_202341\\data_sync_status.json"
+    },
+    "inventory_index": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251103_202341\\inventory.json"
+    },
+    "monitoring": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251103_202341\\monitoring_status.json"
+    },
+    "notification": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251103_202341\\notification_config.json"
+    },
+    "error_flag": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251103_202341\\error_system.json"
+    },
+    "dashboard": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251103_202341\\dashboard.json"
+    },
+    "backup_archive": {
+      "status": "success",
+      "output": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251103_202341\\backup_config.json"
+    }
+  },
+  "output_dir": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251103_202341"
+}

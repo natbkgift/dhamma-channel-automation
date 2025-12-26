@@ -1,0 +1,15 @@
+{
+  "ab_tests": [
+    {
+      "test": "Thumbnail สีส้ม vs สีฟ้า",
+      "winner": "สีส้ม",
+      "ctr": "6.2%"
+    },
+    {
+      "test": "Title ยาว vs สั้น",
+      "winner": "สั้น",
+      "avg_view": "5:45"
+    }
+  ],
+  "next_experiment": "CTA animation vs static"
+}

@@ -1,0 +1,38 @@
+{
+  "formats": [
+    {
+      "name": "YouTube Full Video",
+      "resolution": "1080p (1920x1080)",
+      "format": "MP4 (H.264)",
+      "bitrate": "8-12 Mbps",
+      "fps": "30 fps",
+      "audio": "AAC 192 kbps"
+    },
+    {
+      "name": "YouTube Shorts",
+      "resolution": "1080p (1080x1920) - แนวตั้ง",
+      "format": "MP4 (H.264)",
+      "duration": "< 60 วินาที",
+      "note": "ตัดตอนไฮไลท์จากวิดีโอหลัก"
+    },
+    {
+      "name": "Facebook",
+      "resolution": "720p (1280x720)",
+      "format": "MP4",
+      "note": "ลดขนาดไฟล์ให้โหลดเร็ว"
+    },
+    {
+      "name": "TikTok",
+      "resolution": "1080p (1080x1920)",
+      "format": "MP4",
+      "duration": "< 3 นาที",
+      "note": "ตัดให้สั้น เนื้อหากระชับ"
+    }
+  ],
+  "tools": [
+    "Adobe Premiere Pro",
+    "DaVinci Resolve (ฟรี)",
+    "HandBrake (แปลงไฟล์)",
+    "FFmpeg (command line)"
+  ]
+}

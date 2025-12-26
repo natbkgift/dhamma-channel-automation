@@ -1,0 +1,91 @@
+{
+  "yaml_file": "pipelines\\system_setup.yaml",
+  "pipeline": {
+    "pipeline": "system_setup",
+    "version": 1.0,
+    "description": "Initialize and verify all system components",
+    "steps": [
+      {
+        "id": "prompt_pack",
+        "uses": "PromptPack",
+        "description": "จัดการแพ็กพร็อมต์และไดอะแกรมเวิร์กโฟลว์",
+        "output": "prompt_pack.json"
+      },
+      {
+        "id": "agent_template",
+        "uses": "AgentTemplate",
+        "description": "แม่แบบสร้างเอเจนต์ใหม่",
+        "output": "agent_template.json"
+      },
+      {
+        "id": "security",
+        "uses": "Security",
+        "description": "ตรวจสอบความปลอดภัย API keys และ access control",
+        "output": "security_check.json"
+      },
+      {
+        "id": "integration",
+        "uses": "Integration",
+        "description": "เชื่อมต่อระบบภายนอก (YouTube, Google Trends, etc.)",
+        "needs": [
+          "security"
+        ],
+        "output": "integration_status.json"
+      },
+      {
+        "id": "data_sync",
+        "uses": "DataSync",
+        "description": "ซิงก์ข้อมูลระหว่างระบบ",
+        "needs": [
+          "integration"
+        ],
+        "output": "data_sync_status.json"
+      },
+      {
+        "id": "inventory_index",
+        "uses": "InventoryIndex",
+        "description": "สแกนไฟล์เอเจนต์/พร็อมต์ บันทึกรายการและข้อมูลเบื้องต้น",
+        "needs": [
+          "data_sync"
+        ],
+        "output": "inventory.json"
+      },
+      {
+        "id": "monitoring",
+        "uses": "Monitoring",
+        "description": "เฝ้าระวังระบบและสถานะ",
+        "output": "monitoring_status.json"
+      },
+      {
+        "id": "notification",
+        "uses": "Notification",
+        "description": "ระบบแจ้งเตือน",
+        "output": "notification_config.json"
+      },
+      {
+        "id": "error_flag",
+        "uses": "ErrorFlag",
+        "description": "จัดการข้อผิดพลาดและธงเตือน",
+        "output": "error_system.json"
+      },
+      {
+        "id": "dashboard",
+        "uses": "Dashboard",
+        "description": "ศูนย์รวมสถานะและตัวชี้วัด",
+        "needs": [
+          "monitoring",
+          "notification",
+          "error_flag"
+        ],
+        "output": "dashboard.json"
+      },
+      {
+        "id": "backup_archive",
+        "uses": "BackupArchive",
+        "description": "สำรองและจัดเก็บข้อมูล",
+        "output": "backup_config.json"
+      }
+    ]
+  },
+  "status": "LOADED"
+}

@@ -1,0 +1,38 @@
+{
+  "configured_at": "2025-11-03T20:23:42.172018",
+  "channels": {
+    "console": {
+      "enabled": true,
+      "level": "INFO"
+    },
+    "email": {
+      "enabled": false,
+      "recipients": []
+    },
+    "slack": {
+      "enabled": false,
+      "webhook_url": ""
+    },
+    "line": {
+      "enabled": false,
+      "token": ""
+    }
+  },
+  "notification_rules": {
+    "on_error": [
+      "console",
+      "email"
+    ],
+    "on_success": [
+      "console"
+    ],
+    "on_warning": [
+      "console"
+    ]
+  },
+  "test_notification": {
+    "message": "Notification system initialized",
+    "sent_at": "2025-11-03T20:23:42.172018",
+    "status": "success"
+  }
+}

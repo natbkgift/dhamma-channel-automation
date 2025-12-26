@@ -1,0 +1,51 @@
+{
+  "test": "youtube_api",
+  "status": "success",
+  "timestamp": "2025-11-04T08:28:58.343482",
+  "api_key_status": "configured",
+  "search_query": "ธรรมะ meditation",
+  "results_count": 5,
+  "videos": [
+    {
+      "rank": 1,
+      "title": "Why they go to Himalayas for meditation?",
+      "channel": "Mr Informative",
+      "published": "2023-09-05",
+      "video_id": "-Ss4gVGyNxc",
+      "url": "https://www.youtube.com/watch?v=-Ss4gVGyNxc"
+    },
+    {
+      "rank": 2,
+      "title": "ดนตรีเพื่อสมาธิ4 (ผ่อนคลาย บำบัดความเครียด) Meditation music",
+      "channel": "ทัตเทพธรรม",
+      "published": "2017-12-29",
+      "video_id": "34pFjZoSMKM",
+      "url": "https://www.youtube.com/watch?v=34pFjZoSMKM"
+    },
+    {
+      "rank": 3,
+      "title": "Day 6 ✅🔱#shortsvideo #spirituality #shorts #meditation #soul#gyan #30dayschallenge",
+      "channel": " Barsha kirtania ",
+      "published": "2024-09-04",
+      "video_id": "0P9rNeivDLI",
+      "url": "https://www.youtube.com/watch?v=0P9rNeivDLI"
+    },
+    {
+      "rank": 4,
+      "title": "นำนั่งสมาธิ 10 นาที (ช่วยให้จิตสงบง่ายขึ้น) ทำทุกวันชีวิตดีขึ้น พลิกชีวิต จากร้ายกลายเป็นดี",
+      "channel": "100% Organic Sounds",
+      "published": "2020-10-30",
+      "video_id": "up_8I2bmEjs",
+      "url": "https://www.youtube.com/watch?v=up_8I2bmEjs"
+    },
+    {
+      "rank": 5,
+      "title": "MV เพลง ลมหายใจแห่งความสุข (เวอร์ชั่นทำสมาธิ)ดนตรีเพื่อสมาธิ  | Meditation Music",
+      "channel": "สามเณร ปลูกปัญญาธรรม - True Little Monk",
+      "published": "2016-07-25",
+      "video_id": "hGUGqLy46l0",
+      "url": "https://www.youtube.com/watch?v=hGUGqLy46l0"
+    }
+  ],
+  "quota_used": "approximately 3 units"
+}

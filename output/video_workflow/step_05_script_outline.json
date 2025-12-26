@@ -1,0 +1,42 @@
+{
+  "video_structure": {
+    "duration": "7-9 นาที",
+    "sections": [
+      {
+        "section": "Hook (15 วินาที)",
+        "content": "คำถามเปิดใจ: 'คุณเคยรู้สึกเครียด จิตใจไม่สงบไหม?'",
+        "visual_note": "ภาพคนนั่งทำงาน เครียด"
+      },
+      {
+        "section": "บทนำ (30 วินาที)",
+        "content": "แนะนำหัวข้อ: สมาธิภาวนาคืออะไร ทำไมต้องฝึก",
+        "visual_note": "Title card + ภาพธรรมชาติ"
+      },
+      {
+        "section": "เนื้อหาหลัก ส่วน 1 (2 นาที)",
+        "content": "อธิบายว่าสมาธิคืออะไร + ประโยชน์ 5 ข้อ",
+        "visual_note": "Infographic แสดงประโยชน์"
+      },
+      {
+        "section": "เนื้อหาหลัก ส่วน 2 (3 นาที)",
+        "content": "วิธีฝึกสมาธิเบื้องต้น 4 ขั้นตอน",
+        "visual_note": "Animation แสดงขั้นตอน"
+      },
+      {
+        "section": "เนื้อหาหลัก ส่วน 3 (1.5 นาที)",
+        "content": "ข้อผิดพลาดที่มักเจอ + วิธีแก้",
+        "visual_note": "Text overlay + ตัวอย่าง"
+      },
+      {
+        "section": "บทสรุป (45 วินาที)",
+        "content": "สรุป key takeaways 3 ข้อ",
+        "visual_note": "Recap กราฟิก"
+      },
+      {
+        "section": "Call-to-Action (15 วินาที)",
+        "content": "กดไลค์ กดติดตาม ลองฝึก 10 นาทีวันนี้",
+        "visual_note": "Subscribe button animation"
+      }
+    ]
+  }
+}

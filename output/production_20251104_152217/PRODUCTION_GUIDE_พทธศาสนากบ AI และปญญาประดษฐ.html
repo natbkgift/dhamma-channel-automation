@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Guide - production_20251104_152217</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header .run-id {
+            font-size: 1.2em;
+            opacity: 0.9;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .video-info {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .video-info h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+        
+        .video-info .meta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            font-size: 0.95em;
+        }
+        
+        .video-info .meta-item {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 8px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .step {
+            background: #f8f9fa;
+            border-left: 5px solid #667eea;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .step:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-right: 15px;
+        }
+        
+        .step h3 {
+            color: #333;
+            font-size: 1.4em;
+            margin: 0;
+        }
+        
+        .step-content {
+            margin-left: 55px;
+        }
+        
+        .file-list {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .file-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .file-item.exists {
+            border-left: 4px solid #28a745;
+        }
+        
+        .file-item.missing {
+            border-left: 4px solid #dc3545;
+            opacity: 0.6;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .tools {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .tool-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        .tool-card h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .checklist li {
+            padding: 10px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-radius: 5px;
+            padding-left: 40px;
+            position: relative;
+        }
+        
+        .checklist li:before {
+            content: "☐";
+            position: absolute;
+            left: 15px;
+            font-size: 1.3em;
+            color: #667eea;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+            margin-top: 40px;
+        }
+        
+        .tag {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            margin: 3px;
+            font-size: 0.85em;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 Production Guide</h1>
+            <div class="run-id">Run ID: production_20251104_152217</div>
+            <div style="margin-top: 15px; opacity: 0.8;">
+                สร้างเมื่อ: 04/11/2025 15:22:27
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- Video Information -->
+            <div class="video-info">
+                <h2>📹 พุทธศาสนากับ AI และปัญญาประดิษฐ์</h2>
+                <p style="margin: 10px 0;">🙏 เจริญสติง่ายๆ แค่ 5 นาที ทำได้ทุกที่ ทุกเวลา!
+
+วิดีโอนี้จะพาคุณเรียนรู้การฝึก "อานาปานสติ" หรือสติกับลมหายใจ 
+ตามหลักพระพุทธศาสนาแบบเข้าใจง่าย เหมาะสำหรับผู้เริ่มต้น
+
+📖 เนื้อหาในวิดีโอ:
+00:00 - สติค...</p>
+                <div class="meta">
+                    <div class="meta-item">⏱️ ระยะเวลา: N/A</div>
+                    <div class="meta-item">📝 Sections: 14</div>
+                    <div class="meta-item">🎞️ Scenes: 5</div>
+                    <div class="meta-item">🖼️ Thumbnails: 3</div>
+                </div>
+                <div style="margin-top: 15px;">
+                    <span class="tag">#สติ</span> <span class="tag">#อานาปานสติ</span> <span class="tag">#ธรรมะ</span> <span class="tag">#พุทธศาสนา</span> <span class="tag">#mindfulness</span> <span class="tag">#meditation</span> <span class="tag">#สมาธิ</span> <span class="tag">#ลมหายใจ</span> <span class="tag">#ลดเครียด</span> <span class="tag">#ฝึกสติ</span>
+                </div>
+            </div>
+            
+            <!-- Statistics -->
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-label">AI Generated Files</div>
+                    <div class="stat-number">22</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Recording Sections</div>
+                    <div class="stat-number">14</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Video Scenes</div>
+                    <div class="stat-number">5</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Thumbnail Concepts</div>
+                    <div class="stat-number">3</div>
+                </div>
+            </div>
+            
+            <!-- Quick Links -->
+            <div class="section">
+                <h2>🔗 Quick Links</h2>
+                <div style="text-align: center; padding: 20px;">
+                    <a href="file:///D:\Auto Tool\dhamma-channel-automation\output\production_20251104_152217" class="btn">📂 Output Folder</a>
+                    <a href="file:///D:\Auto Tool\dhamma-channel-automation\audio\production_20251104_152217" class="btn">🎙️ Audio Scripts</a>
+                    <a href="file:///D:\Auto Tool\dhamma-channel-automation\templates\production_20251104_152217" class="btn">🎬 Video Templates</a>
+                    <a href="file:///D:\Auto Tool\dhamma-channel-automation\templates\canva" class="btn">🖼️ Thumbnail Guide</a>
+                </div>
+            </div>
+            
+            <!-- Production Steps -->
+            <div class="section">
+                <h2>📋 Production Workflow</h2>
+                
+                <!-- Step 1: Voiceover Recording -->
+                <div class="step">
+                    <div class="step-header">
+                        <div class="step-number">1</div>
+                        <h3>🎙️ บันทึกเสียง (Voiceover Recording)</h3>
+                    </div>
+                    <div class="step-content">
+                        <p><strong>เครื่องมือที่แนะนำ:</strong></p>
+                        <div class="tools">
+                            <div class="tool-card">
+                                <h4>Audacity (Free)</h4>
+                                <p>โปรแกรมบันทึก/ตัดต่อเสียงฟรี</p>
+                                <a href="https://www.audacityteam.org/" target="_blank" class="btn btn-info">Download</a>
+                            </div>
+                            <div class="tool-card">
+                                <h4>OBS Studio (Free)</h4>
+                                <p>บันทึกเสียง+วิดีโอพร้อมกัน</p>
+                                <a href="https://obsproject.com/" target="_blank" class="btn btn-info">Download</a>
+                            </div>
+                        </div>
+                        
+                        <p><strong>ไฟล์สำหรับบันทึก:</strong></p>
+                        <div class="file-list">
+                            <div class="file-item exists">
+                                <span>📄 recording_script_SIMPLE.txt</span>
+                                <span>17.8 KB</span>
+                            </div>
+                            <div class="file-item exists">
+                                <span>📄 recording_script_DETAILED.txt (มี timing)</span>
+                                <span>28.1 KB</span>
+                            </div>
+                            <div class="file-item exists">
+                                <span>📁 sections/ (14 ไฟล์)</span>
+                                <span>บันทึกทีละ section</span>
+                            </div>
+                        </div>
+                        
+                        <a href="file:///D:\Auto Tool\dhamma-channel-automation\audio\production_20251104_152217" class="btn btn-success">เปิดโฟลเดอร์ Audio</a>
+                        
+                        <p><strong>Checklist:</strong></p>
+                        <ul class="checklist">
+                            <li>อ่านสคริปต์ SIMPLE ทั้งหมดก่อน</li>
+                            <li>ฝึกซ้อมการออกเสียง</li>
+                            <li>ตรวจสอบไมโครโฟน (ลด noise)</li>
+                            <li>บันทึกทีละ section ตาม DETAILED script</li>
+                            <li>บันทึก 2-3 takes เพื่อเลือกที่ดีที่สุด</li>
+                            <li>Edit ด้วย Audacity: Noise Reduction + Normalize to -3dB</li>
+                            <li>Export เป็น MP3 (192 kbps) หรือ WAV (48kHz, 16-bit)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Video Editing -->
+                <div class="step">
+                    <div class="step-header">
+                        <div class="step-number">2</div>
+                        <h3>🎬 ตัดต่อวิดีโอ (Video Editing)</h3>
+                    </div>
+                    <div class="step-content">
+                        <p><strong>เครื่องมือที่แนะนำ:</strong></p>
+                        <div class="tools">
+                            <div class="tool-card">
+                                <h4>DaVinci Resolve (Free)</h4>
+                                <p>Professional video editor</p>
+                                <a href="https://www.blackmagicdesign.com/products/davinciresolve" target="_blank" class="btn btn-info">Download</a>
+                            </div>
+                            <div class="tool-card">
+                                <h4>CapCut (Free)</h4>
+                                <p>ตัดต่อง่าย เหมาะมือใหม่</p>
+                                <a href="https://www.capcut.com/" target="_blank" class="btn btn-info">Download</a>
+                            </div>
+                        </div>
+                        
+                        <p><strong>ไฟล์เทมเพลต:</strong></p>
+                        <div class="file-list">
+                            <div class="file-item exists">
+                                <span>📄 timeline.edl</span>
+                                <span>1.1 KB</span>
+                            </div>
+                            <div class="file-item exists">
+                                <span>📄 timeline.csv (5 scenes)</span>
+                                <span>1.1 KB</span>
+                            </div>
+                            <div class="file-item exists">
+                                <span>📄 EDITING_GUIDE.md (คู่มือละเอียด)</span>
+                                <span>3.4 KB</span>
+                            </div>
+                        </div>
+                        
+                        <a href="file:///D:\Auto Tool\dhamma-channel-automation\templates\production_20251104_152217" class="btn btn-success">เปิดโฟลเดอร์ Templates</a>
+                        <a href="https://www.pexels.com/videos/" target="_blank" class="btn btn-secondary">หา B-roll (Pexels)</a>
+                        <a href="https://pixabay.com/videos/" target="_blank" class="btn btn-secondary">หา B-roll (Pixabay)</a>
+                        
+                        <p><strong>Checklist:</strong></p>
+                        <ul class="checklist">
+                            <li>สร้าง Project ใหม่ใน DaVinci Resolve (1080p, 30fps)</li>
+                            <li>Import เสียงบรรยาย (voiceover.mp3)</li>
+                            <li>อ่าน EDITING_GUIDE.md ทั้งหมด</li>
+                            <li>Download B-roll จาก Pexels/Pixabay ตาม visual_guide</li>
+                            <li>วาง B-roll บน timeline ตาม timeline.csv</li>
+                            <li>เพิ่ม text overlays (Fusion > Text+)</li>
+                            <li>Color grading: warm tones, soft contrast</li>
+                            <li>Export MP4 (H.264, 1080p, 10-15 Mbps)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Thumbnail Creation -->
+                <div class="step">
+                    <div class="step-header">
+                        <div class="step-number">3</div>
+                        <h3>🖼️ สร้าง Thumbnail</h3>
+                    </div>
+                    <div class="step-content">
+                        <p><strong>เครื่องมือที่แนะนำ:</strong></p>
+                        <div class="tools">
+                            <div class="tool-card">
+                                <h4>Canva (Free)</h4>
+                                <p>ออกแบบกราฟิกออนไลน์</p>
+                                <a href="https://www.canva.com/" target="_blank" class="btn btn-info">เปิด Canva</a>
+                            </div>
+                            <div class="tool-card">
+                                <h4>Photopea (Free)</h4>
+                                <p>Photoshop แบบ web-based</p>
+                                <a href="https://www.photopea.com/" target="_blank" class="btn btn-info">เปิด Photopea</a>
+                            </div>
+                        </div>
+                        
+                        <p><strong>ไฟล์คู่มือ:</strong></p>
+                        <div class="file-list">
+                            <div class="file-item exists">
+                                <span>📄 CANVA_GUIDE.md (step-by-step)</span>
+                                <span>6.0 KB</span>
+                            </div>
+                            <div class="file-item exists">
+                                <span>📄 canva_concept_1.json</span>
+                                <span>Concept 1</span>
+                            </div>
+                            <div class="file-item exists">
+                                <span>📄 canva_concept_2.json</span>
+                                <span>Concept 2</span>
+                            </div>
+                            <div class="file-item exists">
+                                <span>📄 canva_concept_3.json</span>
+                                <span>Concept 3</span>
+                            </div>
+                        </div>
+                        
+                        <a href="file:///D:\Auto Tool\dhamma-channel-automation\templates\canva" class="btn btn-success">เปิดโฟลเดอร์ Canva</a>
+                        <a href="https://www.canva.com/templates/?query=youtube%20thumbnail" target="_blank" class="btn btn-secondary">เทมเพลต Canva</a>
+                        
+                        <p><strong>Checklist:</strong></p>
+                        <ul class="checklist">
+                            <li>อ่าน CANVA_GUIDE.md</li>
+                            <li>เลือก concept (แนะนำทำทั้ง 3 เพื่อ A/B testing)</li>
+                            <li>ค้นหาภาพพื้นหลังจาก Unsplash/Pexels</li>
+                            <li>เพิ่มข้อความหลัก (ฟอนต์ใหญ่ชัด อ่านง่าย)</li>
+                            <li>ใช้สี contrast สูง (ข้อความต้องชัด)</li>
+                            <li>เพิ่ม visual elements ตาม concept</li>
+                            <li>ขนาด: 1280x720 pixels</li>
+                            <li>Download เป็น JPG (&lt;2MB)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Step 4: YouTube Upload -->
+                <div class="step">
+                    <div class="step-header">
+                        <div class="step-number">4</div>
+                        <h3>📤 อัปโหลดขึ้น YouTube</h3>
+                    </div>
+                    <div class="step-content">
+                        <p><strong>ข้อมูล Metadata:</strong></p>
+                        <div class="file-list">
+                            <div class="file-item exists">
+                                <span>📄 metadata.json</span>
+                                <span>Title, Description, Tags</span>
+                            </div>
+                            <div class="file-item exists">
+                                <span>📄 subtitles_th.srt</span>
+                                <span>คำบรรยายภาษาไทย</span>
+                            </div>
+                        </div>
+                        
+                        <a href="https://studio.youtube.com/" target="_blank" class="btn btn-success">เปิด YouTube Studio</a>
+                        <a href="file:///D:\Auto Tool\dhamma-channel-automation\output\production_20251104_152217\metadata.json" class="btn btn-secondary">เปิด metadata.json</a>
+                        
+                        <p><strong>Checklist:</strong></p>
+                        <ul class="checklist">
+                            <li>เปิด YouTube Studio</li>
+                            <li>Upload ไฟล์วิดีโอ (MP4)</li>
+                            <li>คัดลอก Title จาก metadata.json</li>
+                            <li>คัดลอก Description (เพิ่ม timestamps ถ้ามี)</li>
+                            <li>เพิ่ม Tags (คัดลอกจาก metadata.json)</li>
+                            <li>Upload Thumbnail</li>
+                            <li>เพิ่มคำบรรยาย (Upload subtitles_th.srt)</li>
+                            <li>เลือก Category: Education</li>
+                            <li>ตั้งค่า Visibility (Public/Unlisted/Private)</li>
+                            <li>Publish!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Resources -->
+            <div class="section">
+                <h2>📚 Additional Resources</h2>
+                <div class="tools">
+                    <div class="tool-card">
+                        <h4>Stock Videos</h4>
+                        <a href="https://www.pexels.com/videos/" target="_blank" class="btn btn-info">Pexels</a>
+                        <a href="https://pixabay.com/videos/" target="_blank" class="btn btn-info">Pixabay</a>
+                    </div>
+                    <div class="tool-card">
+                        <h4>Stock Photos</h4>
+                        <a href="https://unsplash.com/" target="_blank" class="btn btn-info">Unsplash</a>
+                        <a href="https://www.pexels.com/" target="_blank" class="btn btn-info">Pexels</a>
+                    </div>
+                    <div class="tool-card">
+                        <h4>Background Music</h4>
+                        <a href="https://www.youtube.com/audiolibrary" target="_blank" class="btn btn-info">YouTube Audio Library</a>
+                    </div>
+                    <div class="tool-card">
+                        <h4>Fonts (Thai)</h4>
+                        <a href="https://fonts.google.com/?subset=thai" target="_blank" class="btn btn-info">Google Fonts</a>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="footer">
+            <p><strong>🎬 Dhamma Channel Automation</strong></p>
+            <p>Generated by Production Orchestrator • 2025</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">
+                Run ID: <code>production_20251104_152217</code>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

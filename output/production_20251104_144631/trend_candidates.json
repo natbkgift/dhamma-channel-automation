@@ -1,0 +1,67 @@
+{
+  "scouted_at": "2025-11-04T14:46:31.400215",
+  "niches": [
+    "dhamma",
+    "mindfulness",
+    "Buddhism (TH)"
+  ],
+  "horizon_days": 30,
+  "total_candidates": 5,
+  "candidates": [
+    {
+      "title": "เจริญสติในชีวิตประจำวัน 5 นาที",
+      "why_now": "Short-form mindfulness content กำลังเป็นเทรนด์ในช่วง 30 วันข้างหน้า",
+      "sources": [
+        "YouTube Trending",
+        "Google Trends TH"
+      ],
+      "audience": "คนทำงาน, ผู้เริ่มต้น",
+      "difficulty": "ง่าย",
+      "risk": "ต่ำ - เนื้อหาพื้นฐาน ไม่ขัดแย้ง"
+    },
+    {
+      "title": "วิธีรับมือความเครียดด้วยอานาปานสติ",
+      "why_now": "ความเครียดจากการทำงานเพิ่มขึ้น + ปีใหม่ใกล้เข้ามา",
+      "sources": [
+        "YouTube Health & Wellness",
+        "Pantip"
+      ],
+      "audience": "วัยทำงาน 25-45 ปี",
+      "difficulty": "กลาง",
+      "risk": "ต่ำ - มีอ้างอิงชัดเจน"
+    },
+    {
+      "title": "อริยสัจ 4 ฉบับเข้าใจง่าย",
+      "why_now": "Search volume เพิ่มขึ้น 35% ในไทย (เข้าพรรษา)",
+      "sources": [
+        "Google Trends",
+        "Facebook Groups"
+      ],
+      "audience": "ผู้เริ่มต้นศึกษาธรรม",
+      "difficulty": "กลาง",
+      "risk": "กลาง - ต้องระวังการตีความ"
+    },
+    {
+      "title": "ทำบุญยุคใหม่: ให้ถูกหลักธรรม",
+      "why_now": "มีดราม่าเรื่องการบริจาคในโซเชียล",
+      "sources": [
+        "Twitter/X Trending",
+        "News"
+      ],
+      "audience": "ทุกกลุ่ม",
+      "difficulty": "ยาก",
+      "risk": "สูง - อาจมีความเห็นขัดแย้ง"
+    },
+    {
+      "title": "เมตตาภาวนา: วิธีฝึกให้มีใจเมตตา",
+      "why_now": "วันมาฆบูชาใกล้เข้ามา (ก.พ. 2026)",
+      "sources": [
+        "YouTube Meditation",
+        "Calendar Events"
+      ],
+      "audience": "ผู้ปฏิบัติธรรม",
+      "difficulty": "ง่าย",
+      "risk": "ต่ำ"
+    }
+  ]
+}

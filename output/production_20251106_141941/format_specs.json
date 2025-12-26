@@ -1,0 +1,85 @@
+{
+  "converted_at": "2025-11-06T14:19:42.470080",
+  "source_file": "D:\\Auto Tool\\dhamma-channel-automation\\output\\production_20251106_141941\\script_validated.md",
+  "conversions": {
+    "video": {
+      "youtube": {
+        "format": "MP4",
+        "codec": "H.264",
+        "resolution": "1920x1080 (1080p)",
+        "frame_rate": "30fps",
+        "bitrate": "8-12 Mbps",
+        "audio": "AAC 320kbps",
+        "max_file_size": "128GB",
+        "aspect_ratio": "16:9"
+      },
+      "facebook": {
+        "format": "MP4",
+        "resolution": "1280x720 (720p)",
+        "aspect_ratio": "16:9 or 1:1 (square)",
+        "max_duration": "240 min",
+        "max_file_size": "10GB"
+      },
+      "tiktok_shorts": {
+        "format": "MP4",
+        "resolution": "1080x1920 (vertical)",
+        "aspect_ratio": "9:16",
+        "max_duration": "10 min",
+        "recommendation": "Extract key 60-90 sec clips"
+      }
+    },
+    "audio": {
+      "podcast": {
+        "format": "MP3",
+        "bitrate": "192kbps",
+        "sample_rate": "44.1kHz",
+        "use_case": "Audio-only version for podcast platforms"
+      }
+    },
+    "document": {
+      "pdf": {
+        "filename": "script_formatted.pdf",
+        "use_case": "Printable script for reference",
+        "include": [
+          "Full script",
+          "Citations",
+          "Timestamps"
+        ]
+      },
+      "docx": {
+        "filename": "script_editable.docx",
+        "use_case": "Editable for future revisions"
+      }
+    }
+  },
+  "export_settings": {
+    "premiere_pro": {
+      "sequence": "1920x1080, 30fps",
+      "export_preset": "YouTube 1080p Full HD"
+    },
+    "davinci_resolve": {
+      "timeline": "1920x1080, 30fps",
+      "delivery": "YouTube preset"
+    },
+    "final_cut_pro": {
+      "destination": "YouTube & Facebook"
+    }
+  },
+  "optimization": {
+    "compress_without_quality_loss": {
+      "tool": "HandBrake",
+      "preset": "Fast 1080p30"
+    },
+    "thumbnail": {
+      "extract_frame": "at 02:30 (engaging moment)",
+      "resolution": "1280x720"
+    }
+  },
+  "delivery_checklist": [
+    "MP4 for YouTube (1080p)",
+    "SRT subtitle file",
+    "Thumbnail JPG (1280x720)",
+    "Metadata JSON",
+    "PDF script (backup)"
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "concept_id": 2,
+  "title": "Modern Minimal",
+  "canvas_size": "1280x720 px (16:9)",
+  "file_format": "JPG or PNG",
+  "file_size_limit": "2MB (YouTube)",
+  "text_layers": [
+    {
+      "type": "main",
+      "text": "5 นาที",
+      "font": "Prompt ExtraBold",
+      "font_size": "120pt",
+      "color": "Dark blue + White",
+      "effects": "None"
+    },
+    {
+      "type": "sub",
+      "text": "เปลี่ยนใจ",
+      "font": "Prompt ExtraBold",
+      "font_size": "48pt",
+      "color": "Dark blue + White"
+    },
+    {
+      "type": "badge",
+      "text": "🧘 สติ",
+      "font": "Prompt ExtraBold",
+      "font_size": "24pt"
+    }
+  ],
+  "visual_elements": [
+    "Minimalist breath animation",
+    "Geometric shapes (circles/waves)",
+    "Gradient background (blue to green)",
+    "NO clutter"
+  ],
+  "color_scheme": "cool (blue/green)",
+  "composition": "Center-aligned, symmetrical",
+  "canva_steps": [
+    "1. Go to Canva.com and create custom size: 1280x720 px (16:9)",
+    "2. Background: cool (blue/green)",
+    "3. Add background image/gradient according to visual_elements",
+    "4. Add main text: \"5 นาที\"",
+    "   - Font: Prompt ExtraBold",
+    "   - Size: 120pt",
+    "   - Color: Dark blue + White",
+    "5. Add subtitle: \"เปลี่ยนใจ\" (smaller font)",
+    "6. Add visual elements (person, icons, etc.)",
+    "7. Adjust composition and spacing",
+    "8. Download as JPG (Quality: 100, Size: <2MB)"
+  ]
+}

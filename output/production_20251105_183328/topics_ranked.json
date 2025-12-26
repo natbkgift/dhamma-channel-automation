@@ -1,0 +1,92 @@
+{
+  "prioritized_at": "2025-11-05T18:33:29.087191",
+  "total_evaluated": 6,
+  "selected_top": 3,
+  "ranked": [
+    {
+      "rank": 1,
+      "title": "เมตตาภาวนา ใน 15 นาทีต่อวัน",
+      "scores": {
+        "impact": 10,
+        "feasibility": 10,
+        "alignment": 10,
+        "total": 10.0
+      },
+      "reason": "Selected from Mock Topics Database",
+      "difficulty": "กลาง",
+      "risk": "ต่ำ",
+      "audience": "ทั่วไป"
+    },
+    {
+      "rank": 2,
+      "title": "เจริญสติในชีวิตประจำวัน 5 นาที",
+      "scores": {
+        "impact": 6,
+        "feasibility": 10,
+        "alignment": 10,
+        "total": 8.4
+      },
+      "reason": "Short-form mindfulness content กำลังเป็นเทรนด์ในช่วง 30 วันข้างหน้า",
+      "difficulty": "ง่าย",
+      "risk": "ต่ำ - เนื้อหาพื้นฐาน ไม่ขัดแย้ง",
+      "audience": "คนทำงาน, ผู้เริ่มต้น"
+    },
+    {
+      "rank": 3,
+      "title": "วิธีรับมือความเครียดด้วยอานาปานสติ",
+      "scores": {
+        "impact": 8,
+        "feasibility": 7,
+        "alignment": 10,
+        "total": 8.3
+      },
+      "reason": "ความเครียดจากการทำงานเพิ่มขึ้น + ปีใหม่ใกล้เข้ามา",
+      "difficulty": "กลาง",
+      "risk": "ต่ำ - มีอ้างอิงชัดเจน",
+      "audience": "วัยทำงาน 25-45 ปี"
+    },
+    {
+      "rank": 4,
+      "title": "อริยสัจ 4 ฉบับเข้าใจง่าย",
+      "scores": {
+        "impact": 8,
+        "feasibility": 7,
+        "alignment": 6,
+        "total": 7.1
+      },
+      "reason": "Search volume เพิ่มขึ้น 35% ในไทย (เข้าพรรษา)",
+      "difficulty": "กลาง",
+      "risk": "กลาง - ต้องระวังการตีความ",
+      "audience": "ผู้เริ่มต้นศึกษาธรรม"
+    },
+    {
+      "rank": 5,
+      "title": "ทำบุญยุคใหม่: ให้ถูกหลักธรรม",
+      "scores": {
+        "impact": 6,
+        "feasibility": 4,
+        "alignment": 3,
+        "total": 4.5
+      },
+      "reason": "มีดราม่าเรื่องการบริจาคในโซเชียล",
+      "difficulty": "ยาก",
+      "risk": "สูง - อาจมีความเห็นขัดแย้ง",
+      "audience": "ทุกกลุ่ม"
+    },
+    {
+      "rank": 6,
+      "title": "เมตตาภาวนา: วิธีฝึกให้มีใจเมตตา",
+      "scores": {
+        "impact": 6,
+        "feasibility": 10,
+        "alignment": 10,
+        "total": 8.4
+      },
+      "reason": "วันมาฆบูชาใกล้เข้ามา (ก.พ. 2026)",
+      "difficulty": "ง่าย",
+      "risk": "ต่ำ",
+      "audience": "ผู้ปฏิบัติธรรม"
+    }
+  ],
+  "topic_override": "เมตตาภาวนา ใน 15 นาทีต่อวัน"
+}

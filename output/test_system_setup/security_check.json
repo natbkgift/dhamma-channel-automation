@@ -1,0 +1,37 @@
+{
+  "checked_at": "2025-11-03T20:18:16.640080",
+  "api_keys": {
+    "youtube_api": {
+      "status": "configured",
+      "masked": "AIza***********"
+    },
+    "openai_api": {
+      "status": "configured",
+      "masked": "sk-***********"
+    },
+    "google_trends": {
+      "status": "not_required"
+    }
+  },
+  "access_control": {
+    "encryption": "AES-256",
+    "secret_storage": ".env file (gitignored)",
+    "permissions": {
+      "read_prompts": [
+        "all_agents"
+      ],
+      "write_output": [
+        "all_agents"
+      ],
+      "publish_content": [
+        "SchedulingPublishing",
+        "MultiChannelPublish"
+      ]
+    }
+  },
+  "recommendations": [
+    "ตรวจสอบ .env อยู่ใน .gitignore",
+    "หมุนเวียน API keys ทุก 90 วัน",
+    "ใช้ IAM roles สำหรับ production"
+  ]
+}

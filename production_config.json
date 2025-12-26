@@ -1,0 +1,42 @@
+{
+  "path": "A",
+  "description": "Path A: Free Manual Workflow - No APIs required",
+  
+  "prepare_voiceover": true,
+  "generate_davinci_templates": true,
+  "download_broll": false,
+  "generate_canva_templates": true,
+  
+  "audio_dir": "audio",
+  "template_dir": "templates",
+  "broll_dir": "broll",
+  "thumbnail_dir": "thumbnails",
+  
+  "fps": 30,
+  "max_broll_videos": 10,
+  
+  "pexels_api_key": "",
+  "openai_api_key": "",
+  "elevenlabs_api_key": "",
+  "youtube_client_secret": "",
+  
+  "tts_provider": "google",
+  "tts_voice_google": "th-TH-Wavenet-B",
+  "tts_voice_openai": "alloy",
+  "tts_speed": 1.0,
+  "tts_pitch": 0.0,
+  "google_cloud_credentials_json": "",
+  
+  "comments": {
+    "path_options": "A (free manual), B (semi-auto with OpenAI TTS), C (full auto with all APIs)",
+    "api_keys": "Leave empty for Path A. Fill for Path B/C.",
+    "pexels_api_key": "Get free at https://www.pexels.com/api/",
+    "openai_api_key": "For Path B voiceover (TTS)",
+    "elevenlabs_api_key": "For Path C premium voiceover",
+    "youtube_client_secret": "For automated upload (Path B/C)",
+    "tts_provider": "google (แนะนำ เสียงไทยชัด) หรือ openai",
+    "tts_voice_google": "th-TH-Wavenet-B (ผู้ชาย), th-TH-Neural2-A (ผู้หญิง)",
+    "tts_voice_openai": "alloy, echo, fable, onyx, nova, shimmer",
+    "google_cloud_credentials_json": "วาง service account JSON content ที่นี่"
+  }
+}

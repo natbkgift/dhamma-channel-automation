@@ -1,0 +1,36 @@
+{
+  "channels": [
+    {
+      "platform": "YouTube",
+      "status": "READY",
+      "method": "YouTube Data API v3 - videos.insert",
+      "requirements": [
+        "วิดีโอ MP4",
+        "Thumbnail",
+        "Title",
+        "Description",
+        "Tags"
+      ],
+      "upload_time": "~5-10 นาที (ขึ้นกับขนาดไฟล์)"
+    },
+    {
+      "platform": "Facebook",
+      "status": "PLANNED",
+      "method": "Facebook Graph API",
+      "note": "ต้อง verify Page + Access Token"
+    },
+    {
+      "platform": "TikTok",
+      "status": "MANUAL",
+      "method": "อัพโหลดด้วยมือ (ยังไม่มี API สาธารณะ)",
+      "note": "ใช้ TikTok Creator Tools"
+    },
+    {
+      "platform": "Instagram",
+      "status": "PLANNED",
+      "method": "Instagram Graph API (Reels)",
+      "note": "สำหรับ Shorts/Reels เท่านั้น"
+    }
+  ],
+  "automation_level": "50% (YouTube auto, อื่นๆ manual)"
+}

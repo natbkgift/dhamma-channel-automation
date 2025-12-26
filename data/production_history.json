@@ -1,0 +1,116 @@
+{
+  "completed": [
+    {
+      "topic_id": "topic_001",
+      "title": "เมตตาภาวนา ใน 15 นาทีต่อวัน",
+      "category": "Practical Meditation",
+      "produced_at": "2025-11-05T18:33:38.721159",
+      "run_id": "production_20251105_183328",
+      "output_dir": "output\\production_20251105_183328",
+      "status": "completed"
+    },
+    {
+      "topic_id": "topic_002",
+      "title": "มรณานุสติ ใน 20 นาทีต่อวัน",
+      "category": "Practical Meditation",
+      "produced_at": "2025-11-05T23:31:25.644366",
+      "run_id": "production_20251105_233113",
+      "output_dir": "output\\production_20251105_233113",
+      "status": "completed"
+    },
+    {
+      "topic_id": "topic_003",
+      "title": "พุทธศาสนากับ Mindful Living",
+      "category": "Modern Context",
+      "produced_at": "2025-11-06T10:23:49.539274",
+      "run_id": "production_20251106_102339",
+      "output_dir": "output\\production_20251106_102339",
+      "status": "completed"
+    },
+    {
+      "topic_id": "topic_004",
+      "title": "ธรรมะช่วยรับมือกับ การเปลี่ยนแปลง",
+      "category": "Modern Context",
+      "produced_at": "2025-11-06T10:40:00.669575",
+      "run_id": "production_20251106_103951",
+      "output_dir": "output\\production_20251106_103951",
+      "status": "completed"
+    },
+    {
+      "topic_id": "topic_005",
+      "title": "พุทธศาสนากับ ความเครียดในยุคดิจิทัล",
+      "category": "Modern Context",
+      "produced_at": "2025-11-06T13:24:54.274507",
+      "run_id": "production_20251106_132244",
+      "output_dir": "output\\production_20251106_132244",
+      "status": "completed"
+    },
+    {
+      "topic_id": "topic_006",
+      "title": "พระพุทธศาสนาตอบโจทย์ ชีวิตรีบเร่ง",
+      "category": "Modern Context",
+      "produced_at": "2025-11-06T13:49:20.749737",
+      "run_id": "production_20251106_134911",
+      "output_dir": "output\\production_20251106_134911",
+      "status": "completed"
+    },
+    {
+      "topic_id": "topic_007",
+      "title": "เรียนรู้ ไตรสิกขา ใน 10 นาที",
+      "category": "Basic Dhamma",
+      "produced_at": "2025-11-06T13:53:33.829439",
+      "run_id": "production_20251106_135324",
+      "output_dir": "output\\production_20251106_135324",
+      "status": "completed"
+    },
+    {
+      "topic_id": "topic_008",
+      "title": "ขันธ์ 5 สำหรับมือใหม่",
+      "category": "Basic Dhamma",
+      "produced_at": "2025-11-06T14:15:38.763805",
+      "run_id": "production_20251106_141529",
+      "output_dir": "output\\production_20251106_141529",
+      "status": "completed"
+    },
+    {
+      "topic_id": "topic_009",
+      "title": "มือใหม่ควรรู้เรื่อง ไตรสิกขา",
+      "category": "Basic Dhamma",
+      "produced_at": "2025-11-06T14:19:51.940129",
+      "run_id": "production_20251106_141941",
+      "output_dir": "output\\production_20251106_141941",
+      "status": "completed"
+    },
+    {
+      "topic_id": "topic_010",
+      "title": "ไตรสิกขา ฉบับเข้าใจง่าย",
+      "category": "Basic Dhamma",
+      "produced_at": "2025-11-06T14:23:38.700224",
+      "run_id": "production_20251106_142326",
+      "output_dir": "output\\production_20251106_142326",
+      "status": "completed"
+    },
+    {
+      "topic_id": "topic_011",
+      "title": "ขันธ์ 5 คืออะไร? ทำไมต้องรู้?",
+      "category": "Basic Dhamma",
+      "produced_at": "2025-11-06T14:34:14.810635",
+      "run_id": "production_20251106_143405",
+      "output_dir": "output\\production_20251106_143405",
+      "status": "completed"
+    },
+    {
+      "topic_id": "topic_012",
+      "title": "กายคตาสติ - เริ่มต้นอย่างไร?",
+      "category": "Practical Meditation",
+      "produced_at": "2025-11-09T18:43:00.408062",
+      "run_id": "production_20251109_184244",
+      "output_dir": "output\\production_20251109_184244",
+      "status": "completed"
+    }
+  ],
+  "in_progress": [],
+  "failed": [],
+  "total_produced": 12,
+  "last_updated": ""
+}

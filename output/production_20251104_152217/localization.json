@@ -1,0 +1,69 @@
+{
+  "generated_at": "2025-11-04T15:22:18.111845",
+  "primary_language": "th",
+  "subtitles": {
+    "thai": {
+      "filename": "subtitles_th.srt",
+      "status": "generated",
+      "total_lines": 120,
+      "format": "SRT",
+      "encoding": "UTF-8",
+      "font_recommendation": "Prompt, Kanit",
+      "size": "Medium (not too small)",
+      "position": "Bottom center",
+      "style": {
+        "color": "White",
+        "outline": "Black (2px)",
+        "background": "Semi-transparent black (optional)"
+      }
+    },
+    "english": {
+      "filename": "subtitles_en.srt",
+      "status": "to_be_translated",
+      "target_audience": "International Buddhists, meditation practitioners",
+      "notes": "Translate key terms carefully: สติ = mindfulness/awareness"
+    }
+  },
+  "translation_guide": {
+    "key_terms": {
+      "สติ": "mindfulness / awareness",
+      "อานาปานสติ": "mindfulness of breathing / breath meditation",
+      "พระไตรปิฎก": "Tripitaka / Pali Canon",
+      "วิสุทธิมรรค": "Visuddhimagga / Path of Purification",
+      "กรรมฐาน": "meditation object / kammaṭṭhāna",
+      "สมาธิ": "concentration / samadhi"
+    },
+    "cultural_notes": [
+      "🙏 emoji = wai gesture (Thai greeting)",
+      "Keep Thai Buddhist terminology intact when appropriate",
+      "Add footnotes for untranslatable concepts"
+    ]
+  },
+  "accessibility": {
+    "closed_captions": {
+      "enabled": true,
+      "includes_sound_effects": "[เสียงธรรมชาติ]",
+      "speaker_labels": "[ผู้บรรยาย]"
+    },
+    "auto_generated": {
+      "youtube_auto_captions": "available as backup",
+      "accuracy": "60-70% (Thai)",
+      "recommendation": "Always upload custom SRT"
+    }
+  },
+  "srt_file_preview": "1\n00:00:00,000 --> 00:00:05,000\nสวัสดีครับผู้ชมทุกท่าน 🙏\n\n2\n00:00:05,000 --> 00:00:10,000\nคุณเคยรู้สึกเครียด ใจฟุ้งซ่าน\nจนไม่รู้จะทำอะไรก่อนดีไหมครับ?\n\n3\n00:00:12,000 --> 00:00:17,000\nชีวิตยุคใหม่เต็มไปด้วยความเร่งรีบ\nข้อมูลข่าวสารท่วมท้น\n\n4\n00:00:17,000 --> 00:00:22,000\nทำให้จิตใจของเราไม่ค่อยได้พัก\nไม่ค่อยได้สงบเลย\n\n5\n00:00:24,000 --> 00:00:30,000\nแต่ถ้าผมบอกว่า แค่ 5 นาที\nทำได้ทุกที่ ทุกเวลา\n\n6\n00:00:30,000 --> 00:00:35,000\nคุณก็สามารถทำให้ใจสงบลงได้\n\n... [continues]\n...",
+  "tools_recommended": [
+    "Subtitle Edit (free, Windows)",
+    "Aegisub (free, cross-platform)",
+    "YouTube Studio (built-in editor)",
+    "Rev.com (paid transcription service)"
+  ],
+  "quality_checklist": [
+    "ตรวจสอบความสอดคล้องกับเสียง",
+    "แบ่งบรรทัดตามความหมาย (ไม่เกิน 2 บรรทัด)",
+    "ระยะเวลาแสดงผล 1-7 วินาที/บรรทัด",
+    "ใช้ emoji อย่างประหยัด",
+    "ตรวจสอบการสะกดคำ"
+  ],
+  "estimated_time": "2-3 hours (manual timing)"
+}

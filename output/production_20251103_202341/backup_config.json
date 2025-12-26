@@ -1,0 +1,37 @@
+{
+  "configured_at": "2025-11-03T20:23:42.184120",
+  "backup_strategy": {
+    "frequency": "daily",
+    "retention": "30 days",
+    "storage_location": "output\\backups"
+  },
+  "backup_targets": {
+    "prompts": {
+      "path": "prompts/",
+      "exists": true
+    },
+    "examples": {
+      "path": "examples/",
+      "exists": true
+    },
+    "pipelines": {
+      "path": "pipelines/",
+      "exists": true
+    },
+    "configs": {
+      "path": "*.yml",
+      "exists": true
+    }
+  },
+  "current_backup": {
+    "name": "backup_20251103_202342.zip",
+    "files_count": 64,
+    "status": "ready"
+  },
+  "archive_policy": {
+    "compress": true,
+    "format": "zip",
+    "naming": "backup_YYYYMMDD_HHMMSS.zip"
+  },
+  "next_backup": "2025-11-03 00:00:00"
+}
