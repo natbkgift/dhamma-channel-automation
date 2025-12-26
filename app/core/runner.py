@@ -138,9 +138,9 @@ class ProcessJob:
         pipeline_enabled = _parse_pipeline_enabled(os.environ.get("PIPELINE_ENABLED"))
 
         if not pipeline_enabled:
-            self.status = "completed"
+            self.status = "disabled"
             self.progress = 100
-            msg = "Pipeline disabled by PIPELINE_ENABLED=false"
+            msg = "[DISABLED] Pipeline disabled by PIPELINE_ENABLED=false"
             self.log.append(msg)
             self._append_file_log(msg)
             return

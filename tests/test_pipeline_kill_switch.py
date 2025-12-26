@@ -226,3 +226,86 @@ def test_web_runner_parse_pipeline_enabled():
     assert _parse_pipeline_enabled("true") is True
     assert _parse_pipeline_enabled("TRUE") is True
     assert _parse_pipeline_enabled("1") is True
+
+
+def test_web_runner_no_subprocess_spawn_when_disabled(monkeypatch):
+    """
+    CRITICAL: When PIPELINE_ENABLED=false, ProcessJob.start() should
+    NOT call asyncio.create_subprocess_exec()
+    This ensures no partial output artifacts are created
+    """
+    import asyncio
+    import sys
+    from pathlib import Path
+    from unittest.mock import AsyncMock, patch
+
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from app.core.runner import ProcessJob
+
+    monkeypatch.setenv("PIPELINE_ENABLED", "false")
+
+    job = ProcessJob("test_agent", ["python", "-c", "print('test')"])
+
+    # Mock the subprocess function
+    with patch("asyncio.create_subprocess_exec", new_callable=AsyncMock) as mock_spawn:
+        # Run the async start() method
+        asyncio.run(job.start())
+
+        # ✅ ASSERT: subprocess MUST NOT be called
+        mock_spawn.assert_not_called()
+
+        # ✅ ASSERT: status should be "disabled"
+        assert job.status == "disabled", (
+            f"Expected status='disabled', got '{job.status}'"
+        )
+
+        # ✅ ASSERT: log should contain [DISABLED] message
+        log_text = "\n".join(job.log)
+        assert "DISABLED" in log_text, f"Expected '[DISABLED]' in logs, got: {log_text}"
+
+        # ✅ ASSERT: No process object created
+        assert job.proc is None, "Process object should not be created when disabled"
+
+        # ✅ ASSERT: Progress should be at 100 (completed state)
+        assert job.progress == 100
+
+
+def test_web_runner_subprocess_spawn_when_enabled(monkeypatch):
+    """
+    CONTROL: When PIPELINE_ENABLED=true (or not set), ProcessJob.start()
+    SHOULD call asyncio.create_subprocess_exec() to spawn subprocess
+    """
+    import asyncio
+    import sys
+    from pathlib import Path
+    from unittest.mock import AsyncMock, patch
+
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from app.core.runner import ProcessJob
+
+    # Ensure PIPELINE_ENABLED is true
+    monkeypatch.setenv("PIPELINE_ENABLED", "true")
+
+    job = ProcessJob("test_agent", ["python", "-c", "print('enabled')"])
+
+    # Mock the subprocess function to avoid actual spawn
+    with patch("asyncio.create_subprocess_exec", new_callable=AsyncMock) as mock_spawn:
+        # Mock a process object
+        mock_proc = AsyncMock()
+        mock_proc.communicate = AsyncMock(return_value=(b"output", b""))
+        mock_spawn.return_value = mock_proc
+
+        # Run the async start() method
+        asyncio.run(job.start())
+
+        # ✅ ASSERT: subprocess MUST be called when enabled
+        mock_spawn.assert_called_once()
+
+        # ✅ ASSERT: status should be "starting" (not disabled)
+        assert job.status != "disabled", "Status should not be 'disabled' when enabled"
+
+        # ✅ ASSERT: No [DISABLED] in logs
+        log_text = "\n".join(job.log)
+        assert "DISABLED" not in log_text, (
+            f"Should not have [DISABLED] when enabled, got: {log_text}"
+        )
