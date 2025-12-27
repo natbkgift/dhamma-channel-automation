@@ -1,5 +1,13 @@
 # GitHub Copilot Instructions for Dhamma Channel Automation
 
+## 🚨 Hard Safety Rules (Must Not Violate)
+
+- Do NOT change agent behavior without updating baseline references in samples/reference/ and docs/BASELINE.md.
+- Do NOT introduce multi-channel or multi-tenant abstractions.
+- Do NOT bypass PIPELINE_ENABLED kill switch (CLI orchestrator and web runner must enforce it).
+- Do NOT write to output/ when the pipeline is disabled.
+- Prefer orchestrator- or web-runner–initiated flows for production; avoid direct agent execution that skips guards.
+
 This file provides guidance to GitHub Copilot coding agent when working on the Dhamma Channel Automation repository.
 
 ## 🎯 Project Overview
@@ -13,6 +21,13 @@ This is a YouTube content automation system for "ธรรมะดีดี" (D
 - CLI interface with Rich output
 - Comprehensive testing with 85%+ coverage
 - Thai language documentation for internal use
+
+## 📌 Baseline Stability Rules
+
+- samples/reference/ defines the expected, stable output structures and reference artifacts.
+- Do not change output schemas, tone, or structure unless explicitly instructed to update baselines.
+- When updating behavior or outputs, also update docs/BASELINE.md and the corresponding files under samples/reference/.
+- Use baseline diffs to detect drift vs acceptable changes before merging.
 
 ## 🔧 Development Environment
 
@@ -257,6 +272,9 @@ pre-commit run --all-files
 - Progress indicators for long-running tasks
 - Colored output for better UX
 
+Important Ops Guardrail:
+- Direct agent CLI commands may bypass operational guards unless routed through the orchestrator. For production operations, prefer invoking via `orchestrator.py` or the web runner so that PIPELINE_ENABLED and other safety checks are enforced.
+
 Example:
 ```python
 import typer
@@ -323,11 +341,8 @@ def my_command(input_file: str):
 - Content: 20-30 high-quality videos per month
 - Time savings: 70% reduction through AI automation
 
-### Current Phase
-- **Phase 0 (Complete)**: Foundation with TrendScoutAgent, LocalizationSubtitleAgent, CLI, testing
-- **Phase 1 (In Progress)**: Topic prioritization and content planning
-- **Phase 2 (Planned)**: Content generation with OutlineAgent and ScriptWriterAgent
-- **Phase 3 (Future)**: Quality assurance and analytics
+### Operating Mode
+- Current operating mode: Client Product
 
 ### Key Principles
 - Quality over quantity
