@@ -62,11 +62,13 @@ if [ -f "docker-compose.yml" ]; then
         check_warn "Could not verify port binding format"
     fi
     
-    # Check allocated port
-    if grep -q "127.0.0.1:${PORT}:8000" docker-compose.yml; then
-        check_pass "Using allocated port ${PORT}"
+    # Check allocated port variable usage
+    if grep -q '127.0.0.1:${FLOWBIZ_ALLOCATED_PORT}:8000' docker-compose.yml; then
+        check_pass "Using FLOWBIZ_ALLOCATED_PORT variable (currently ${PORT})"
+    elif grep -q "127.0.0.1:${PORT}:8000" docker-compose.yml; then
+        check_warn "Using hardcoded port ${PORT} instead of \${FLOWBIZ_ALLOCATED_PORT} variable"
     else
-        check_warn "Not using allocated port ${PORT}"
+        check_warn "Could not verify allocated port usage"
     fi
 else
     check_warn "docker-compose.yml not found - cannot verify port binding"
@@ -109,10 +111,11 @@ echo "-------------------------------------------------------------------"
 if [ -f "nginx/dhamma-automation.conf" ]; then
     check_pass "Nginx config template exists"
     
-    if grep -q "127.0.0.1:${PORT}" nginx/dhamma-automation.conf; then
-        check_pass "Nginx config proxies to localhost:${PORT}"
+    # Check for deployment note about FLOWBIZ_ALLOCATED_PORT
+    if grep -q "FLOWBIZ_ALLOCATED_PORT from config/flowbiz_port.env" nginx/dhamma-automation.conf; then
+        check_pass "Nginx config has deployment note for FLOWBIZ_ALLOCATED_PORT"
     else
-        check_warn "Nginx config may not be configured for port ${PORT}"
+        check_warn "Nginx config missing deployment note for FLOWBIZ_ALLOCATED_PORT"
     fi
 else
     check_fail "Nginx config template missing: nginx/dhamma-automation.conf"
