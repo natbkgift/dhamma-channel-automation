@@ -8,3 +8,10 @@ output/
 data/
 docs/site/
 node_modules/
+audio/
+video/
+outputs/
+broll/
+logs/
+thumbnails/
+reports/
