@@ -131,10 +131,14 @@ expected_binding="127.0.0.1:${PORT}->8000/tcp"
 binding_ok=false
 for cid in $container_ids; do
     ports=$(docker ps --filter "id=$cid" --format '{{.Ports}}')
-    if echo "$ports" | grep -q "$expected_binding"; then
-        binding_ok=true
-        break
-    fi
+    IFS=',' read -r -a port_tokens <<< "$ports"
+    for token in "${port_tokens[@]}"; do
+        token_trimmed="$(echo "$token" | xargs)"
+        if [ "$token_trimmed" = "$expected_binding" ]; then
+            binding_ok=true
+            break 2
+        fi
+    done
 done
 
 if [ "$binding_ok" = false ]; then

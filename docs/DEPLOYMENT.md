@@ -6,24 +6,22 @@ This guide covers production deployment of the Dhamma Channel Automation service
 
 ## Port Allocation
 
-**FLOWBIZ_ALLOCATED_PORT**: `3007`
-
-Single source of truth: `config/flowbiz_port.env`
+**FLOWBIZ_ALLOCATED_PORT** is defined in `config/flowbiz_port.env` (single source of truth).
 
 This port is registered in the FlowBiz VPS port allocation registry:
 - [VPS Status Document](https://github.com/natbkgift/flowbiz-ai-core/blob/main/docs/VPS_STATUS.md)
 
 **Port Conflict Check**:
-Before deploying, verify port 3007 is available:
+Before deploying, verify the allocated port is available:
 ```bash
-sudo lsof -i :3007
-netstat -tulpn | grep 3007
+source config/flowbiz_port.env
+sudo lsof -i :"${FLOWBIZ_ALLOCATED_PORT}"
+netstat -tulpn | grep "${FLOWBIZ_ALLOCATED_PORT}"
 ```
 
-If port 3007 is in use, select the nearest available port within range 3001-3099 and update:
-- `docker-compose.yml` (port binding)
-- `nginx/dhamma-automation.conf` (proxy_pass)
-- This document
+If the allocated port is in use, select the nearest available port within range 3001-3099 and update:
+- `config/flowbiz_port.env`
+- Ensure `docker-compose.yml` (port binding) and `nginx/dhamma-automation.conf` (proxy_pass) match the value
 
 ## System Nginx Architecture
 
@@ -41,9 +39,9 @@ This project follows the **System Nginx** architecture as defined in:
    - Listens on ports 80 (HTTP) and 443 (HTTPS)
 
 2. **Client Service Localhost Binding**
-   - Service binds ONLY to `127.0.0.1:3007`
+   - Service binds ONLY to `127.0.0.1:${FLOWBIZ_ALLOCATED_PORT}`
    - NO public exposure of application ports
-   - System Nginx proxies to `http://127.0.0.1:3007`
+   - System Nginx proxies to `http://127.0.0.1:${FLOWBIZ_ALLOCATED_PORT}`
 
 3. **One Domain = One Config File**
    - Config: `/etc/nginx/sites-available/dhamma-automation.conf`
@@ -110,15 +108,18 @@ DATA_DIR="/app/data"
 ### 3. Build and Start Service
 
 ```bash
+# Load allocated port
+source config/flowbiz_port.env
+
 # Build Docker image
 sudo docker-compose build
 
-# Start service (binds to 127.0.0.1:3007)
+# Start service (binds to 127.0.0.1:${FLOWBIZ_ALLOCATED_PORT})
 sudo docker-compose up -d
 
 # Verify service is running
 sudo docker ps | grep dhamma-web
-curl http://127.0.0.1:3007/healthz
+curl "http://127.0.0.1:${FLOWBIZ_ALLOCATED_PORT}/healthz"
 ```
 
 Expected output:
@@ -192,13 +193,14 @@ Verify ONLY localhost binding:
 # Check docker port binding
 sudo docker ps --format "table {{.Names}}\t{{.Ports}}" | grep dhamma
 
-# Expected: 127.0.0.1:3007->8000/tcp
-# NOT: 0.0.0.0:3007->8000/tcp
+# Expected: 127.0.0.1:${FLOWBIZ_ALLOCATED_PORT}->8000/tcp
+# NOT: 0.0.0.0:${FLOWBIZ_ALLOCATED_PORT}->8000/tcp
 
 # Check with netstat
-sudo netstat -tulpn | grep 3007
+source config/flowbiz_port.env
+sudo netstat -tulpn | grep "${FLOWBIZ_ALLOCATED_PORT}"
 
-# Expected: 127.0.0.1:3007 (NOT 0.0.0.0:3007)
+# Expected: 127.0.0.1:${FLOWBIZ_ALLOCATED_PORT} (NOT 0.0.0.0:${FLOWBIZ_ALLOCATED_PORT})
 ```
 
 ## Maintenance
@@ -230,7 +232,8 @@ sudo docker-compose build
 sudo docker-compose up -d
 
 # Verify health
-curl http://127.0.0.1:3007/healthz
+source config/flowbiz_port.env
+curl "http://127.0.0.1:${FLOWBIZ_ALLOCATED_PORT}/healthz"
 ```
 
 ### Restart Service
@@ -266,7 +269,8 @@ Setup automated health checks (e.g., cron job, monitoring service):
 ```bash
 # Health check script
 #!/bin/bash
-STATUS=$(curl -s http://127.0.0.1:3007/healthz | jq -r .status)
+source /opt/dhamma-channel-automation/config/flowbiz_port.env
+STATUS=$(curl -s "http://127.0.0.1:${FLOWBIZ_ALLOCATED_PORT}/healthz" | jq -r .status)
 if [ "$STATUS" != "ok" ]; then
     echo "Service unhealthy!"
     # Send alert
@@ -288,7 +292,8 @@ Monitor these endpoints:
 sudo docker logs dhamma-web
 
 # Check port availability
-sudo lsof -i :3007
+source config/flowbiz_port.env
+sudo lsof -i :"${FLOWBIZ_ALLOCATED_PORT}"
 
 # Verify environment variables
 sudo docker exec dhamma-web env | grep -E "APP_|FLOWBIZ_"
@@ -297,16 +302,17 @@ sudo docker exec dhamma-web env | grep -E "APP_|FLOWBIZ_"
 ### Port Binding Issues
 
 ```bash
-# Check if port 3007 is already in use
-sudo lsof -i :3007
+# Check if port is already in use
+source config/flowbiz_port.env
+sudo lsof -i :"${FLOWBIZ_ALLOCATED_PORT}"
 
 # Check docker port binding
 sudo docker ps | grep dhamma
 
 # If bound to 0.0.0.0, fix docker-compose.yml:
 # ports:
-#   - "127.0.0.1:3007:8000"  # Correct
-#   - "3007:8000"            # Wrong!
+#   - "127.0.0.1:${FLOWBIZ_ALLOCATED_PORT}:8000"  # Correct
+#   - "${FLOWBIZ_ALLOCATED_PORT}:8000"            # Wrong!
 ```
 
 ### Nginx Errors
@@ -341,7 +347,7 @@ Before going to production:
 
 - [ ] Changed `SECRET_KEY` in `.env`
 - [ ] Changed `ADMIN_USERNAME` and `ADMIN_PASSWORD`
-- [ ] Service binds to `127.0.0.1:3007` (NOT `0.0.0.0`)
+- [ ] Service binds to `127.0.0.1:${FLOWBIZ_ALLOCATED_PORT}` (NOT `0.0.0.0`)
 - [ ] System Nginx configured with SSL
 - [ ] Firewall rules configured (only 80, 443 open)
 - [ ] Docker containers run as non-root user (if applicable)
