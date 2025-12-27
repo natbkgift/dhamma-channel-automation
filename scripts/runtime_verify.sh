@@ -55,14 +55,15 @@ if ! [[ "$PORT" =~ ^[0-9]+$ ]]; then
 fi
 
 log "Using port $PORT from $PORT_ENV_FILE"
+COMPOSE_ENV_ARGS=("--env-file" "$PORT_ENV_FILE")
 
 # Bring up service with retries
 attempt=1
 backoff=$BACKOFF_SECONDS
 up_success=false
 while [ $attempt -le $MAX_UP_RETRIES ]; do
-    log "Starting services with ${COMPOSE_CMD[*]} up -d (attempt $attempt/$MAX_UP_RETRIES)"
-    if up_output=$("${COMPOSE_CMD[@]}" up -d 2>&1); then
+    log "Starting services with ${COMPOSE_CMD[*]} ${COMPOSE_ENV_ARGS[*]} up -d (attempt $attempt/$MAX_UP_RETRIES)"
+    if up_output=$("${COMPOSE_CMD[@]}" "${COMPOSE_ENV_ARGS[@]}" up -d 2>&1); then
         up_success=true
         break
     fi
@@ -122,7 +123,7 @@ check_endpoint "http://127.0.0.1:${PORT}/healthz" "status" "service" "version"
 check_endpoint "http://127.0.0.1:${PORT}/v1/meta" "service" "environment" "version" "build_sha"
 
 # Verify docker port binding
-container_ids=$("${COMPOSE_CMD[@]}" ps -q)
+container_ids=$("${COMPOSE_CMD[@]}" "${COMPOSE_ENV_ARGS[@]}" ps -q)
 if [ -z "$container_ids" ]; then
     fail "No containers found from compose project. Ensure services are defined and running."
 fi
@@ -131,10 +132,14 @@ expected_binding="127.0.0.1:${PORT}->8000/tcp"
 binding_ok=false
 for cid in $container_ids; do
     ports=$(docker ps --filter "id=$cid" --format '{{.Ports}}')
-    if echo "$ports" | grep -q "$expected_binding"; then
-        binding_ok=true
-        break
-    fi
+    IFS=',' read -r -a port_tokens <<< "$ports"
+    for token in "${port_tokens[@]}"; do
+        token_trimmed="$(echo "$token" | xargs)"
+        if [ "$token_trimmed" = "$expected_binding" ]; then
+            binding_ok=true
+            break 2
+        fi
+    done
 done
 
 if [ "$binding_ok" = false ]; then
