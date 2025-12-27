@@ -4,8 +4,14 @@ services:
     build: .
     container_name: dhamma-web
     ports:
-      - "8000:8000"
+      - "127.0.0.1:3007:8000"
     environment:
+      - APP_SERVICE_NAME=dhamma-automation
+      - APP_ENV=dev
+      - APP_LOG_LEVEL=INFO
+      - APP_CORS_ORIGINS=["*"]
+      - FLOWBIZ_VERSION=0.0.0
+      - FLOWBIZ_BUILD_SHA=dev
       - APP_NAME=dhamma-automation
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=admin123

@@ -38,6 +38,28 @@ def _redirect(path: str):
     return RedirectResponse(url=path, status_code=302)
 
 
+# FlowBiz Contract Endpoints
+@app.get("/healthz")
+async def healthz():
+    """FlowBiz health check endpoint"""
+    return {
+        "status": "ok",
+        "service": config.APP_SERVICE_NAME,
+        "version": config.FLOWBIZ_VERSION,
+    }
+
+
+@app.get("/v1/meta")
+async def meta():
+    """FlowBiz metadata endpoint"""
+    return {
+        "service": config.APP_SERVICE_NAME,
+        "environment": config.APP_ENV,
+        "version": config.FLOWBIZ_VERSION,
+        "build_sha": config.FLOWBIZ_BUILD_SHA,
+    }
+
+
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     if current_user(request):
