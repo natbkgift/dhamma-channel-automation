@@ -32,6 +32,21 @@ check_fail() {
     FAIL_COUNT=$((FAIL_COUNT + 1))
 }
 
+DEFAULT_PORT=3007
+PORT_ENV_FILE="config/flowbiz_port.env"
+PORT="$DEFAULT_PORT"
+if [ -f "$PORT_ENV_FILE" ]; then
+    # shellcheck disable=SC1090
+    source "$PORT_ENV_FILE"
+    if [[ "${FLOWBIZ_ALLOCATED_PORT:-}" =~ ^[0-9]+$ ]]; then
+        PORT="$FLOWBIZ_ALLOCATED_PORT"
+    else
+        check_warn "Invalid FLOWBIZ_ALLOCATED_PORT in $PORT_ENV_FILE - using default $DEFAULT_PORT"
+    fi
+else
+    check_warn "Port config not found at $PORT_ENV_FILE - using default $DEFAULT_PORT"
+fi
+
 echo "1. Checking port binding configuration..."
 echo "-------------------------------------------------------------------"
 
@@ -48,10 +63,10 @@ if [ -f "docker-compose.yml" ]; then
     fi
     
     # Check allocated port
-    if grep -q "127.0.0.1:3007:8000" docker-compose.yml; then
-        check_pass "Using allocated port 3007"
+    if grep -q "127.0.0.1:${PORT}:8000" docker-compose.yml; then
+        check_pass "Using allocated port ${PORT}"
     else
-        check_warn "Not using standard allocated port 3007"
+        check_warn "Not using allocated port ${PORT}"
     fi
 else
     check_warn "docker-compose.yml not found - cannot verify port binding"
@@ -94,10 +109,10 @@ echo "-------------------------------------------------------------------"
 if [ -f "nginx/dhamma-automation.conf" ]; then
     check_pass "Nginx config template exists"
     
-    if grep -q "127.0.0.1:3007" nginx/dhamma-automation.conf; then
-        check_pass "Nginx config proxies to localhost:3007"
+    if grep -q "127.0.0.1:${PORT}" nginx/dhamma-automation.conf; then
+        check_pass "Nginx config proxies to localhost:${PORT}"
     else
-        check_warn "Nginx config may not be configured for port 3007"
+        check_warn "Nginx config may not be configured for port ${PORT}"
     fi
 else
     check_fail "Nginx config template missing: nginx/dhamma-automation.conf"
@@ -132,14 +147,14 @@ echo "-------------------------------------------------------------------"
 # Check if service is running on localhost:3007
 SERVICE_RUNNING=false
 if command -v curl &> /dev/null; then
-    if curl -s -f -m 2 http://127.0.0.1:3007/healthz > /dev/null 2>&1; then
+    if curl -s -f -m 2 "http://127.0.0.1:${PORT}/healthz" > /dev/null 2>&1; then
         SERVICE_RUNNING=true
     fi
 fi
 
 if [ "$SERVICE_RUNNING" = true ]; then
     # Test /healthz endpoint
-    healthz_response=$(curl -s -f http://127.0.0.1:3007/healthz 2>/dev/null || echo "")
+    healthz_response=$(curl -s -f "http://127.0.0.1:${PORT}/healthz" 2>/dev/null || echo "")
     if [ -n "$healthz_response" ]; then
         if echo "$healthz_response" | grep -q '"status"' && \
            echo "$healthz_response" | grep -q '"service"' && \
@@ -153,7 +168,7 @@ if [ "$SERVICE_RUNNING" = true ]; then
     fi
     
     # Test /v1/meta endpoint
-    meta_response=$(curl -s -f http://127.0.0.1:3007/v1/meta 2>/dev/null || echo "")
+    meta_response=$(curl -s -f "http://127.0.0.1:${PORT}/v1/meta" 2>/dev/null || echo "")
     if [ -n "$meta_response" ]; then
         if echo "$meta_response" | grep -q '"service"' && \
            echo "$meta_response" | grep -q '"environment"' && \
@@ -167,7 +182,7 @@ if [ "$SERVICE_RUNNING" = true ]; then
         check_fail "/v1/meta endpoint not responding"
     fi
 else
-    check_warn "Service not running on localhost:3007 - skipping endpoint checks"
+    check_warn "Service not running on localhost:${PORT} - skipping endpoint checks"
     echo "         Start service with: docker-compose up -d"
 fi
 
