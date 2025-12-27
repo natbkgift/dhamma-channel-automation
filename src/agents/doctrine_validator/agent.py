@@ -53,16 +53,25 @@ class DoctrineValidatorAgent(
     """Agent สำหรับตรวจสอบความถูกต้องของสคริปต์ตามหลักธรรม"""
 
     _embedding_model = None
+    _embedding_model_failed: bool = False
 
     @classmethod
     def _get_embedding_model(cls):
-        if SentenceTransformer is None:
+        if SentenceTransformer is None or cls._embedding_model_failed:
             return None
 
         if cls._embedding_model is None:
-            cls._embedding_model = SentenceTransformer(
-                "paraphrase-multilingual-MiniLM-L12-v2"
-            )
+            try:
+                cls._embedding_model = SentenceTransformer(
+                    "paraphrase-multilingual-MiniLM-L12-v2"
+                )
+            except Exception as exc:  # pragma: no cover - fallback for offline env
+                logger.warning(
+                    "ไม่สามารถโหลด embedding model จะใช้ lexical similarity แทน: %s",
+                    exc,
+                )
+                cls._embedding_model_failed = True
+                cls._embedding_model = None
         return cls._embedding_model
 
     def __init__(self) -> None:
@@ -242,8 +251,7 @@ class DoctrineValidatorAgent(
         suggestions: str | None = None
         notes: str | None = None
         status = SegmentStatus.OK
-
-        embedding_available = SentenceTransformer is not None
+        embedding_available = self._get_embedding_model() is not None
 
         if normalized_type == SegmentType.TEACHING and not citations:
             # ถือว่าเป็น hallucination เสมอเมื่อไม่มี citation เพื่อบังคับให้มีการอ้างอิง

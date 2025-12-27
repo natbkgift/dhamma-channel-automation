@@ -1,0 +1,98 @@
+name: Guardrails
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+# Non-blocking compliance checks
+# These verify FlowBiz Client Product standards
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  guardrails:
+    name: FlowBiz Compliance Check
+    runs-on: ubuntu-latest
+    continue-on-error: true  # Non-blocking
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Guardrails
+        id: guardrails
+        run: |
+          bash scripts/guardrails.sh
+        continue-on-error: true
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Read guardrails output (if we captured it)
+            let body = '## FlowBiz Guardrails Check\n\n';
+            
+            if (${{ steps.guardrails.outcome == 'success' }}) {
+              body += '✅ **All guardrail checks passed!**\n\n';
+              body += 'This PR complies with FlowBiz Client Product standards.';
+            } else {
+              body += '⚠️ **Some guardrail checks failed or warned**\n\n';
+              body += 'Please review the workflow logs for details.\n\n';
+              body += 'Note: Guardrails are non-blocking but should be addressed before deployment.';
+            }
+            
+            body += '\n\n### Checks Performed\n';
+            body += '- Port binding configuration\n';
+            body += '- Environment variables documentation\n';
+            body += '- Required documentation files\n';
+            body += '- Nginx configuration\n';
+            body += '- Dockerfile security\n';
+            body += '- Contract endpoints (if service running)\n';
+            
+            body += '\n\nSee [Guardrails Documentation](../blob/main/docs/GUARDRAILS.md) for details.';
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('FlowBiz Guardrails Check')
+            );
+            
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+
+      - name: Upload guardrails report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: guardrails-report
+          path: |
+            scripts/guardrails.sh
+          retention-days: 7

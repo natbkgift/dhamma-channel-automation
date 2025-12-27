@@ -1,10 +1,27 @@
+import json
 import os
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
-APP_NAME = os.getenv("APP_NAME", "dhamma-automation")
+# FlowBiz Standard Environment Variables
+APP_SERVICE_NAME = os.getenv("APP_SERVICE_NAME", "dhamma-automation")
+APP_ENV = os.getenv("APP_ENV", "dev")
+APP_LOG_LEVEL = os.getenv("APP_LOG_LEVEL", "INFO")
+FLOWBIZ_VERSION = os.getenv("FLOWBIZ_VERSION", "0.0.0")
+FLOWBIZ_BUILD_SHA = os.getenv("FLOWBIZ_BUILD_SHA", "dev")
+
+# Parse APP_CORS_ORIGINS from JSON string
+_cors_origins_str = os.getenv("APP_CORS_ORIGINS", '["*"]')
+try:
+    APP_CORS_ORIGINS = json.loads(_cors_origins_str)
+except json.JSONDecodeError:
+    APP_CORS_ORIGINS = ["*"]
+
+# Legacy APP_NAME for backwards compatibility
+APP_NAME = os.getenv("APP_NAME", APP_SERVICE_NAME)
+
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-me")
 SESSION_COOKIE = os.getenv("SESSION_COOKIE_NAME", "dhamma_session")
 
