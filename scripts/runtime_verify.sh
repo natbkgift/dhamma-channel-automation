@@ -134,7 +134,7 @@ for cid in $container_ids; do
     ports=$(docker ps --filter "id=$cid" --format '{{.Ports}}')
     IFS=',' read -r -a port_tokens <<< "$ports"
     for token in "${port_tokens[@]}"; do
-        token_trimmed="$(echo "$token" | xargs)"
+        read -r token_trimmed <<< "$token"
         if [ "$token_trimmed" = "$expected_binding" ]; then
             binding_ok=true
             break 2
