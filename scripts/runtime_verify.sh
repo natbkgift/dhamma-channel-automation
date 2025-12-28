@@ -135,7 +135,7 @@ for cid in $container_ids; do
     IFS=',' read -r -a port_tokens <<< "$ports"
     for token in "${port_tokens[@]}"; do
         read -r token_trimmed <<< "$token"
-        if echo "$token_trimmed" | grep -q "127.0.0.1:${PORT}->8000/tcp"; then
+        if [[ "$token_trimmed" == *"$expected_binding"* ]]; then
             binding_ok=true
             break 2
         fi
