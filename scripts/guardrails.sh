@@ -186,7 +186,7 @@ if [ "$SERVICE_RUNNING" = true ]; then
     fi
 else
     check_warn "Service not running on localhost:${PORT} - skipping endpoint checks"
-    echo "         Start service with: docker-compose up -d"
+    echo "         Start service with: docker-compose --env-file config/flowbiz_port.env up -d (or docker compose equivalent)"
 fi
 
 echo ""
