@@ -288,7 +288,7 @@ make agent         # รัน TrendScout
 make docs          # Build docs
 make serve-docs    # Serve docs locally
 
-# TTS smoke (ไม่ต้องใช้ make)
+# TTS smoke test (แนะนำให้ใช้ 'make tts-demo')
 python scripts/tts_generate.py --run-id sample_run --slug voiceover_demo --script samples/reference/tts/input.txt --dry-run
 
 # ทำความสะอาด
