@@ -188,7 +188,7 @@ def generate_voiceover(
         metadata["created_utc"] = created_utc
 
     metadata_path.write_text(
-        json.dumps(metadata, ensure_ascii=True, indent=2, sort_keys=True),
+        json.dumps(metadata, ensure_ascii=False, indent=2, sort_keys=True),
         encoding="utf-8",
     )
 
