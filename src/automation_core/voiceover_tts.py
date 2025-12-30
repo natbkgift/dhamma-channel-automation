@@ -39,7 +39,7 @@ def is_pipeline_enabled() -> bool:
 
 
 def _validate_identifier(value: str, field_name: str) -> str:
-    if value is None or not str(value).strip():
+    if not value or not value.strip():
         raise ValueError(f"{field_name} is required")
 
     if value in {".", ".."}:
