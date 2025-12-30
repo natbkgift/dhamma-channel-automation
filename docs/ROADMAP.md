@@ -1,8 +1,8 @@
-# 🗺️ แผนงานโครงการ (Roadmap)
+# ROADMAP — Dhamma Channel Automation
 
 > **📘 Blueprint (Single Source of Truth)**: สำหรับภาพรวมโครงการ ขอบเขต และกฎหลักที่ต้องไม่ละเมิด โปรดดู [/BLUEPRINT.md](/BLUEPRINT.md)
 
-แผนการพัฒนาระบบ Dhamma Automation ตั้งแต่ Phase 0 ถึง Phase 3
+เอกสารนี้แสดงแผนงานพัฒนาระบบ Dhamma Channel Automation แบบ **PR-based development** โดยแบ่งเป็น Core Track (PR1–PR11), Extension Track (PR-2.2–PR-2.4) และ Future Vision (PR12+)
 
 ## 🎯 วิสัยทัศน์โครงการ
 
@@ -14,328 +14,240 @@
 - ⚡ ลดเวลาการผลิต: 70% โดยใช้ automation
 - 📊 อัตราการมีส่วนร่วม: เพิ่มขึ้น 150%
 
-## 📅 Timeline Overview
+---
+
+## 🏗️ หลักการออกแบบ (Design Principles)
+
+ระบบ Dhamma Channel Automation ออกแบบตามหลักการสำคัญดังนี้:
+
+### 1. **Core System ทำงานได้โดยไม่ต้องพึ่ง Extension**
+- Pipeline หลัก (orchestrator) ทำงานได้เต็มรูปแบบโดยไม่ต้องมี n8n, LINE notify หรือ extension อื่นๆ
+- Extension เป็นเพียงส่วนเสริม (optional) ที่เพิ่มความสะดวก แต่ไม่ใช่ dependency
+
+### 2. **มี Kill Switch และ Guardrails**
+- `PIPELINE_ENABLED=false` หยุดการทำงานของ pipeline อย่างปลอดภัย
+- Orchestrator และ web runner บังคับใช้ kill switch
+- Human oversight gates ในทุกขั้นตอนสำคัญ
+
+### 3. **ตรวจสอบย้อนหลังได้ (Auditable)**
+- ทุก pipeline run สร้าง output directories พร้อม timestamp
+- Logs, artifacts และ metadata ครบถ้วน
+- สามารถตรวจสอบการตัดสินใจของ AI ได้ทุกขั้นตอน
+
+### 4. **Automation เพิ่มแบบไม่ผูกระบบ (Loosely Coupled)**
+- แต่ละ agent ทำงานแบบ pure function (อ่าน input, เขียน output)
+- Event-driven extensions (n8n) ถอดออกได้โดยไม่กระทบ core
+- Single-channel focus (ไม่มี multi-tenant complexity)
+
+---
+
+## 🚀 CORE TRACK (PR1–PR11)
+
+แกนหลักของระบบ (Core Pipeline) ที่ทำงานแบบ deterministic และต้องทำงานได้โดยไม่พึ่ง extension
+
+### **PR1: Baseline Snapshot + Global Kill Switch** ✅
+สร้าง baseline reference artifacts และเพิ่ม kill switch `PIPELINE_ENABLED=false` เพื่อความปลอดภัย ทำให้สามารถหยุด pipeline ได้ทันทีโดยไม่ต้องแก้โค้ด
+
+### **PR2: FlowBiz Client Product Adoption** ✅
+ปรับระบบให้เป็น FlowBiz Client Product รูปแบบ single-channel พร้อม contract endpoints (`/healthz`, `/v1/meta`), localhost-only binding (port 3007), และ System Nginx pattern
+
+### **PR3: Repository Cleanup + Runtime Safety**
+ทำความสะอาด repository โดยลบไฟล์ชั่วคราว, artifacts ที่ไม่ใช้, และเพิ่ม runtime safety checks เพื่อป้องกันการทำงานที่ผิดพลาด
+
+### **PR4: Voiceover Generation (TTS Auto)**
+เพิ่ม TTS agent สำหรับสังเคราะห์เสียงพากย์อัตโนมัติ รองรับ Google Cloud TTS, Azure TTS หรือ local models พร้อม voice quality validation
+
+### **PR5: Video Rendering (FFmpeg Auto)**
+สร้าง video rendering pipeline ด้วย FFmpeg โดยรวม audio, visuals, subtitles เข้าด้วยกัน รองรับ templates หลายรูปแบบ
+
+### **PR6: Quality Gate + Auto Decision**
+เพิ่ม quality gate ที่ตรวจสอบ content quality, compliance, SEO readiness พร้อมระบบตัดสินใจอัตโนมัติว่า content ผ่านเกณฑ์หรือต้อง review โดยมนุษย์
+
+### **PR7: YouTube Auto Upload + Retry Logic**
+สร้าง YouTube upload agent พร้อม idempotent upload (ตรวจจับวิดีโอซ้ำ), retry logic สำหรับ transient failures, และ metadata optimization
+
+### **PR8: Content Plan Calendar (Scheduler / Queue)**
+เพิ่มระบบจัดการตารางเนื้อหา (content calendar) พร้อม queue management, scheduling logic, และ priority handling
+
+### **PR9: Asset Library**
+สร้าง asset library สำหรับจัดการ visuals, music, sound effects, templates พร้อมระบบ tagging และ search
+
+### **PR10: Short/Long Templates + Post Content Automation**
+เพิ่ม templates สำหรับวิดีโอแบบ short-form และ long-form พร้อมระบบ post-content automation (คำบรรยาย, community posts, etc.)
+
+### **PR11: KPI Monitor & Recommendation Engine (Read-Only)**
+สร้าง KPI monitoring dashboard และ recommendation engine ที่**อ่านข้อมูลอย่างเดียว** โดยไม่เปลี่ยนแปลง prompts หรือ agent parameters (มนุษย์เป็นผู้ตัดสินใจ)
+
+---
+
+## 🔌 EXTENSION TRACK (Optional)
+
+ส่วนเสริมที่**ถอดออกได้**โดยไม่กระทบการทำงานของ Core Pipeline
+
+### การันตี: Core ยังทำงานได้เต็มรูปแบบโดยไม่มี Extensions
+- การปิดหรือลบ n8n workflows ไม่ทำให้ core pipeline พัง
+- Extensions เป็น event-driven และทำงานแบบ async
+- มีไว้เพื่อความสะดวก ไม่ใช่ dependency
+
+### **PR-2.2: n8n Integration**
+เพิ่ม n8n workflows สำหรับ event-driven orchestration:
+- กำหนดเวลารัน pipeline อัตโนมัติ (cron scheduling)
+- เชื่อมต่อกับ external services (webhooks, APIs)
+- Trigger pipeline runs จาก external events
+
+### **PR-2.3: LINE Notify หลัง Publish**
+ส่ง LINE notifications เมื่อ:
+- วิดีโอ publish สำเร็จบน YouTube
+- Pipeline run เสร็จสมบูรณ์
+- เกิด error ที่ต้องการความสนใจ
+
+### **PR-2.4: Auto Retry + Fail Alert**
+เพิ่ม intelligent retry logic:
+- Exponential backoff สำหรับ transient failures
+- Alert routing เมื่อ retry หมด
+- Human intervention triggers
+
+---
+
+## 🔮 FUTURE (PR12+)
+
+คุณสมบัติขั้นสูงที่อยู่นอกเหนือ Core Track (พิจารณาหลัง PR11)
+
+### Closed-Loop Optimization (แบบมีข้อจำกัด)
+- **AI อ่าน KPIs**: ระบบวิเคราะห์ performance metrics อัตโนมัติ
+- **AI แนะนำการปรับเล็กน้อย**: เช่น hook wording, video length, posting time
+- **Human Override ทุกครั้ง**: มนุษย์ต้องอนุมัติก่อนทุกการเปลี่ยนแปลง
+- **Rule + Confidence Threshold**: มีกฎและเกณฑ์ความเชื่อมั่นที่ชัดเจน
+
+### ข้อจำกัดสำคัญ (Non-Negotiable)
+- ❌ AI **ห้าม**เปลี่ยน prompts, agent parameters หรือกลยุทธ์เนื้อหาเอง
+- ❌ AI **ห้าม**ตัดสินใจลงทุนหรือเปลี่ยนแปลงสำคัญโดยไม่มีมนุษย์
+- ✅ AI **ได้**เสนอแนะและแสดง reasoning
+- ✅ มนุษย์**ต้อง**เป็นผู้ตัดสินใจขั้นสุดท้าย
+
+### Multi-Channel Support (ไกลกว่า Client Product Mode)
+- รองรับหลายช่อง (multi-tenant)
+- แยก data, configs, และ KPIs ตามช่อง
+- Shared infrastructure แต่ isolated workspaces
+
+### Advanced Features
+- **Platform Expansion**: Facebook, TikTok, Instagram optimization
+- **Advanced AI**: GPT-4+, fine-tuned models, real-time personalization
+- **Internationalization**: Multi-language support, cultural adaptation
+
+---
+
+## 📊 สรุปภาพรวม
+
+### แยกชัด Core vs Extension
+
+**CORE (PR1–PR11):**
+- ✅ ทำงานได้เต็มรูปแบบโดยไม่ต้องพึ่ง extension
+- ✅ Deterministic และ reproducible
+- ✅ Orchestrator-managed, sequential execution
+- ✅ มี kill switch และ guardrails ครบครัน
+- ✅ Audit trail และ logging ครบถ้วน
+
+**EXTENSION (PR-2.2–PR-2.4):**
+- ⚡ Event-driven และ async
+- ⚡ n8n-managed workflows
+- ⚡ **ถอดออกได้โดยไม่กระทบ core**
+- ⚡ เพิ่มความสะดวกและ automation เพิ่มเติม
+
+### เหมาะกับการ Scale ช่องในอนาคต
+
+ระบบออกแบบให้:
+1. **เริ่มต้นง่าย**: Single-channel, client product mode
+2. **ขยายได้**: Extension track เพิ่มได้ตามต้องการ
+3. **ยืดหยุ่น**: Future track พร้อมรองรับ multi-channel
+4. **ปลอดภัย**: Human oversight gates ในทุกขั้นตอนสำคัญ
+
+---
+
+## 🎨 แผนภาพ Pipeline (Mermaid Diagram)
+
+### Core Pipeline Flow
 
 ```mermaid
-gantt
-    title Dhamma Automation Development Timeline
-    dateFormat  YYYY-MM-DD
-    section Phase 0: Foundation
-    TrendScoutAgent           :done, p0-1, 2024-09-21, 2024-10-15
-    CLI Interface            :done, p0-2, 2024-09-21, 2024-10-15
-    Documentation           :done, p0-3, 2024-09-21, 2024-10-15
-    Testing Framework       :done, p0-4, 2024-09-21, 2024-10-15
+graph LR
+    A[Idea/Topic<br/>Scout] --> B[Script<br/>Writer]
+    B --> C[TTS<br/>Voice]
+    C --> D[Video<br/>Render]
+    D --> E[QA<br/>Gate]
+    E --> F[YouTube<br/>Upload]
+    F --> G[KPI<br/>Track]
     
-    section Phase 1: Topic Prioritization
-    TopicPrioritizerAgent   :p1-1, 2024-10-16, 2024-11-15
-    RetrievalAgent          :p1-2, 2024-10-16, 2024-11-30
-    Data Integration        :p1-3, 2024-11-01, 2024-11-30
+    style A fill:#4CAF50,color:#fff
+    style B fill:#4CAF50,color:#fff
+    style C fill:#4CAF50,color:#fff
+    style D fill:#4CAF50,color:#fff
+    style E fill:#4CAF50,color:#fff
+    style F fill:#4CAF50,color:#fff
+    style G fill:#4CAF50,color:#fff
     
-    section Phase 2: Content Generation
-    OutlineAgent            :p2-1, 2024-12-01, 2024-12-31
-    ScriptWriterAgent       :p2-2, 2024-12-01, 2025-01-15
-    Workflow Engine         :p2-3, 2025-01-01, 2025-01-31
+    classDef coreStyle fill:#4CAF50,color:#fff,stroke:#2E7D32,stroke-width:2px
+    class A,B,C,D,E,F,G coreStyle
+```
+
+### Extensions (Optional, Event-Driven)
+
+```mermaid
+graph TB
+    YT[YouTube Publish<br/>Event] --> N8N{n8n<br/>Workflow}
+    N8N --> LINE[LINE<br/>Notify]
+    N8N --> RETRY[Auto<br/>Retry]
+    N8N --> SCHED[Scheduler<br/>Queue]
     
-    section Phase 3: Quality & Analytics
-    ValidatorAgent          :p3-1, 2025-02-01, 2025-02-28
-    AnalyticsAgent          :p3-2, 2025-02-01, 2025-03-15
-    Auto-optimization       :p3-3, 2025-03-01, 2025-03-31
+    style YT fill:#2196F3,color:#fff
+    style N8N fill:#FF9800,color:#fff
+    style LINE fill:#9C27B0,color:#fff
+    style RETRY fill:#9C27B0,color:#fff
+    style SCHED fill:#9C27B0,color:#fff
+    
+    classDef extStyle fill:#9C27B0,color:#fff,stroke:#7B1FA2,stroke-width:2px,stroke-dasharray: 5 5
+    class LINE,RETRY,SCHED extStyle
 ```
 
----
+### ความสัมพันธ์ระหว่าง Core และ Extension
 
-## 🌟 Phase 0: Foundation (เสร็จแล้ว ✅)
-
-**ระยะเวลา**: กันยายน - ตุลาคม 2024
-
-### ✅ สิ่งที่เสร็จแล้ว
-
-#### TrendScoutAgent
-- [x] BaseAgent abstract class พร้อม Generic types
-- [x] TrendScoutAgent ที่จำลองการเรียก LLM
-- [x] Pydantic models สำหรับ Input/Output
-- [x] อัลกอริทึมการคำนวณคะแนนแบบ deterministic
-- [x] การสร้างหัวข้อจากคำสำคัญ
-
-#### CLI Interface
-- [x] Typer-based CLI พร้อม Rich output
-- [x] คำสั่ง `trend-scout` พร้อม parameters
-- [x] แสดงผลตารางสวยงาม
-- [x] Progress indicators และ error handling
-
-#### Infrastructure
-- [x] โครงสร้างโฟลเดอร์ตามมาตรฐาน
-- [x] pyproject.toml พร้อม dependencies
-- [x] Prompt loading system
-- [x] Configuration management (Pydantic Settings)
-- [x] Logging system (Rich + file)
-
-#### Documentation
-- [x] เอกสารภาษาไทยครบครัน
-- [x] MkDocs setup พร้อม Material theme
-- [x] สถาปัตยกรรมระบบ
-- [x] คู่มือการเพิ่ม Agent ใหม่
-
-#### Testing
-- [x] Unit tests สำหรับ TrendScoutAgent
-- [x] Tests สำหรับ prompt loading
-- [x] Tests สำหรับ scoring utilities
-- [x] CI/CD workflow (GitHub Actions)
-
-### 📊 ผลลัพธ์ Phase 0
-
-**Deliverables**:
-- ✅ TrendScoutAgent ที่ใช้งานได้
-- ✅ CLI interface สำหรับทดสอบ
-- ✅ เอกสารครบครัน 15+ หน้า
-- ✅ Test coverage > 85%
-- ✅ CI/CD pipeline พร้อมใช้งาน
-
-**ตัวอย่างการใช้งาน**:
-```bash
-python -m cli.main trend-scout \
-  --input src/agents/trend_scout/mock_input.json \
-  --out output/result.json
+```mermaid
+graph TD
+    subgraph CORE["CORE PIPELINE (Required)"]
+        C1[TrendScout] --> C2[ScriptWriter]
+        C2 --> C3[TTS Agent]
+        C3 --> C4[Video Render]
+        C4 --> C5[QA Gate]
+        C5 --> C6[YouTube Upload]
+        C6 --> C7[KPI Monitor]
+    end
+    
+    subgraph EXT["EXTENSIONS (Optional)"]
+        E1[n8n Workflows]
+        E2[LINE Notify]
+        E3[Scheduler]
+        E4[Auto Retry]
+    end
+    
+    C6 -.webhook.-> E1
+    E1 --> E2
+    E1 --> E3
+    E1 --> E4
+    
+    style CORE fill:#E8F5E9,stroke:#4CAF50,stroke-width:3px
+    style EXT fill:#FFF3E0,stroke:#FF9800,stroke-width:3px,stroke-dasharray: 10 5
+    
+    classDef coreNode fill:#4CAF50,color:#fff,stroke:#2E7D32,stroke-width:2px
+    classDef extNode fill:#FF9800,color:#fff,stroke:#E65100,stroke-width:2px,stroke-dasharray: 5 5
+    
+    class C1,C2,C3,C4,C5,C6,C7 coreNode
+    class E1,E2,E3,E4 extNode
 ```
 
----
-
-## 🎯 Phase 1: Topic Prioritization & Data Integration
-
-**ระยะเวลา**: ตุลาคม - พฤศจิกายน 2024
-
-### 🚧 งานที่กำลังพัฒนา
-
-#### 1. TopicPrioritizerAgent
-**เป้าหมาย**: จัดลำดับความสำคัญของหัวข้อจาก TrendScout
-
-**Features**:
-- [ ] รับ input จาก TrendScoutAgent
-- [ ] ประเมินตามเกณฑ์ธุรกิจ (ROI, Risk, Brand fit)
-- [ ] จัดลำดับความสำคัญพร้อมเหตุผล
-- [ ] สร้างคำแนะนำการผลิต
-
-**Input**:
-```json
-{
-  "topics": [...],              // จาก TrendScout
-  "business_goals": {...},      // เป้าหมายธุรกิจ
-  "resource_constraints": {...} // ข้อจำกัดทรัพยากร
-}
-```
-
-**Output**:
-```json
-{
-  "prioritized_topics": [...],  // หัวข้อที่จัดลำดับแล้ว
-  "production_schedule": {...}, // แผนการผลิต
-  "resource_allocation": {...}  // การจัดสรรทรัพยากร
-}
-```
-
-#### 2. RetrievalAgent
-**เป้าหมาย**: ค้นหาและรวบรวมข้อมูลสำหรับการสร้างเนื้อหา
-
-**Data Sources**:
-- [ ] YouTube Data API (วิดีโอที่เกี่ยวข้อง)
-- [ ] Google Trends (ข้อมูลเทรนด์)
-- [ ] Buddhist scriptures database
-- [ ] Competitor analysis
-- [ ] Social media mentions
-
-**Features**:
-- [ ] Multi-source data gathering
-- [ ] Content relevance scoring
-- [ ] Data quality validation
-- [ ] Caching mechanism
-
-#### 3. Data Integration Layer
-**เป้าหมาย**: รวมข้อมูลจากแหล่งต่างๆ ให้เป็นระบบ
-
-**Components**:
-- [ ] API connectors (YouTube, Google Trends)
-- [ ] Data normalization
-- [ ] Rate limiting และ quota management
-- [ ] Error handling และ retry logic
-
-### 📈 Success Metrics Phase 1
-
-- **Accuracy**: ความถูกต้องของการจัดลำดับ > 80%
-- **Data Quality**: ข้อมูลที่รวบรวมได้มีคุณภาพ > 85%
-- **Performance**: Response time < 30 วินาที
-- **Coverage**: ครอบคลุมข้อมูล 5+ sources
-
----
-
-## 🎬 Phase 2: Content Generation
-
-**ระยะเวลา**: ธันวาคม 2024 - มกราคม 2025
-
-### 🎨 OutlineAgent
-
-**เป้าหมาย**: สร้างโครงเรื่องที่มีโครงสร้างชัดเจน
-
-**Features**:
-- [ ] วิเคราะห์หัวข้อและสร้างโครงเรื่อง
-- [ ] กำหนด hook, main points, และ conclusion
-- [ ] คำนวณเวลาแต่ละส่วน
-- [ ] เสนอ visual elements และ examples
-
-**Template Structure**:
-```
-1. Hook (0-30 วิ) - ดึงดูดใจผู้ชม
-2. Problem (30-90 วิ) - นำเสนอปัญหา
-3. Solution (90-80% ของวิดีโอ) - แนวทางแก้ไข
-4. Call to Action (สุดท้าย 30 วิ) - เรียกร้องปฏิบัติ
-```
-
-### ✍️ ScriptWriterAgent
-
-**เป้าหมาย**: เขียนสคริปต์วิดีโอที่พร้อมใช้งาน
-
-**Features**:
-- [ ] แปลงโครงเรื่องเป็นสคริปต์เต็ม
-- [ ] ปรับน้ำเสียงตามผู้ชมเป้าหมาย
-- [ ] เพิ่ม visual cues และ timing
-- [ ] ตรวจสอบ brand compliance
-
-**Output Format**:
-```
-[00:00-00:30] HOOK
-วอยซ์โอเวอร์: "คุณเคยรู้สึกเครียดจนนอนไม่หลับไหม?"
-Visual: ภาพคนนอนไม่หลับ, กลับตัวบนเตียง
-
-[00:30-01:00] PROBLEM
-วอยซ์โอเวอร์: "วันนี้เราจะมาดูวิธีปล่อยวางให้ใจสงบ..."
-Visual: ตัวอย่างปัญหาในชีวิตประจำวัน
-```
-
-### ⚙️ Workflow Engine
-
-**เป้าหมาย**: จัดการ workflow การผลิตแบบอัตโนมัติ
-
-**Features**:
-- [ ] Chain agents ตามลำดับ
-- [ ] Parallel processing สำหรับ multiple topics
-- [ ] Error handling และ retry logic
-- [ ] Progress tracking และ notifications
-
-**Workflow Example**:
-```
-TrendScout → TopicPrioritizer → Retrieval → Outline → ScriptWriter → Validator
-```
-
-### 📋 Success Metrics Phase 2
-
-- **Content Quality**: การให้คะแนนโดย human reviewer > 4/5
-- **Production Speed**: ลดเวลาการผลิต 60%
-- **Script Completeness**: สคริปต์ที่ใช้งานได้ทันที > 90%
-- **Brand Consistency**: ความสอดคล้องกับแบรนด์ > 95%
-
----
-
-## 📊 Phase 3: Quality Assurance & Analytics
-
-**ระยะเวลา**: กุมภาพันธ์ - มีนาคม 2025
-
-### ✅ ValidatorAgent
-
-**เป้าหมาย**: ตรวจสอบคุณภาพเนื้อหาก่อนเผยแพร่
-
-**Quality Checks**:
-- [ ] Brand compliance validation
-- [ ] Factual accuracy checking
-- [ ] Sentiment analysis
-- [ ] SEO optimization validation
-- [ ] Accessibility compliance
-
-**Validation Categories**:
-```
-1. Content Quality (40%)
-   - ความถูกต้องของข้อมูล
-   - ความชัดเจนของการนำเสนอ
-   - ความเข้ากับกลุ่มเป้าหมาย
-
-2. Brand Compliance (30%)
-   - ความสอดคล้องกับ brand voice
-   - การใช้ภาษาที่เหมาะสม
-   - ความเป็นบวกของเนื้อหา
-
-3. Technical Quality (30%)
-   - SEO optimization
-   - Video structure
-   - Call-to-action effectiveness
-```
-
-### 📈 AnalyticsAgent
-
-**เป้าหมาย**: วิเคราะห์ประสิทธิภาพและปรับปรุงระบบ
-
-**Analytics Features**:
-- [ ] Performance tracking (views, engagement, revenue)
-- [ ] Content effectiveness analysis
-- [ ] Trend prediction และ forecasting
-- [ ] ROI calculation
-- [ ] A/B testing results
-
-**Reports Generated**:
-```
-1. Weekly Performance Report
-   - Top performing topics
-   - Engagement metrics
-   - Revenue attribution
-
-2. Monthly Optimization Report
-   - Content gaps analysis
-   - Trending topics forecast
-   - Production efficiency metrics
-
-3. Quarterly Strategic Report
-   - Market position analysis
-   - Growth opportunities
-   - Technology roadmap
-```
-
-### 🤖 Auto-optimization Engine
-
-**เป้าหมาย**: ปรับปรุงระบบอัตโนมัติตามผลการวิเคราะห์
-
-**Optimization Areas**:
-- [ ] Prompt engineering optimization
-- [ ] Agent parameter tuning
-- [ ] Content strategy adjustment
-- [ ] Production schedule optimization
-
-### 🎯 Success Metrics Phase 3
-
-- **Content Success Rate**: วิดีโอที่ได้ผลตามคาด > 75%
-- **Revenue Growth**: เพิ่มขึ้น 40% จากช่วงก่อน automation
-- **Quality Score**: คะแนนคุณภาพเฉลี่ย > 4.2/5
-- **Automation Rate**: งานที่ automate ได้ > 80%
-
----
-
-## 🔮 Phase 4+: Advanced Features (Future Vision)
-
-### 🌐 Multi-Platform Expansion
-- Facebook, Instagram, TikTok content adaptation
-- Platform-specific optimization
-- Cross-platform analytics
-
-### 🎥 Video Production Automation
-- AI video editing integration
-- Automated thumbnail generation
-- Voice synthesis และ dubbing
-
-### 🧠 Advanced AI Integration
-- GPT-4+ integration
-- Custom model fine-tuning
-- Real-time content personalization
-
-### 🌍 Internationalization
-- Multi-language support
-- Cultural adaptation
-- Global market expansion
+**หมายเหตุ:**
+- 🟢 สีเขียว = CORE (จำเป็น, deterministic)
+- 🟠 สีส้ม = EXTENSION (เสริม, ถอดออกได้)
+- เส้นประ `-.->` = event/webhook (optional connection)
+- เส้นทึบ `-->` = sequential flow (required)
 
 ---
 
@@ -345,31 +257,45 @@ TrendScout → TopicPrioritizer → Retrieval → Outline → ScriptWriter → V
 - Robust architecture design
 - Scalable infrastructure
 - High-quality AI integration
+- Comprehensive testing และ validation
 
 ### 2. **Content Quality**
 - Maintaining human-like creativity
 - Brand consistency
 - Audience engagement
+- Buddhist doctrine accuracy
 
 ### 3. **Business Alignment**
 - Clear ROI measurement
 - Strategic goal alignment
 - Stakeholder buy-in
+- Sustainable revenue model
 
 ### 4. **Continuous Improvement**
 - Data-driven optimization
 - Regular performance review
 - Agile development approach
+- Community feedback loop
 
-## 📞 Get Involved
+### 5. **Operational Safety**
+- Kill switch enforcement
+- Human oversight gates
+- Audit trails
+- Compliance monitoring
 
-สนใจมีส่วนร่วมในการพัฒนา? 
+---
+
+## 📞 การมีส่วนร่วม
+
+สนใจมีส่วนร่วมในการพัฒนา?
 
 - 📧 **Email**: [โปรดติดต่อผ่าน GitHub Issues]
 - 💻 **Contribute**: [Agent Development Guide](AGENT_LIFECYCLE.md)
 - 📚 **Documentation**: [Architecture Overview](ARCHITECTURE.md)
 - 🐛 **Bug Reports**: [GitHub Issues](https://github.com/natbkgift/dhamma-channel-automation/issues)
+- 📋 **Project Contract**: [FlowBiz Integration](PROJECT_CONTRACT.md)
+- 🛡️ **Safety Guidelines**: [Operational Safety](OPS_SAFETY.md)
 
 ---
 
-🙏 **วิสัยทัศน์**: สร้างระบบ AI ที่ช่วยเผยแพร่ธรรมะให้คนไทยได้เข้าถึงง่ายขึ้น พร้อมสร้างรายได้ที่ยั่งยืนให้ผู้ผลิตเนื้อหา
+🙏 **วิสัยทัศน์**: สร้างระบบ AI ที่ช่วยเผยแพร่ธรรมะให้คนไทยได้เข้าถึงง่ายขึ้น พร้อมสร้างรายได้ที่ยั่งยืนให้ผู้ผลิตเนื้อหา โดยยึดหลักความปลอดภัย การตรวจสอบได้ และการดูแลโดยมนุษย์เป็นหลัก
