@@ -1,49 +1,49 @@
 # BLUEPRINT.md
 
-**Single Source of Truth** for Dhamma Channel Automation project boundaries, invariants, and evolution path.
+**Single Source of Truth (แหล่งข้อมูลหลักเดียว)** สำหรับขอบเขตโครงการ กฎหลัก และเส้นทางพัฒนาของ Dhamma Channel Automation
 
 ---
 
-## 1. Purpose
+## 1. วัตถุประสงค์ (Purpose)
 
-- **Mission**: Automate YouTube content production for "ธรรมะดีดี" (Dhamma Channel) using AI agents to generate 20-30 high-quality Buddhist/mindfulness videos per month
-- **Revenue Target**: 100,000 THB/month from YouTube AdSense
-- **Automation Goal**: Reduce manual production time by 70% while maintaining content quality and cultural appropriateness
-- **Safety First**: Reliable, auditable pipeline with human oversight gates; AI generates, humans decide
+- **ภารกิจ**: ระบบอัตโนมัติการผลิตคอนเทนต์ YouTube สำหรับช่อง "ธรรมะดีดี" โดยใช้ AI agents สร้างวิดีโอธรรมะ/สติปัญญาคุณภาพสูง 20-30 วิดีโอต่อเดือน
+- **เป้าหมายรายได้**: 100,000 บาท/เดือน จาก YouTube AdSense
+- **เป้าหมาย Automation**: ลดเวลาการผลิตแบบแมนนวล 70% โดยยังรักษาคุณภาพเนื้อหาและความเหมาะสมทางวัฒนธรรม
+- **ความปลอดภัยเป็นอันดับแรก**: Pipeline ที่เชื่อถือได้ ตรวจสอบได้ มี human oversight gates; AI สร้าง มนุษย์ตัดสินใจ
 
-## 2. Scope
+## 2. ขอบเขต (Scope)
 
-### Core Pipeline (Deterministic)
-Pipeline stages executed sequentially by orchestrator:
+### Core Pipeline (แบบกำหนดไว้)
+ขั้นตอนการทำงานที่ orchestrator รันตามลำดับ:
 - **Discovery**: TrendScout, TopicPrioritizer, ResearchRetrieval
 - **Content**: ScriptOutline, ScriptWriter, DoctrineValidator, LegalCompliance
 - **Production**: VoiceoverAgent (TTS), VisualAsset, Localization/Subtitle
 - **Publishing**: SEOMetadata, ThumbnailGenerator, SchedulingPublishing
 - **Analytics**: KPI tracking, performance monitoring
 
-### Extensions (Event-Driven, Optional)
-n8n workflows for orchestration enhancements:
-- Post-publish LINE notifications
-- Scheduled pipeline triggers
-- Retry logic for failed stages
-- Alert routing for human review
+### Extensions (Event-Driven, เสริมเพิ่มเติม)
+n8n workflows สำหรับเสริมการทำงานของ orchestration:
+- การแจ้งเตือน LINE หลังเผยแพร่วิดีโอ
+- กำหนดเวลารัน pipeline อัตโนมัติ
+- Retry logic สำหรับขั้นตอนที่ล้มเหลว
+- Alert routing สำหรับการตรวจสอบโดยมนุษย์
 
-## 3. Non-goals
+## 3. สิ่งที่ไม่อยู่ในเป้าหมาย (Non-goals)
 
-- **No closed-loop auto-optimization**: AI reads KPIs but does NOT autonomously change prompts, agent parameters, or content strategy; humans/rules decide all changes
-- **n8n not required**: Core pipeline must function fully without any n8n workflows; extensions are convenience, not dependency
-- **No multi-tenant**: Single channel, single operator; scaling to other channels is future work (post-PR11)
+- **ไม่มีการเพิ่มประสิทธิภาพอัตโนมัติแบบวงปิด**: AI อ่าน KPIs แต่จะไม่เปลี่ยน prompts, agent parameters หรือกลยุทธ์เนื้อหาเอง; มนุษย์/กฎเท่านั้นที่ตัดสินใจเปลี่ยนแปลง
+- **n8n ไม่จำเป็น**: Core pipeline ต้องทำงานได้เต็มที่โดยไม่ต้องมี n8n workflows; extensions เป็นสิ่งอำนวยความสะดวก ไม่ใช่ dependency
+- **ไม่รองรับหลายช่อง (multi-tenant)**: ช่องเดียว ผู้ดูแลเดียว; การขยายไปยังช่องอื่นๆ เป็นงานในอนาคต (หลัง PR11)
 
-## 4. Core Invariants (Must-Not-Break)
+## 4. กฎหลักที่ต้องไม่ละเมิด (Core Invariants - Must-Not-Break)
 
-1. **Kill Switch Safety**: `PIPELINE_ENABLED=false` stops all pipeline execution cleanly; orchestrator and web runner enforce this; exit code 0 (no-op, not error)
-2. **Removable Extensions**: Disabling/removing n8n, webhooks, or notification systems must NOT break core pipeline execution
-3. **Idempotent Upload**: YouTube publish agent must detect existing videos to prevent duplicate uploads; safe to re-run
-4. **Localhost-Only Ports**: All services bind to `127.0.0.1:PORT`; System Nginx is the sole public-facing reverse proxy (FlowBiz pattern)
-5. **Green Main Branch**: Every PR keeps `main` branch deployable; minimal changes, full tests pass, no breaking changes
-6. **Audit Trail**: All pipeline runs produce timestamped output directories with full logs, artifacts, and metadata
+1. **Kill Switch Safety**: `PIPELINE_ENABLED=false` หยุดการทำงานของ pipeline อย่างสะอาด; orchestrator และ web runner บังคับใช้; exit code 0 (no-op, ไม่ใช่ error)
+2. **Extensions ถอดออกได้**: การปิด/ลบ n8n, webhooks หรือระบบแจ้งเตือนต้องไม่ทำให้ core pipeline พัง
+3. **Idempotent Upload**: YouTube publish agent ต้องตรวจจับวิดีโอที่มีอยู่แล้ว เพื่อป้องกันการอัพโหลดซ้ำ; รันซ้ำได้อย่างปลอดภัย
+4. **Localhost-Only Ports**: บริการทั้งหมด bind ที่ `127.0.0.1:PORT` เท่านั้น; System Nginx เป็น reverse proxy หน้าบ้านเพียงตัวเดียว (FlowBiz pattern)
+5. **Green Main Branch**: ทุก PR ต้องรักษา `main` branch ให้ deploy ได้; การเปลี่ยนแปลงน้อยที่สุด, tests ผ่านทั้งหมด, ไม่มี breaking changes
+6. **Audit Trail**: ทุก pipeline run สร้าง output directories พร้อม timestamp, logs, artifacts และ metadata ครบถ้วน
 
-## 5. System Shape (Core vs Extensions)
+## 5. รูปแบบระบบ (System Shape - Core vs Extensions)
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -67,9 +67,9 @@ n8n workflows for orchestration enhancements:
 └─────────────────────────────────────────────────────┘
 ```
 
-**Port Configuration Pattern**: Single source of truth in `config/flowbiz_port.env` (`FLOWBIZ_ALLOCATED_PORT=3007`); all services reference this variable; System Nginx proxies from public domain to `127.0.0.1:3007`.
+**Port Configuration Pattern**: แหล่งข้อมูลเดียว (single source of truth) อยู่ใน `config/flowbiz_port.env` (`FLOWBIZ_ALLOCATED_PORT=3007`); บริการทั้งหมดอ้างอิงตัวแปรนี้; System Nginx proxy จาก public domain ไปยัง `127.0.0.1:3007`
 
-## 6. Control Flow (High Level)
+## 6. Control Flow ระดับสูง (High Level)
 
 ```
 ┌─────────┐    ┌────────┐    ┌───────┐    ┌───────┐    ┌──────┐    ┌────────┐    ┌────────┐    ┌─────┐
@@ -83,42 +83,42 @@ Legend:
   EXTENSION = Optional, event-driven, n8n-managed
 ```
 
-Pipeline phases:
-1. **Discovery** (CORE): Trend analysis → topic selection → research gathering
-2. **Content** (CORE): Outline → script → validation (doctrine, legal)
-3. **Production** (CORE): Voice synthesis → visual assets → subtitles
-4. **Publishing** (CORE): SEO metadata → thumbnail → YouTube upload
-5. **Notification** (EXTENSION): LINE alerts, status updates
-6. **Analytics** (CORE): KPI collection, performance tracking
+ระยะของ Pipeline:
+1. **Discovery** (CORE): วิเคราะห์เทรนด์ → เลือกหัวข้อ → รวบรวมข้อมูลวิจัย
+2. **Content** (CORE): โครงเรื่อง → สคริปต์ → ตรวจสอบความถูกต้อง (หลักธรรม, กฎหมาย)
+3. **Production** (CORE): สังเคราะห์เสียง → visual assets → คำบรรยาย
+4. **Publishing** (CORE): SEO metadata → thumbnail → อัพโหลด YouTube
+5. **Notification** (EXTENSION): แจ้งเตือน LINE, อัพเดตสถานะ
+6. **Analytics** (CORE): เก็บ KPI, ติดตามประสิทธิภาพ
 
-## 7. Extension Policy (n8n Optional)
+## 7. นโยบาย Extension (n8n เป็นตัวเลือก)
 
-### Allowed Uses (Event-Driven Orchestration)
-- **After-publish notifications**: Send LINE message when video is live
-- **Scheduling**: Trigger pipeline runs on cron schedule
-- **Retry logic**: Re-run failed pipeline stages with exponential backoff
-- **Alerting**: Notify humans when manual review required (doctrine flag, compliance issue)
+### การใช้งานที่อนุญาต (Event-Driven Orchestration)
+- **การแจ้งเตือนหลังเผยแพร่**: ส่งข้อความ LINE เมื่อวิดีโอออนไลน์
+- **การกำหนดเวลา**: เรียก pipeline runs ตามตารางเวลา cron
+- **Retry logic**: รันขั้นตอนที่ล้มเหลวซ้ำด้วย exponential backoff
+- **การแจ้งเตือน**: แจ้งมนุษย์เมื่อต้องการการตรวจสอบแบบแมนนวล (ธงหลักธรรม, ปัญหาการปฏิบัติตามกฎ)
 
-### Prohibited Uses (Must Stay in Core)
-- **Artifact generation**: n8n must NOT call agents directly to create scripts, audio, or video; orchestrator owns execution
-- **Guardrail bypass**: n8n cannot override `PIPELINE_ENABLED`, skip validation stages, or modify agent behavior
-- **Core decision-making**: n8n cannot change content strategy, prompt templates, or agent parameters; humans via code/config only
+### การใช้งานที่ห้าม (ต้องอยู่ใน Core)
+- **การสร้าง artifact**: n8n ต้องไม่เรียก agents โดยตรงเพื่อสร้างสคริปต์, เสียง หรือวิดีโอ; orchestrator เป็นเจ้าของการทำงาน
+- **การข้าม guardrail**: n8n ไม่สามารถ override `PIPELINE_ENABLED`, ข้ามขั้นตอนตรวจสอบ หรือแก้ไข agent behavior
+- **การตัดสินใจหลัก**: n8n ไม่สามารถเปลี่ยนกลยุทธ์เนื้อหา, prompt templates หรือ agent parameters; มนุษย์ผ่าน code/config เท่านั้น
 
-### Testing Standard
-Pipeline must pass full end-to-end test with n8n disabled/removed:
+### มาตรฐานการทดสอบ
+Pipeline ต้องผ่าน full end-to-end test โดย n8n ปิด/ลบออก:
 ```bash
-# n8n down or not installed
+# n8n down หรือไม่ได้ติดตั้ง
 PIPELINE_ENABLED=true python orchestrator.py --pipeline pipeline.web.yml --run-id test_no_n8n
-# Expected: Pipeline completes successfully, outputs in output/test_no_n8n/
+# คาดหวัง: Pipeline เสร็จสมบูรณ์, outputs อยู่ใน output/test_no_n8n/
 ```
 
-## 8. Delivery Model (PR-by-PR)
+## 8. โมเดลการส่งมอบ (Delivery Model - PR-by-PR)
 
-### Completed (PR1-PR2)
+### เสร็จสมบูรณ์แล้ว (PR1-PR2)
 - **PR1**: Foundation (BaseAgent, TrendScout, CLI, tests, docs, CI/CD)
 - **PR2**: FlowBiz Client Product adoption (contract endpoints, port binding, guardrails)
 
-### Planned Milestones (PR3-PR11)
+### Milestone ที่วางแผนไว้ (PR3-PR11)
 - **PR3**: TopicPrioritizer + integration tests
 - **PR4**: ScriptOutline + ScriptWriter agents
 - **PR5**: DoctrineValidator + compliance checks
@@ -130,57 +130,57 @@ PIPELINE_ENABLED=true python orchestrator.py --pipeline pipeline.web.yml --run-i
 - **PR11**: End-to-end integration + production readiness checklist
 
 ### Platform v2 (PR12+)
-When sufficient production data exists (3+ months of KPI data, 60+ videos published):
-- Dashboard for human review/approval gates
-- Advanced analytics and insights
-- A/B testing framework for prompts/strategies
-- Multi-channel expansion (if validated by PR11 success)
+เมื่อมีข้อมูลการใช้งานจริงเพียงพอ (3+ เดือนของข้อมูล KPI, 60+ วิดีโอที่เผยแพร่):
+- Dashboard สำหรับการตรวจสอบ/อนุมัติโดยมนุษย์
+- การวิเคราะห์และข้อมูลเชิงลึกขั้นสูง
+- A/B testing framework สำหรับ prompts/strategies
+- การขยายหลายช่อง (ถ้าได้รับการยืนยันจากความสำเร็จของ PR11)
 
-**Constraint**: PR12+ requires production validation; do NOT prematurely build platform features without proven demand/data.
+**ข้อจำกัด**: PR12+ ต้องการการยืนยันจากการใช้งานจริง; ห้ามสร้างฟีเจอร์ platform ก่อนเวลาโดยไม่มีความต้องการ/ข้อมูลที่พิสูจน์แล้ว
 
-## 9. Observability & Safety (Minimum)
+## 9. Observability & Safety (ขั้นต่ำ)
 
-### Required Runtime Checks
-- **GET /healthz**: Service health status; fast (<50ms), no external dependencies, no auth required
-- **GET /v1/meta**: Service metadata (version, build SHA, environment); useful for deployment verification
+### Runtime Checks ที่จำเป็น
+- **GET /healthz**: สถานะความพร้อมของบริการ; เร็ว (<50ms), ไม่ต้องเชื่อมต่อบริการภายนอก, ไม่ต้อง auth
+- **GET /v1/meta**: Metadata ของบริการ (version, build SHA, environment); มีประโยชน์สำหรับการยืนยัน deployment
 
-### Safety Tools (Reference Only)
-- **scripts/guardrails.sh**: Pre-deployment compliance checks (port binding, env vars, documentation, security)
-- **scripts/runtime_verify.sh**: Post-deployment smoke tests (endpoints, port binding, basic pipeline run)
-- **PIPELINE_ENABLED kill switch**: Emergency stop for production incidents (API outages, content policy changes)
+### เครื่องมือ Safety (อ้างอิงเท่านั้น)
+- **scripts/guardrails.sh**: การตรวจสอบการปฏิบัติตามกฎก่อน deployment (port binding, env vars, documentation, security)
+- **scripts/runtime_verify.sh**: Smoke tests หลัง deployment (endpoints, port binding, basic pipeline run)
+- **PIPELINE_ENABLED kill switch**: หยุดฉุกเฉินสำหรับเหตุการณ์ในการใช้งานจริง (API outages, การเปลี่ยนแปลงนโยบายเนื้อหา)
 
-**Note**: These tools exist and must remain functional; PRs should NOT modify them unless fixing bugs or extending safety (never weaken checks).
+**หมายเหตุ**: เครื่องมือเหล่านี้มีอยู่และต้องใช้งานได้; PRs ไม่ควรแก้ไขเว้นแต่แก้บัคหรือเพิ่มความปลอดภัย (ห้ามทำให้การตรวจสอบอ่อนแอลง)
 
-### Monitoring Expectations
-- Every pipeline run logs to `output/<run-id>/logs/`
-- Success/failure tracked in pipeline metadata JSON
-- Human operators review outputs before YouTube publish (manual gate in PR3-PR9; may automate in PR12+ if proven reliable)
+### ความคาดหวังด้าน Monitoring
+- ทุก pipeline run บันทึก logs ไปยัง `output/<run-id>/logs/`
+- ติดตามความสำเร็จ/ล้มเหลวใน pipeline metadata JSON
+- ผู้ดูแลมนุษย์ตรวจสอบผลลัพธ์ก่อนเผยแพร่ YouTube (manual gate ใน PR3-PR9; อาจทำอัตโนมัติใน PR12+ ถ้าพิสูจน์ความน่าเชื่อถือแล้ว)
 
-## 10. Evolution Path
+## 10. เส้นทางการพัฒนา (Evolution Path)
 
-### Current State (PR2 Complete)
-- **Manual + Semi-Automated**: Trend analysis automated; script/video production semi-manual; publish requires human approval
-- **Local/Dev Environment**: Runs on developer machine; not yet production-deployed
-- **Single Channel**: "ธรรมะดีดี" only
+### สถานะปัจจุบัน (PR2 เสร็จสมบูรณ์)
+- **Manual + Semi-Automated**: วิเคราะห์เทรนด์อัตโนมัติ; การผลิตสคริปต์/วิดีโอกึ่งแมนนวล; การเผยแพร่ต้องมีการอนุมัติจากมนุษย์
+- **สภาพแวดล้อม Local/Dev**: รันบนเครื่องนักพัฒนา; ยังไม่ได้ deploy ในการใช้งานจริง
+- **ช่องเดียว**: "ธรรมะดีดี" เท่านั้น
 
-### Near-Term (PR3-PR11, Next 3-6 Months)
-- **Production-Ready Pipeline**: Fully automated discovery→script→voice→video→upload with human review gates
-- **Reliable Notifications**: n8n workflows for status alerts, scheduling
-- **KPI Dashboard**: Web UI for viewing analytics, approving content, monitoring costs
-- **FlowBiz Integration**: Deployed on VPS, System Nginx proxying, healthz monitoring
+### ระยะใกล้ (PR3-PR11, 3-6 เดือนถัดไป)
+- **Production-Ready Pipeline**: ระบบอัตโนมัติเต็มรูปแบบ discovery→script→voice→video→upload พร้อม human review gates
+- **การแจ้งเตือนที่เชื่อถือได้**: n8n workflows สำหรับ status alerts, scheduling
+- **KPI Dashboard**: Web UI สำหรับดูการวิเคราะห์, อนุมัติเนื้อหา, ตรวจสอบค่าใช้จ่าย
+- **FlowBiz Integration**: Deploy บน VPS, System Nginx proxying, healthz monitoring
 
-### Mid-Term (PR12+, 6-12 Months, Data-Driven)
-- **Proven Automation**: 60+ videos published, KPIs validated (revenue, engagement, quality)
-- **Reduced Review Gates**: Automate approval for low-risk content (doctrine/legal checks pass automatically)
-- **Performance Insights**: AI-powered suggestions for topic selection, SEO optimization (humans still decide)
+### ระยะกลาง (PR12+, 6-12 เดือน, ขับเคลื่อนด้วยข้อมูล)
+- **Automation ที่พิสูจน์แล้ว**: 60+ วิดีโอที่เผยแพร่, KPIs ยืนยันแล้ว (รายได้, engagement, คุณภาพ)
+- **ลด Review Gates**: ทำการอนุมัติอัตโนมัติสำหรับเนื้อหาความเสี่ยงต่ำ (ผ่านการตรวจสอบหลักธรรม/กฎหมายอัตโนมัติ)
+- **Performance Insights**: คำแนะนำจาก AI สำหรับการเลือกหัวข้อ, การเพิ่มประสิทธิภาพ SEO (มนุษย์ยังคงตัดสินใจ)
 
-### Long-Term (Future, Conditional on Success)
-- **Multi-Channel Scaling**: Expand to other Buddhist/mindfulness channels if single-channel model proves profitable and reliable
-- **Advanced Features**: Real-time trend detection, multi-language content, video editing automation
-- **Platform Product**: White-label solution for other content creators (speculative; depends on PR11 validation)
+### ระยะยาว (อนาคต, ขึ้นอยู่กับความสำเร็จ)
+- **Multi-Channel Scaling**: ขยายไปยังช่องธรรมะ/สติปัญญาอื่นๆ ถ้าโมเดลช่องเดียวมีกำไรและเชื่อถือได้
+- **ฟีเจอร์ขั้นสูง**: การตรวจจับเทรนด์แบบ real-time, เนื้อหาหลายภาษา, ระบบตัดต่อวิดีโออัตโนมัติ
+- **Platform Product**: โซลูชัน white-label สำหรับ content creators อื่นๆ (เป็นการคาดการณ์; ขึ้นอยู่กับการยืนยันจาก PR11)
 
 ---
 
 **Blueprint Status**: v1.0 (2025-12-30)  
 **Maintained By**: Repository maintainers  
-**Update Policy**: Review quarterly or when major architectural changes planned; keep concise (<5 min read)
+**Update Policy**: ทบทวนรายไตรมาสหรือเมื่อมีการเปลี่ยนแปลงสถาปัตยกรรมหลัก; รักษาความกระชับ (อ่านได้ใน <5 นาที)
