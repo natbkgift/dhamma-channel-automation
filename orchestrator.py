@@ -2613,6 +2613,25 @@ def agent_youtube_upload(step, run_dir: Path):
             return None
         return _validate_repo_relative_path(value, env_name)
 
+    def _read_override_text(path: Path, env_name: str) -> str:
+        max_bytes = 65_536
+        try:
+            size = path.stat().st_size
+        except OSError as exc:
+            raise ValueError(f"Unable to read override file for {env_name}") from exc
+        if size > max_bytes:
+            raise ValueError(
+                f"Override file for {env_name} is too large (>{max_bytes} bytes)"
+            )
+        try:
+            return path.read_text(encoding="utf-8")
+        except UnicodeDecodeError as exc:
+            raise ValueError(
+                f"Override file for {env_name} must be valid UTF-8 text"
+            ) from exc
+        except OSError as exc:
+            raise ValueError(f"Unable to read override file for {env_name}") from exc
+
     def _resolve_metadata() -> tuple[str, str, list[str]]:
         title = None
         description = None
@@ -2634,17 +2653,20 @@ def agent_youtube_upload(step, run_dir: Path):
         if title is None:
             title_path = _resolve_override_path("YOUTUBE_TITLE_PATH")
             if title_path is not None:
-                title = title_path.read_text(encoding="utf-8")
+                title = _read_override_text(title_path, "YOUTUBE_TITLE_PATH")
 
         if description is None:
             description_path = _resolve_override_path("YOUTUBE_DESCRIPTION_PATH")
             if description_path is not None:
-                description = description_path.read_text(encoding="utf-8")
+                description = _read_override_text(
+                    description_path, "YOUTUBE_DESCRIPTION_PATH"
+                )
 
         if tags is None:
             tags_path = _resolve_override_path("YOUTUBE_TAGS_PATH")
             if tags_path is not None:
-                tags = _parse_tags_text(tags_path.read_text(encoding="utf-8"))
+                tags_text = _read_override_text(tags_path, "YOUTUBE_TAGS_PATH")
+                tags = _parse_tags_text(tags_text)
 
         if title is None:
             title = f"Dhamma Video - {run_id}"
@@ -2671,11 +2693,17 @@ def agent_youtube_upload(step, run_dir: Path):
     upload_enabled = _is_upload_enabled(step)
     max_retries = _parse_int_env("YOUTUBE_UPLOAD_MAX_RETRIES", 3)
     backoff_seconds = _parse_int_env("YOUTUBE_UPLOAD_BACKOFF_SECONDS", 10)
-    privacy_status = (
+    privacy_status_raw = (
         os.environ.get("YOUTUBE_PRIVACY_STATUS", "unlisted").strip().lower()
     )
-    if privacy_status not in ("private", "unlisted", "public"):
+    if privacy_status_raw not in ("private", "unlisted", "public"):
+        log(
+            f"Invalid YOUTUBE_PRIVACY_STATUS='{privacy_status_raw}', falling back to 'unlisted'",
+            "WARN",
+        )
         privacy_status = "unlisted"
+    else:
+        privacy_status = privacy_status_raw
 
     checked_at = datetime.now(tz=UTC).isoformat().replace("+00:00", "Z")
     upload_summary_rel = (
