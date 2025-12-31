@@ -52,7 +52,7 @@ def _require_env(name: str) -> str:
 
 
 def upload_video(
-    mp4_path: Path,
+    mp4_path: Path | str,
     title: str,
     description: str,
     tags: list[str],
