@@ -289,7 +289,9 @@ def test_orchestrator_youtube_upload_failed_when_auth_missing(tmp_path, monkeypa
     assert summary["attempt_count"] == 1
 
 
-def test_orchestrator_youtube_upload_failed_when_input_mp4_missing(tmp_path, monkeypatch):
+def test_orchestrator_youtube_upload_failed_when_input_mp4_missing(
+    tmp_path, monkeypatch
+):
     run_id = "run_mp4_missing"
     output_mp4_rel = f"output/{run_id}/artifacts/missing.mp4"
     _write_quality_gate_summary(tmp_path, run_id, "pass", output_mp4_rel)

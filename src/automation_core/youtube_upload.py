@@ -93,9 +93,13 @@ def upload_video(
         raise YoutubeUploadError("Video description must be a non-empty string")
 
     allowed_privacy_statuses = {"private", "unlisted", "public"}
-    if not isinstance(privacy_status, str) or privacy_status not in allowed_privacy_statuses:
+    if (
+        not isinstance(privacy_status, str)
+        or privacy_status not in allowed_privacy_statuses
+    ):
         raise YoutubeUploadError(
-            "privacy_status must be one of: " + ", ".join(sorted(allowed_privacy_statuses))
+            "privacy_status must be one of: "
+            + ", ".join(sorted(allowed_privacy_statuses))
         )
 
     try:
