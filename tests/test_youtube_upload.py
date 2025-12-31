@@ -10,7 +10,6 @@
 
 from __future__ import annotations
 
-import sys
 from unittest.mock import Mock, patch
 
 import pytest
@@ -49,8 +48,22 @@ def mock_google_api():
     mock_request_class = Mock()
     mock_build_func = Mock()
     mock_media_upload_class = Mock()
-    mock_http_error_class = Exception
-    mock_refresh_error_class = Exception
+
+    # Create proper mock exception classes
+    class MockHttpError(Exception):
+        """Mock HttpError with resp attribute"""
+
+        def __init__(self, message):
+            super().__init__(message)
+            self.resp = None
+
+    class MockRefreshError(Exception):
+        """Mock RefreshError exception"""
+
+        pass
+
+    mock_http_error_class = MockHttpError
+    mock_refresh_error_class = MockRefreshError
 
     # Setup module attributes
     mock_google_auth_exceptions.RefreshError = mock_refresh_error_class
@@ -560,10 +573,17 @@ class TestUploadVideoDepsMissing:
         monkeypatch.setenv("YOUTUBE_CLIENT_SECRET", "test_secret")
         monkeypatch.setenv("YOUTUBE_REFRESH_TOKEN", "test_token")
 
-        # Make sure google modules are not available
-        google_modules = [k for k in sys.modules.keys() if k.startswith("google")]
-        for mod in google_modules:
-            monkeypatch.setitem(sys.modules, mod, None)
+        # Use a more targeted approach to simulate missing imports
+        import builtins
+
+        original_import = builtins.__import__
+
+        def mock_import(name, *args, **kwargs):
+            if name.startswith("google"):
+                raise ImportError(f"No module named '{name}'")
+            return original_import(name, *args, **kwargs)
+
+        monkeypatch.setattr(builtins, "__import__", mock_import)
 
         with pytest.raises(YoutubeDepsMissingError) as exc_info:
             upload_video(
@@ -590,10 +610,10 @@ class TestUploadVideoApiErrors:
         monkeypatch.setenv("YOUTUBE_CLIENT_SECRET", "test_secret")
         monkeypatch.setenv("YOUTUBE_REFRESH_TOKEN", "test_token")
 
-        # Make refresh raise an error
-        mock_google_api["credentials_instance"].refresh.side_effect = Exception(
-            "Refresh failed"
-        )
+        # Make refresh raise RefreshError
+        mock_google_api["credentials_instance"].refresh.side_effect = mock_google_api[
+            "RefreshError"
+        ]("Refresh failed")
 
         with pytest.raises(YoutubeApiError) as exc_info:
             upload_video(
