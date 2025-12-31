@@ -2756,7 +2756,7 @@ def agent_youtube_upload(step, run_dir: Path):
         output_mp4_value = quality_summary_required.get("output_mp4_path")
         if isinstance(output_mp4_value, str) and output_mp4_value:
             output_mp4_rel = Path(output_mp4_value).as_posix()
-            output_mp4_abs = _validate_repo_relative_path(
+            _validate_repo_relative_path(
                 output_mp4_rel, "quality_gate_summary.output_mp4_path"
             )
         summary_path = _write_summary(
