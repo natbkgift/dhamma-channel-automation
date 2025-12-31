@@ -78,7 +78,15 @@ class ProcessJob:
             line = await stream.readline()
             if not line:
                 break
-            text = line.decode(errors="ignore").rstrip("\n")
+            # `asyncio.StreamReader.readline()` normally returns `bytes`.
+            # In unit tests we may see mocked values; treat unexpected types as EOF
+            # to avoid runaway loops and unhandled task exceptions.
+            if isinstance(line, (bytes, bytearray, memoryview)):
+                text = bytes(line).decode(errors="ignore").rstrip("\n")
+            elif isinstance(line, str):
+                text = line.rstrip("\n")
+            else:
+                break
             self.log.append(f"{prefix}: {text}")
             self._append_file_log(f"{prefix}: {text}")
             # heuristic progress e.g., "progress=42%"
