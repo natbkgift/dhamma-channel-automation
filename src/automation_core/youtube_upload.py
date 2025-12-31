@@ -28,7 +28,7 @@ def _require_env(name: str) -> str:
     value = os.environ.get(name)
     if value is None or not value.strip():
         raise YoutubeAuthMissingError(
-            "Missing required YouTube auth environment variables"
+            f"Missing required YouTube auth environment variable: {name}"
         )
     return value.strip()
 
