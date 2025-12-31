@@ -223,3 +223,97 @@ def test_orchestrator_youtube_upload_failed_after_retries(tmp_path, monkeypatch)
     assert summary["decision"] == "failed"
     assert summary["error"]["code"] == "upload_failed_after_retries"
     assert summary["attempt_count"] == 3
+
+
+def test_orchestrator_youtube_upload_failed_when_deps_missing(tmp_path, monkeypatch):
+    run_id = "run_deps_missing"
+    output_mp4_rel = f"output/{run_id}/artifacts/demo.mp4"
+    _write_mp4(tmp_path, output_mp4_rel)
+    _write_quality_gate_summary(tmp_path, run_id, "pass", output_mp4_rel)
+    pipeline_path = _write_pipeline(tmp_path)
+
+    monkeypatch.setattr(orchestrator, "ROOT", tmp_path)
+    monkeypatch.setenv("PIPELINE_ENABLED", "true")
+    monkeypatch.setenv("YOUTUBE_UPLOAD_ENABLED", "true")
+
+    def fake_upload(*_args, **_kwargs):
+        raise orchestrator.youtube_upload.YoutubeDepsMissingError("deps missing")
+
+    monkeypatch.setattr(orchestrator.youtube_upload, "upload_video", fake_upload)
+
+    try:
+        orchestrator.run_pipeline(pipeline_path, run_id)
+    except RuntimeError as exc:
+        assert "youtube_deps_missing" in str(exc)
+    else:
+        raise AssertionError("Expected RuntimeError for deps missing")
+
+    summary_path = (
+        tmp_path / "output" / run_id / "artifacts" / "youtube_upload_summary.json"
+    )
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    assert summary["decision"] == "failed"
+    assert summary["error"]["code"] == "youtube_deps_missing"
+    assert summary["attempt_count"] == 1
+
+
+def test_orchestrator_youtube_upload_failed_when_auth_missing(tmp_path, monkeypatch):
+    run_id = "run_auth_missing"
+    output_mp4_rel = f"output/{run_id}/artifacts/demo.mp4"
+    _write_mp4(tmp_path, output_mp4_rel)
+    _write_quality_gate_summary(tmp_path, run_id, "pass", output_mp4_rel)
+    pipeline_path = _write_pipeline(tmp_path)
+
+    monkeypatch.setattr(orchestrator, "ROOT", tmp_path)
+    monkeypatch.setenv("PIPELINE_ENABLED", "true")
+    monkeypatch.setenv("YOUTUBE_UPLOAD_ENABLED", "true")
+
+    def fake_upload(*_args, **_kwargs):
+        raise orchestrator.youtube_upload.YoutubeAuthMissingError("auth missing")
+
+    monkeypatch.setattr(orchestrator.youtube_upload, "upload_video", fake_upload)
+
+    try:
+        orchestrator.run_pipeline(pipeline_path, run_id)
+    except RuntimeError as exc:
+        assert "auth_missing_env" in str(exc)
+    else:
+        raise AssertionError("Expected RuntimeError for auth missing")
+
+    summary_path = (
+        tmp_path / "output" / run_id / "artifacts" / "youtube_upload_summary.json"
+    )
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    assert summary["decision"] == "failed"
+    assert summary["error"]["code"] == "auth_missing_env"
+    assert summary["attempt_count"] == 1
+
+
+def test_orchestrator_youtube_upload_failed_when_input_mp4_missing(tmp_path, monkeypatch):
+    run_id = "run_mp4_missing"
+    output_mp4_rel = f"output/{run_id}/artifacts/missing.mp4"
+    _write_quality_gate_summary(tmp_path, run_id, "pass", output_mp4_rel)
+    pipeline_path = _write_pipeline(tmp_path)
+
+    monkeypatch.setattr(orchestrator, "ROOT", tmp_path)
+    monkeypatch.setenv("PIPELINE_ENABLED", "true")
+    monkeypatch.setenv("YOUTUBE_UPLOAD_ENABLED", "true")
+
+    mock_upload = Mock()
+    monkeypatch.setattr(orchestrator.youtube_upload, "upload_video", mock_upload)
+
+    try:
+        orchestrator.run_pipeline(pipeline_path, run_id)
+    except RuntimeError as exc:
+        assert "input_mp4_missing" in str(exc)
+    else:
+        raise AssertionError("Expected RuntimeError for missing mp4")
+
+    summary_path = (
+        tmp_path / "output" / run_id / "artifacts" / "youtube_upload_summary.json"
+    )
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    assert summary["decision"] == "failed"
+    assert summary["error"]["code"] == "input_mp4_missing"
+    assert summary["attempt_count"] == 0
+    assert mock_upload.call_count == 0

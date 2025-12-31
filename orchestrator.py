@@ -2487,7 +2487,11 @@ def agent_quality_gate(step, run_dir: Path):
 
 
 def agent_youtube_upload(step, run_dir: Path):
-    """YouTube Upload - Upload MP4 to YouTube with retry and summary output."""
+    """เอเจนต์อัปโหลด YouTube - อัปโหลดไฟล์ MP4 ขึ้น YouTube พร้อม retry และสรุปผลลัพธ์
+
+    หมายเหตุ: ควรถูกเรียกผ่าน orchestrator เท่านั้น เพื่อให้ guardrails เช่น
+    `PIPELINE_ENABLED` ถูกบังคับใช้อย่างถูกต้อง
+    """
     run_id = run_dir.name
     root_dir = ROOT.resolve()
 
@@ -2777,7 +2781,7 @@ def agent_youtube_upload(step, run_dir: Path):
     )
 
     if not output_mp4_abs.is_file() or output_mp4_abs.stat().st_size <= 0:
-        summary_path = _write_summary(
+        _write_summary(
             decision="failed",
             attempt_count=0,
             error_code=CODE_INPUT_MP4_MISSING,
@@ -2810,7 +2814,7 @@ def agent_youtube_upload(step, run_dir: Path):
             )
             return summary_path
         except youtube_upload.YoutubeDepsMissingError as exc:
-            summary_path = _write_summary(
+            _write_summary(
                 decision="failed",
                 attempt_count=attempt,
                 error_code=CODE_DEPS_MISSING,
@@ -2824,7 +2828,7 @@ def agent_youtube_upload(step, run_dir: Path):
                 f"YouTube upload failed for run_id={run_id}; code={CODE_DEPS_MISSING}"
             ) from exc
         except youtube_upload.YoutubeAuthMissingError as exc:
-            summary_path = _write_summary(
+            _write_summary(
                 decision="failed",
                 attempt_count=attempt,
                 error_code=CODE_AUTH_MISSING_ENV,
@@ -2856,7 +2860,7 @@ def agent_youtube_upload(step, run_dir: Path):
                 error_code = CODE_YOUTUBE_API_ERROR
                 error_message = "YouTube API error"
 
-            summary_path = _write_summary(
+            _write_summary(
                 decision="failed",
                 attempt_count=attempt,
                 error_code=error_code,
