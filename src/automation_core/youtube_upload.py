@@ -41,6 +41,7 @@ def upload_video(
     privacy_status: str,
 ) -> str:
     try:
+        from google.auth.exceptions import RefreshError
         from google.auth.transport.requests import Request
         from google.oauth2.credentials import Credentials
         from googleapiclient.discovery import build
@@ -67,7 +68,7 @@ def upload_video(
 
     try:
         creds.refresh(Request())
-    except Exception as exc:
+    except RefreshError as exc:
         raise YoutubeApiError("YouTube auth refresh failed") from exc
 
     try:

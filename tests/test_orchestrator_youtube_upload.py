@@ -71,6 +71,31 @@ def test_orchestrator_youtube_upload_skipped_when_disabled(tmp_path, monkeypatch
     assert mock_upload.call_count == 0
 
 
+def test_orchestrator_youtube_upload_skipped_when_disabled_without_quality_summary(
+    tmp_path, monkeypatch
+):
+    run_id = "run_disabled_no_quality"
+    pipeline_path = _write_pipeline(tmp_path)
+
+    monkeypatch.setattr(orchestrator, "ROOT", tmp_path)
+    monkeypatch.setenv("PIPELINE_ENABLED", "true")
+    monkeypatch.delenv("YOUTUBE_UPLOAD_ENABLED", raising=False)
+
+    mock_upload = Mock()
+    monkeypatch.setattr(orchestrator.youtube_upload, "upload_video", mock_upload)
+
+    orchestrator.run_pipeline(pipeline_path, run_id)
+
+    summary_path = (
+        tmp_path / "output" / run_id / "artifacts" / "youtube_upload_summary.json"
+    )
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    assert summary["decision"] == "skipped"
+    assert summary["error"]["code"] == "upload_disabled"
+    assert summary["attempt_count"] == 0
+    assert mock_upload.call_count == 0
+
+
 def test_orchestrator_youtube_upload_skipped_when_quality_fail(tmp_path, monkeypatch):
     run_id = "run_quality_fail"
     output_mp4_rel = f"output/{run_id}/artifacts/demo.mp4"
