@@ -175,3 +175,144 @@ steps:
     assert summary["decision"] == "fail"
     assert [reason["code"] for reason in summary["reasons"]] == ["ffprobe_failed"]
     _assert_reason_contract(summary["reasons"][0], summary["checked_at"])
+
+
+def test_orchestrator_quality_gate_mp4_empty_fails(tmp_path, monkeypatch):
+    run_id = "run_empty"
+    output_mp4_rel = f"output/{run_id}/artifacts/empty.mp4"
+    mp4_path = tmp_path / output_mp4_rel
+    mp4_path.parent.mkdir(parents=True, exist_ok=True)
+    mp4_path.write_bytes(b"")
+
+    _write_video_render_summary(tmp_path, run_id, output_mp4_rel)
+
+    pipeline_path = tmp_path / "pipeline.yml"
+    pipeline_path.write_text(
+        """pipeline: quality_gate_empty
+steps:
+  - id: quality_gate
+    uses: quality.gate
+""",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(orchestrator, "ROOT", tmp_path)
+    monkeypatch.setenv("PIPELINE_ENABLED", "true")
+
+    mock_run = Mock()
+    monkeypatch.setattr(orchestrator.subprocess, "run", mock_run)
+
+    try:
+        orchestrator.run_pipeline(pipeline_path, run_id)
+    except RuntimeError as exc:
+        assert "Quality gate failed" in str(exc)
+    else:
+        raise AssertionError("Expected RuntimeError for empty mp4")
+
+    summary_path = (
+        tmp_path / "output" / run_id / "artifacts" / "quality_gate_summary.json"
+    )
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    _assert_summary_contract(summary, run_id, output_mp4_rel)
+    assert summary["decision"] == "fail"
+    assert [reason["code"] for reason in summary["reasons"]] == ["mp4_empty"]
+    _assert_reason_contract(summary["reasons"][0], summary["checked_at"])
+    assert mock_run.call_count == 0
+
+
+def test_orchestrator_quality_gate_duration_zero_fails(tmp_path, monkeypatch):
+    run_id = "run_dur_zero"
+    output_mp4_rel = f"output/{run_id}/artifacts/dur_zero.mp4"
+    mp4_path = tmp_path / output_mp4_rel
+    mp4_path.parent.mkdir(parents=True, exist_ok=True)
+    mp4_path.write_bytes(b"fake mp4")
+
+    _write_video_render_summary(tmp_path, run_id, output_mp4_rel)
+
+    pipeline_path = tmp_path / "pipeline.yml"
+    pipeline_path.write_text(
+        """pipeline: quality_gate_dur_zero
+steps:
+  - id: quality_gate
+    uses: quality.gate
+""",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(orchestrator, "ROOT", tmp_path)
+    monkeypatch.setenv("PIPELINE_ENABLED", "true")
+
+    ffprobe_payload = json.dumps(
+        {"format": {"duration": "0"}, "streams": [{"codec_type": "audio"}]}
+    )
+
+    def fake_run(cmd, check=False, capture_output=True, text=True):
+        return subprocess.CompletedProcess(cmd, 0, stdout=ffprobe_payload, stderr="")
+
+    monkeypatch.setattr(orchestrator.subprocess, "run", fake_run)
+
+    try:
+        orchestrator.run_pipeline(pipeline_path, run_id)
+    except RuntimeError as exc:
+        assert "Quality gate failed" in str(exc)
+    else:
+        raise AssertionError("Expected RuntimeError for duration zero")
+
+    summary_path = (
+        tmp_path / "output" / run_id / "artifacts" / "quality_gate_summary.json"
+    )
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    _assert_summary_contract(summary, run_id, output_mp4_rel)
+    assert summary["decision"] == "fail"
+    assert [reason["code"] for reason in summary["reasons"]] == [
+        "duration_zero_or_missing"
+    ]
+    _assert_reason_contract(summary["reasons"][0], summary["checked_at"])
+
+
+def test_orchestrator_quality_gate_audio_stream_missing_fails(tmp_path, monkeypatch):
+    run_id = "run_no_audio"
+    output_mp4_rel = f"output/{run_id}/artifacts/no_audio.mp4"
+    mp4_path = tmp_path / output_mp4_rel
+    mp4_path.parent.mkdir(parents=True, exist_ok=True)
+    mp4_path.write_bytes(b"fake mp4")
+
+    _write_video_render_summary(tmp_path, run_id, output_mp4_rel)
+
+    pipeline_path = tmp_path / "pipeline.yml"
+    pipeline_path.write_text(
+        """pipeline: quality_gate_no_audio
+steps:
+  - id: quality_gate
+    uses: quality.gate
+""",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(orchestrator, "ROOT", tmp_path)
+    monkeypatch.setenv("PIPELINE_ENABLED", "true")
+
+    ffprobe_payload = json.dumps(
+        {"format": {"duration": "12.0"}, "streams": [{"codec_type": "video"}]}
+    )
+
+    def fake_run(cmd, check=False, capture_output=True, text=True):
+        return subprocess.CompletedProcess(cmd, 0, stdout=ffprobe_payload, stderr="")
+
+    monkeypatch.setattr(orchestrator.subprocess, "run", fake_run)
+
+    try:
+        orchestrator.run_pipeline(pipeline_path, run_id)
+    except RuntimeError as exc:
+        assert "Quality gate failed" in str(exc)
+    else:
+        raise AssertionError("Expected RuntimeError for missing audio stream")
+
+    summary_path = (
+        tmp_path / "output" / run_id / "artifacts" / "quality_gate_summary.json"
+    )
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    _assert_summary_contract(summary, run_id, output_mp4_rel)
+    assert summary["decision"] == "fail"
+    assert [reason["code"] for reason in summary["reasons"]] == ["audio_stream_missing"]
+    _assert_reason_contract(summary["reasons"][0], summary["checked_at"])

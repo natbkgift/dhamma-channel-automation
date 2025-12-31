@@ -2269,9 +2269,17 @@ def agent_video_render(step, run_dir: Path):
 
 
 def agent_quality_gate(step, run_dir: Path):
-    """Deterministic quality gate checks for rendered MP4 outputs."""
+    """Quality Gate - ตรวจสอบคุณภาพวิดีโอที่เรนเดอร์แล้วแบบ deterministic."""
     run_id = run_dir.name
     root_dir = ROOT.resolve()
+
+    QG_ENGINE = "quality.gate"
+    SEVERITY_ERROR = "error"
+    CODE_MP4_MISSING = "mp4_missing"
+    CODE_MP4_EMPTY = "mp4_empty"
+    CODE_FFPROBE_FAILED = "ffprobe_failed"
+    CODE_DURATION_ZERO_OR_MISSING = "duration_zero_or_missing"
+    CODE_AUDIO_STREAM_MISSING = "audio_stream_missing"
 
     summary_rel = (
         Path("output") / run_id / "artifacts" / "video_render_summary.json"
@@ -2317,7 +2325,7 @@ def agent_quality_gate(step, run_dir: Path):
         ) from exc
 
     checked_at = datetime.now(tz=UTC).isoformat().replace("+00:00", "Z")
-    reasons = []
+    reasons: list[dict[str, object]] = []
     checks = {
         "mp4_exists": False,
         "mp4_size_bytes": None,
@@ -2326,106 +2334,124 @@ def agent_quality_gate(step, run_dir: Path):
         "has_audio_stream": None,
     }
 
-    def _add_reason(code: str, message: str, severity: str):
+    def _add_reason(code: str, message: str, severity: str) -> None:
         reasons.append(
             {
                 "code": code,
                 "message": message,
                 "severity": severity,
-                "engine": "quality.gate",
+                "engine": QG_ENGINE,
                 "checked_at": checked_at,
             }
         )
 
-    if not output_mp4_abs.is_file():
-        _add_reason("mp4_missing", f"MP4 file not found: {output_mp4_rel}", "error")
-    else:
+    def _check_mp4_existence() -> None:
+        if not output_mp4_abs.is_file():
+            _add_reason(
+                CODE_MP4_MISSING,
+                f"MP4 file not found: {output_mp4_rel}",
+                SEVERITY_ERROR,
+            )
+            return
+
         checks["mp4_exists"] = True
+
+    def _check_mp4_size() -> None:
         mp4_size = output_mp4_abs.stat().st_size
         checks["mp4_size_bytes"] = mp4_size
         if mp4_size == 0:
-            _add_reason("mp4_empty", f"MP4 file is empty: {output_mp4_rel}", "error")
-        else:
-            ffprobe_cmd = [
-                "ffprobe",
-                "-v",
-                "error",
-                "-show_entries",
-                "format=duration:stream=codec_type",
-                "-of",
-                "json",
-                str(output_mp4_abs),
-            ]
-            ffprobe_data = None
+            _add_reason(
+                CODE_MP4_EMPTY, f"MP4 file is empty: {output_mp4_rel}", SEVERITY_ERROR
+            )
+
+    def _run_ffprobe() -> dict | None:
+        ffprobe_cmd = [
+            "ffprobe",
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration:stream=codec_type",
+            "-of",
+            "json",
+            str(output_mp4_abs),
+        ]
+        try:
+            completed = subprocess.run(
+                ffprobe_cmd, check=False, capture_output=True, text=True
+            )
+        except OSError:
+            _add_reason(CODE_FFPROBE_FAILED, "ffprobe execution failed", SEVERITY_ERROR)
+            checks["ffprobe_ok"] = False
+            return None
+
+        if completed.returncode != 0:
+            _add_reason(
+                CODE_FFPROBE_FAILED,
+                f"ffprobe returned non-zero exit code: {completed.returncode}",
+                SEVERITY_ERROR,
+            )
+            checks["ffprobe_ok"] = False
+            return None
+
+        try:
+            data = json.loads(completed.stdout or "{}")
+        except json.JSONDecodeError:
+            _add_reason(
+                CODE_FFPROBE_FAILED, "ffprobe output was not valid JSON", SEVERITY_ERROR
+            )
+            checks["ffprobe_ok"] = False
+            return None
+
+        checks["ffprobe_ok"] = True
+        return data if isinstance(data, dict) else None
+
+    def _check_duration(ffprobe_data: dict) -> None:
+        duration_raw = ffprobe_data.get("format", {}).get("duration")
+        duration_seconds = None
+        if duration_raw is not None:
             try:
-                completed = subprocess.run(
-                    ffprobe_cmd, check=False, capture_output=True, text=True
-                )
-            except OSError:
-                _add_reason("ffprobe_failed", "ffprobe execution failed", "error")
-                checks["ffprobe_ok"] = False
-            else:
-                if completed.returncode != 0:
-                    _add_reason(
-                        "ffprobe_failed",
-                        f"ffprobe returned non-zero exit code: {completed.returncode}",
-                        "error",
-                    )
-                    checks["ffprobe_ok"] = False
-                else:
-                    try:
-                        ffprobe_data = json.loads(completed.stdout or "{}")
-                    except json.JSONDecodeError:
-                        _add_reason(
-                            "ffprobe_failed",
-                            "ffprobe output was not valid JSON",
-                            "error",
-                        )
-                        checks["ffprobe_ok"] = False
-                    else:
-                        checks["ffprobe_ok"] = True
-
-            if checks["ffprobe_ok"]:
-                duration_raw = (
-                    ffprobe_data.get("format", {}).get("duration")
-                    if isinstance(ffprobe_data, dict)
-                    else None
-                )
+                duration_seconds = float(duration_raw)
+            except (TypeError, ValueError):
                 duration_seconds = None
-                if duration_raw is not None:
-                    try:
-                        duration_seconds = float(duration_raw)
-                    except (TypeError, ValueError):
-                        duration_seconds = None
 
-                if duration_seconds is None or duration_seconds <= 0:
-                    _add_reason(
-                        "duration_zero_or_missing",
-                        "MP4 duration is missing or zero",
-                        "error",
-                    )
-                else:
-                    checks["duration_seconds"] = duration_seconds
+        if duration_seconds is None or duration_seconds <= 0:
+            _add_reason(
+                CODE_DURATION_ZERO_OR_MISSING,
+                "MP4 duration is missing or zero",
+                SEVERITY_ERROR,
+            )
+        else:
+            checks["duration_seconds"] = duration_seconds
 
-                streams = (
-                    ffprobe_data.get("streams", [])
-                    if isinstance(ffprobe_data, dict)
-                    else []
-                )
-                has_audio = any(
-                    isinstance(stream, dict) and stream.get("codec_type") == "audio"
-                    for stream in streams
-                )
-                checks["has_audio_stream"] = has_audio
-                if not has_audio:
-                    _add_reason(
-                        "audio_stream_missing",
-                        "No audio stream detected in MP4",
-                        "error",
-                    )
+    def _check_audio_stream(ffprobe_data: dict) -> None:
+        streams = ffprobe_data.get("streams", [])
+        has_audio = any(
+            isinstance(stream, dict) and stream.get("codec_type") == "audio"
+            for stream in streams
+        )
+        checks["has_audio_stream"] = has_audio
+        if not has_audio:
+            _add_reason(
+                CODE_AUDIO_STREAM_MISSING,
+                "No audio stream detected in MP4",
+                SEVERITY_ERROR,
+            )
+
+    _check_mp4_existence()
+    if checks["mp4_exists"]:
+        _check_mp4_size()
+
+    if checks["mp4_exists"] and not any(
+        r.get("code") == CODE_MP4_EMPTY for r in reasons
+    ):
+        ffprobe_data = _run_ffprobe()
+        if checks["ffprobe_ok"]:
+            assert ffprobe_data is not None
+            _check_duration(ffprobe_data)
+            _check_audio_stream(ffprobe_data)
 
     decision = "pass"
-    if any(reason.get("severity") == "error" for reason in reasons):
+    if any(reason.get("severity") == SEVERITY_ERROR for reason in reasons):
         decision = "fail"
 
     gate_summary = {
@@ -2436,7 +2462,7 @@ def agent_quality_gate(step, run_dir: Path):
         "decision": decision,
         "reasons": reasons,
         "checked_at": checked_at,
-        "engine": "quality.gate",
+        "engine": QG_ENGINE,
         "checks": checks,
     }
 
