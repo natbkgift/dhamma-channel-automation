@@ -2014,8 +2014,10 @@ def agent_video_render(step, run_dir: Path):
     slug = config.get("slug")
     if slug is None:
         raise ValueError("config.slug is required")
-    if not isinstance(slug, str) or not slug.strip():
-        raise TypeError("slug must be a non-empty string")
+    if not isinstance(slug, str):
+        raise TypeError("slug must be a string")
+    if not slug.strip():
+        raise ValueError("slug must be a non-empty string")
 
     voiceover_tts._validate_identifier(run_id, "run_id")
     slug = voiceover_tts._validate_identifier(slug, "slug")
