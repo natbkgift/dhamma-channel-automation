@@ -137,6 +137,14 @@ def upload_video(
         youtube = build("youtube", "v3", credentials=creds)
     except (KeyboardInterrupt, SystemExit):
         raise
+    except HttpError as exc:
+        status = getattr(getattr(exc, "resp", None), "status", None)
+        raise YoutubeApiError(
+            "YouTube client initialization failed",
+            status=status,
+        ) from exc
+    except (OSError, ValueError, TypeError) as exc:
+        raise YoutubeApiError("YouTube client initialization failed") from exc
     except Exception as exc:
         raise YoutubeApiError("YouTube client initialization failed") from exc
 

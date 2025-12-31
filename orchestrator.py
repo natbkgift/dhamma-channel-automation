@@ -2486,6 +2486,214 @@ def agent_quality_gate(step, run_dir: Path):
     return summary_out.relative_to(root_dir).as_posix()
 
 
+def _youtube_upload_parse_int_env(name: str, default: int) -> int:
+    raw = os.environ.get(name)
+    if raw is None or not raw.strip():
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        return default
+    return value if value >= 0 else default
+
+
+def _youtube_upload_is_enabled(step_cfg: dict) -> bool:
+    config = step_cfg.get("config")
+    if config is not None and not isinstance(config, dict):
+        raise TypeError("step.config must be an object")
+    if isinstance(config, dict) and "dry_run" in config:
+        dry_run = config.get("dry_run")
+        if not isinstance(dry_run, bool):
+            raise TypeError("config.dry_run must be a boolean")
+        if dry_run:
+            return False
+    return os.environ.get("YOUTUBE_UPLOAD_ENABLED", "false").strip().lower() == "true"
+
+
+def _youtube_upload_expected_quality_summary_rel(run_id: str) -> str:
+    return (
+        Path("output") / run_id / "artifacts" / "quality_gate_summary.json"
+    ).as_posix()
+
+
+def _youtube_upload_load_quality_summary_required(root_dir: Path, run_id: str) -> dict:
+    quality_rel = _youtube_upload_expected_quality_summary_rel(run_id)
+    quality_path = root_dir / quality_rel
+    try:
+        payload = read_json(quality_path)
+    except FileNotFoundError as exc:
+        raise FileNotFoundError(
+            f"Quality gate summary not found: {quality_rel}"
+        ) from exc
+    if not isinstance(payload, dict):
+        raise TypeError("quality_gate_summary must be a JSON object")
+    schema_version = payload.get("schema_version")
+    if schema_version != "v1":
+        raise ValueError("quality_gate_summary.schema_version must be 'v1'")
+    summary_run_id = payload.get("run_id")
+    if summary_run_id is not None and summary_run_id != run_id:
+        raise ValueError("quality_gate_summary.run_id does not match run_id")
+    return payload
+
+
+def _youtube_upload_try_load_quality_summary(
+    root_dir: Path, run_id: str
+) -> dict | None:
+    quality_rel = _youtube_upload_expected_quality_summary_rel(run_id)
+    quality_path = root_dir / quality_rel
+    if not quality_path.is_file():
+        return None
+    try:
+        payload = read_json(quality_path)
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    if payload.get("schema_version") != "v1":
+        return None
+    return payload
+
+
+def _youtube_upload_validate_repo_relative_path(
+    root_dir: Path,
+    value: str,
+    label: str,
+) -> Path:
+    rel = Path(Path(value).as_posix())
+    if rel.is_absolute():
+        raise ValueError(f"{label} must be a relative path")
+    if ".." in rel.parts:
+        raise ValueError(f"{label} must not contain path traversal")
+    abs_path = (root_dir / rel).resolve()
+    try:
+        abs_path.relative_to(root_dir)
+    except ValueError as exc:
+        raise ValueError(f"{label} must be within repository root") from exc
+    return abs_path
+
+
+def _youtube_upload_read_json_if_dict(path: Path) -> dict | None:
+    if not path.is_file():
+        return None
+    try:
+        payload = read_json(path)
+    except (OSError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _youtube_upload_parse_tags_text(text: str) -> list[str]:
+    """แปลงข้อความแท็กจากไฟล์ override
+
+    รูปแบบที่รองรับ: JSON array ของสตริงเท่านั้น เช่น ["tag1", "tag2"]
+    """
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        return []
+    if isinstance(payload, list):
+        return [item for item in payload if isinstance(item, str)]
+    return []
+
+
+def _youtube_upload_resolve_override_path(root_dir: Path, env_name: str) -> Path | None:
+    raw = os.environ.get(env_name)
+    if raw is None:
+        return None
+    value = raw.strip()
+    if not value:
+        return None
+    return _youtube_upload_validate_repo_relative_path(root_dir, value, env_name)
+
+
+def _youtube_upload_read_override_text(path: Path, env_name: str) -> str:
+    max_bytes = 65_536
+    try:
+        size = path.stat().st_size
+    except OSError as exc:
+        raise ValueError(f"Unable to read override file for {env_name}") from exc
+    if size > max_bytes:
+        raise ValueError(
+            f"Override file for {env_name} is too large (>{max_bytes} bytes)"
+        )
+    try:
+        return path.read_text(encoding="utf-8")
+    except UnicodeDecodeError as exc:
+        raise ValueError(
+            f"Override file for {env_name} must be valid UTF-8 text"
+        ) from exc
+    except OSError as exc:
+        raise ValueError(f"Unable to read override file for {env_name}") from exc
+
+
+def _youtube_upload_resolve_metadata(
+    root_dir: Path, run_id: str
+) -> tuple[str, str, list[str]]:
+    title = None
+    description = None
+    tags: list[str] | None = None
+
+    metadata_path = root_dir / "output" / run_id / "metadata.json"
+    metadata = _youtube_upload_read_json_if_dict(metadata_path)
+    if metadata:
+        raw_title = metadata.get("title")
+        if isinstance(raw_title, str) and raw_title != "":
+            title = raw_title
+        raw_description = metadata.get("description")
+        if isinstance(raw_description, str) and raw_description != "":
+            description = raw_description
+        raw_tags = metadata.get("tags")
+        if isinstance(raw_tags, list):
+            tags = [item for item in raw_tags if isinstance(item, str)]
+
+    if title is None:
+        title_path = _youtube_upload_resolve_override_path(
+            root_dir, "YOUTUBE_TITLE_PATH"
+        )
+        if title_path is not None:
+            title = _youtube_upload_read_override_text(title_path, "YOUTUBE_TITLE_PATH")
+
+    if description is None:
+        description_path = _youtube_upload_resolve_override_path(
+            root_dir, "YOUTUBE_DESCRIPTION_PATH"
+        )
+        if description_path is not None:
+            description = _youtube_upload_read_override_text(
+                description_path, "YOUTUBE_DESCRIPTION_PATH"
+            )
+
+    if tags is None:
+        tags_path = _youtube_upload_resolve_override_path(root_dir, "YOUTUBE_TAGS_PATH")
+        if tags_path is not None:
+            tags_text = _youtube_upload_read_override_text(
+                tags_path, "YOUTUBE_TAGS_PATH"
+            )
+            tags = _youtube_upload_parse_tags_text(tags_text)
+
+    if title is None:
+        title = f"Dhamma Video - {run_id}"
+    if description is None:
+        description = "Generated by Dhamma Channel Automation."
+    if tags is None:
+        tags = []
+
+    return title, description, tags
+
+
+def _youtube_upload_extract_http_status(exc: Exception) -> int | None:
+    if isinstance(exc, youtube_upload.YoutubeApiError):
+        return exc.status
+    for attr in ("status", "status_code"):
+        value = getattr(exc, attr, None)
+        if isinstance(value, int):
+            return value
+    resp = getattr(exc, "resp", None)
+    status = getattr(resp, "status", None)
+    if isinstance(status, int):
+        return status
+    return None
+
+
 def agent_youtube_upload(step, run_dir: Path):
     """เอเจนต์อัปโหลด YouTube - อัปโหลดไฟล์ MP4 ขึ้น YouTube พร้อม retry และสรุปผลลัพธ์
 
@@ -2504,195 +2712,11 @@ def agent_youtube_upload(step, run_dir: Path):
     CODE_YOUTUBE_API_ERROR = "youtube_api_error"
     CODE_FAILED_AFTER_RETRIES = "upload_failed_after_retries"
 
-    def _parse_int_env(name: str, default: int) -> int:
-        raw = os.environ.get(name)
-        if raw is None or not raw.strip():
-            return default
-        try:
-            value = int(raw)
-        except ValueError:
-            return default
-        return value if value >= 0 else default
-
-    def _is_upload_enabled(step_cfg: dict) -> bool:
-        config = step_cfg.get("config")
-        if config is not None and not isinstance(config, dict):
-            raise TypeError("step.config must be an object")
-        if isinstance(config, dict) and "dry_run" in config:
-            dry_run = config.get("dry_run")
-            if not isinstance(dry_run, bool):
-                raise TypeError("config.dry_run must be a boolean")
-            if dry_run:
-                return False
-        return (
-            os.environ.get("YOUTUBE_UPLOAD_ENABLED", "false").strip().lower() == "true"
-        )
-
-    def _expected_quality_summary_rel() -> str:
-        return (
-            Path("output") / run_id / "artifacts" / "quality_gate_summary.json"
-        ).as_posix()
-
-    def _load_quality_summary_required() -> dict:
-        quality_rel = _expected_quality_summary_rel()
-        quality_path = root_dir / quality_rel
-        try:
-            payload = read_json(quality_path)
-        except FileNotFoundError as exc:
-            raise FileNotFoundError(
-                f"Quality gate summary not found: {quality_rel}"
-            ) from exc
-        if not isinstance(payload, dict):
-            raise TypeError("quality_gate_summary must be a JSON object")
-        schema_version = payload.get("schema_version")
-        if schema_version != "v1":
-            raise ValueError("quality_gate_summary.schema_version must be 'v1'")
-        summary_run_id = payload.get("run_id")
-        if summary_run_id is not None and summary_run_id != run_id:
-            raise ValueError("quality_gate_summary.run_id does not match run_id")
-        return payload
-
-    def _try_load_quality_summary() -> dict | None:
-        quality_rel = _expected_quality_summary_rel()
-        quality_path = root_dir / quality_rel
-        if not quality_path.is_file():
-            return None
-        try:
-            payload = read_json(quality_path)
-        except (OSError, json.JSONDecodeError):
-            return None
-        if not isinstance(payload, dict):
-            return None
-        if payload.get("schema_version") != "v1":
-            return None
-        return payload
-
-    def _validate_repo_relative_path(value: str, label: str) -> Path:
-        rel = Path(Path(value).as_posix())
-        if rel.is_absolute():
-            raise ValueError(f"{label} must be a relative path")
-        if ".." in rel.parts:
-            raise ValueError(f"{label} must not contain path traversal")
-        abs_path = (root_dir / rel).resolve()
-        try:
-            abs_path.relative_to(root_dir)
-        except ValueError as exc:
-            raise ValueError(f"{label} must be within repository root") from exc
-        return abs_path
-
-    def _read_json_if_dict(path: Path) -> dict | None:
-        if not path.is_file():
-            return None
-        try:
-            payload = read_json(path)
-        except (OSError, json.JSONDecodeError):
-            return None
-        return payload if isinstance(payload, dict) else None
-
-    def _parse_tags_text(text: str) -> list[str]:
-        try:
-            payload = json.loads(text)
-        except json.JSONDecodeError:
-            return []
-        if isinstance(payload, list):
-            return [item for item in payload if isinstance(item, str)]
-        if isinstance(payload, dict):
-            raw_tags = payload.get("tags")
-            if isinstance(raw_tags, list):
-                return [item for item in raw_tags if isinstance(item, str)]
-        if isinstance(payload, str):
-            return [payload]
-        return []
-
-    def _resolve_override_path(env_name: str) -> Path | None:
-        raw = os.environ.get(env_name)
-        if raw is None:
-            return None
-        value = raw.strip()
-        if not value:
-            return None
-        return _validate_repo_relative_path(value, env_name)
-
-    def _read_override_text(path: Path, env_name: str) -> str:
-        max_bytes = 65_536
-        try:
-            size = path.stat().st_size
-        except OSError as exc:
-            raise ValueError(f"Unable to read override file for {env_name}") from exc
-        if size > max_bytes:
-            raise ValueError(
-                f"Override file for {env_name} is too large (>{max_bytes} bytes)"
-            )
-        try:
-            return path.read_text(encoding="utf-8")
-        except UnicodeDecodeError as exc:
-            raise ValueError(
-                f"Override file for {env_name} must be valid UTF-8 text"
-            ) from exc
-        except OSError as exc:
-            raise ValueError(f"Unable to read override file for {env_name}") from exc
-
-    def _resolve_metadata() -> tuple[str, str, list[str]]:
-        title = None
-        description = None
-        tags: list[str] | None = None
-
-        metadata_path = root_dir / "output" / run_id / "metadata.json"
-        metadata = _read_json_if_dict(metadata_path)
-        if metadata:
-            raw_title = metadata.get("title")
-            if isinstance(raw_title, str) and raw_title != "":
-                title = raw_title
-            raw_description = metadata.get("description")
-            if isinstance(raw_description, str) and raw_description != "":
-                description = raw_description
-            raw_tags = metadata.get("tags")
-            if isinstance(raw_tags, list):
-                tags = [item for item in raw_tags if isinstance(item, str)]
-
-        if title is None:
-            title_path = _resolve_override_path("YOUTUBE_TITLE_PATH")
-            if title_path is not None:
-                title = _read_override_text(title_path, "YOUTUBE_TITLE_PATH")
-
-        if description is None:
-            description_path = _resolve_override_path("YOUTUBE_DESCRIPTION_PATH")
-            if description_path is not None:
-                description = _read_override_text(
-                    description_path, "YOUTUBE_DESCRIPTION_PATH"
-                )
-
-        if tags is None:
-            tags_path = _resolve_override_path("YOUTUBE_TAGS_PATH")
-            if tags_path is not None:
-                tags_text = _read_override_text(tags_path, "YOUTUBE_TAGS_PATH")
-                tags = _parse_tags_text(tags_text)
-
-        if title is None:
-            title = f"Dhamma Video - {run_id}"
-        if description is None:
-            description = "Generated by Dhamma Channel Automation."
-        if tags is None:
-            tags = []
-
-        return title, description, tags
-
-    def _extract_http_status(exc: Exception) -> int | None:
-        if isinstance(exc, youtube_upload.YoutubeApiError):
-            return exc.status
-        for attr in ("status", "status_code"):
-            value = getattr(exc, attr, None)
-            if isinstance(value, int):
-                return value
-        resp = getattr(exc, "resp", None)
-        status = getattr(resp, "status", None)
-        if isinstance(status, int):
-            return status
-        return None
-
-    upload_enabled = _is_upload_enabled(step)
-    max_retries = _parse_int_env("YOUTUBE_UPLOAD_MAX_RETRIES", 3)
-    backoff_seconds = _parse_int_env("YOUTUBE_UPLOAD_BACKOFF_SECONDS", 10)
+    upload_enabled = _youtube_upload_is_enabled(step)
+    max_retries = _youtube_upload_parse_int_env("YOUTUBE_UPLOAD_MAX_RETRIES", 3)
+    backoff_seconds = _youtube_upload_parse_int_env(
+        "YOUTUBE_UPLOAD_BACKOFF_SECONDS", 10
+    )
     privacy_status_raw = (
         os.environ.get("YOUTUBE_PRIVACY_STATUS", "unlisted").strip().lower()
     )
@@ -2711,8 +2735,8 @@ def agent_youtube_upload(step, run_dir: Path):
     )
     upload_summary_path = root_dir / upload_summary_rel
 
-    title, description, tags = _resolve_metadata()
-    quality_rel = _expected_quality_summary_rel()
+    title, description, tags = _youtube_upload_resolve_metadata(root_dir, run_id)
+    quality_rel = _youtube_upload_expected_quality_summary_rel(run_id)
 
     output_mp4_rel = ""
 
@@ -2770,15 +2794,17 @@ def agent_youtube_upload(step, run_dir: Path):
         )
         return summary_path
 
-    quality_summary_required = _load_quality_summary_required()
+    quality_summary_required = _youtube_upload_load_quality_summary_required(
+        root_dir, run_id
+    )
     quality_decision = quality_summary_required.get("decision")
 
     # Extract and validate output_mp4_path from quality summary (once)
     output_mp4_value = quality_summary_required.get("output_mp4_path")
     if isinstance(output_mp4_value, str) and output_mp4_value:
         output_mp4_rel = Path(output_mp4_value).as_posix()
-        output_mp4_abs = _validate_repo_relative_path(
-            output_mp4_rel, "quality_gate_summary.output_mp4_path"
+        output_mp4_abs = _youtube_upload_validate_repo_relative_path(
+            root_dir, output_mp4_rel, "quality_gate_summary.output_mp4_path"
         )
     else:
         if quality_decision == "pass":
@@ -2864,7 +2890,7 @@ def agent_youtube_upload(step, run_dir: Path):
                 f"YouTube upload failed for run_id={run_id}; code={CODE_AUTH_MISSING_ENV}"
             ) from exc
         except Exception as exc:
-            status = _extract_http_status(exc)
+            status = _youtube_upload_extract_http_status(exc)
             retryable = status == 429 or (status is not None and 500 <= status < 600)
             if retryable and attempt < total_attempts:
                 log(
