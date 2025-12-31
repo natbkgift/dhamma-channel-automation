@@ -2830,9 +2830,6 @@ def agent_youtube_upload(step, run_dir: Path):
                 f"YouTube upload failed for run_id={run_id}; code={error_code}"
             )
 
-    raise RuntimeError(f"YouTube upload failed for run_id={run_id}; code=unknown")
-
-
 def agent_localization(step, run_dir: Path):
     """Localization & Subtitle - สร้างคำบรรยายและแปลภาษา"""
     in_path = run_dir / step["input_from"]
