@@ -2780,13 +2780,20 @@ def agent_youtube_upload(step, run_dir: Path):
 
     quality_summary_required = _load_quality_summary_required()
     quality_decision = quality_summary_required.get("decision")
+
+    # Extract and validate output_mp4_path from quality summary (once)
+    output_mp4_value = quality_summary_required.get("output_mp4_path")
+    if isinstance(output_mp4_value, str) and output_mp4_value:
+        output_mp4_rel = Path(output_mp4_value).as_posix()
+        output_mp4_abs = _validate_repo_relative_path(
+            output_mp4_rel, "quality_gate_summary.output_mp4_path"
+        )
+    else:
+        if quality_decision == "pass":
+            raise ValueError("quality_gate_summary.output_mp4_path is required")
+        output_mp4_abs = None
+
     if quality_decision != "pass":
-        output_mp4_value = quality_summary_required.get("output_mp4_path")
-        if isinstance(output_mp4_value, str) and output_mp4_value:
-            output_mp4_rel = Path(output_mp4_value).as_posix()
-            _validate_repo_relative_path(
-                output_mp4_rel, "quality_gate_summary.output_mp4_path"
-            )
         summary_path = _write_summary(
             decision="skipped",
             attempt_count=0,
@@ -2799,13 +2806,9 @@ def agent_youtube_upload(step, run_dir: Path):
         )
         return summary_path
 
-    output_mp4_value = quality_summary_required.get("output_mp4_path")
-    if not isinstance(output_mp4_value, str) or not output_mp4_value:
+    # At this point, quality_decision == "pass" and output_mp4_abs must be valid
+    if output_mp4_abs is None:
         raise ValueError("quality_gate_summary.output_mp4_path is required")
-    output_mp4_rel = Path(output_mp4_value).as_posix()
-    output_mp4_abs = _validate_repo_relative_path(
-        output_mp4_rel, "quality_gate_summary.output_mp4_path"
-    )
 
     if not output_mp4_abs.is_file() or output_mp4_abs.stat().st_size <= 0:
         _write_summary(
