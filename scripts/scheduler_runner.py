@@ -21,6 +21,10 @@ if str(SRC_ROOT) not in sys.path:
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from automation_core.params import (  # noqa: E402
+    ParamsSerializationError,
+    inject_pipeline_params,
+)
 from automation_core.queue import FileQueue, JobError, QueueItem  # noqa: E402
 from automation_core.scheduler import (  # noqa: E402
     DEFAULT_TIMEZONE,
@@ -333,7 +337,8 @@ def run_worker(
             raise ValueError(
                 f"invalid pipeline path outside base dir: {pipeline_path_obj}"
             ) from exc
-        pipeline_runner(pipeline_path_obj, item.job.run_id)
+        with inject_pipeline_params(item.job.params):
+            pipeline_runner(pipeline_path_obj, item.job.run_id)
         queue.mark_done(item)
         summary = _build_worker_summary(
             job_id=job_id,
@@ -341,6 +346,20 @@ def run_worker(
             pipeline_path=pipeline_path,
             decision="done",
             error=None,
+            dry_run=dry_run,
+        )
+        summary_path = _worker_summary_path(base_dir, job_id)
+        _write_json(summary_path, summary)
+        return summary
+    except ParamsSerializationError:
+        error = JobError(code="job_invalid", message="job params not JSON serializable")
+        queue.mark_failed(item, error)
+        summary = _build_worker_summary(
+            job_id=job_id,
+            run_id=run_id,
+            pipeline_path=pipeline_path,
+            decision="failed",
+            error=error,
             dry_run=dry_run,
         )
         summary_path = _worker_summary_path(base_dir, job_id)
