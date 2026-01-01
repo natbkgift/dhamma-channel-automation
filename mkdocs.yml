@@ -49,6 +49,7 @@ nav:
   - "Prompt Templates": PROMPTS_OVERVIEW.md
   - "Workflow Chain": DHAMMA_WORKFLOW.md
   - "เรนเดอร์วิดีโอ (PR5)": VIDEO_RENDERING.md
+  - "Scheduler/Queue (PR8)": SCHEDULER.md
   - "แผนงาน (Roadmap)": ROADMAP.md
   - "แก้ไขปัญหา": TROUBLESHOOTING.md
 

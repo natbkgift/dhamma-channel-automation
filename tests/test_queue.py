@@ -1,0 +1,83 @@
+"""ทดสอบการทำงานของคิวไฟล์"""
+
+from datetime import datetime, timedelta, timezone
+
+from automation_core.queue import FileQueue, JobError, JobSpec
+
+
+def _utc_iso(value: datetime) -> str:
+    return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _build_job(job_id: str, scheduled_for: datetime, run_id: str) -> JobSpec:
+    return JobSpec(
+        schema_version="v1",
+        job_id=job_id,
+        created_at=_utc_iso(datetime.now(timezone.utc)),
+        scheduled_for=_utc_iso(scheduled_for),
+        pipeline_path="pipeline.web.yml",
+        run_id=run_id,
+        params=None,
+        status="pending",
+        attempts=0,
+        last_error=None,
+    )
+
+
+def test_enqueue_idempotent(tmp_path):
+    queue = FileQueue(tmp_path / "queue")
+    now = datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc)
+    job = _build_job("job-001", now, "run_001")
+
+    assert queue.enqueue(job) is True
+    assert queue.enqueue(job) is False
+
+    pending = queue.list_pending()
+    assert len(pending) == 1
+    assert pending[0].job_id == "job-001"
+
+
+def test_fifo_ordering_by_schedule(tmp_path):
+    queue = FileQueue(tmp_path / "queue")
+    now = datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc)
+    job_early = _build_job("job-early", now, "run_early")
+    job_late = _build_job("job-late", now + timedelta(minutes=5), "run_late")
+
+    queue.enqueue(job_late)
+    queue.enqueue(job_early)
+
+    pending = queue.list_pending()
+    assert [item.job_id for item in pending] == ["job-early", "job-late"]
+
+
+def test_state_transitions(tmp_path):
+    queue = FileQueue(tmp_path / "queue")
+    now = datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc)
+    job_done = _build_job("job-done", now, "run_done")
+    job_failed = _build_job("job-failed", now + timedelta(minutes=1), "run_fail")
+
+    queue.enqueue(job_done)
+    queue.enqueue(job_failed)
+
+    first = queue.dequeue_next()
+    assert first is not None
+    assert first.job is not None
+    assert first.job.status == "running"
+    assert first.job.attempts == 1
+
+    done_item = queue.mark_done(first)
+    assert done_item.job is not None
+    assert done_item.job.status == "done"
+    assert (queue.done_dir / done_item.filename).exists()
+
+    second = queue.dequeue_next()
+    assert second is not None
+    assert second.job is not None
+    error = JobError(code="test_error", message="fail")
+    failed_item = queue.mark_failed(second, error)
+
+    assert failed_item.job is not None
+    assert failed_item.job.status == "failed"
+    assert failed_item.job.last_error is not None
+    assert failed_item.job.last_error.code == "test_error"
+    assert (queue.failed_dir / failed_item.filename).exists()

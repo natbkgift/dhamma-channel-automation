@@ -118,6 +118,47 @@
 
 **พาธ:** ทุกพาธต้องเป็น relative เท่านั้น (ห้าม absolute)
 
+### 9. สัญญา Schedule Summary (คงที่)
+
+**สคีมาไฟล์ `output/scheduler/artifacts/schedule_summary_<YYYYMMDD>.json` ถือว่า STABLE** สำหรับ scheduler v1
+
+**ฟิลด์ที่ต้องมี (required):**
+- `schema_version` (string, ปัจจุบัน `v1`)
+- `engine` (string, ต้องเป็น `scheduler`)
+- `checked_at` (string, ISO8601 UTC)
+- `plan_path` (string, relative path)
+- `now` (string, ISO8601 UTC)
+- `window_minutes` (int)
+- `enqueued_job_ids` (list[string], ลำดับต้องคงที่)
+- `skipped_entries` (list[object], ลำดับต้องคงที่)
+- `dry_run` (bool)
+
+**รูปแบบ skipped_entries (คงที่):**
+- `publish_at` (string)
+- `pipeline_path` (string)
+- `run_id` (string)
+- `code` (string, one of: `scheduler_disabled`, `pipeline_disabled`, `entry_not_due`, `already_enqueued`, `plan_parse_error`, `job_invalid`)
+- `message` (string)
+
+### 10. สัญญา Worker Summary (คงที่)
+
+**สคีมาไฟล์ `output/worker/artifacts/worker_summary_<job_id>.json` ถือว่า STABLE** สำหรับ worker v1
+
+**ฟิลด์ที่ต้องมี (required):**
+- `schema_version` (string, ปัจจุบัน `v1`)
+- `engine` (string, ต้องเป็น `worker`)
+- `checked_at` (string, ISO8601 UTC)
+- `job_id` (string)
+- `run_id` (string)
+- `pipeline_path` (string, relative path)
+- `decision` (`started` | `done` | `failed` | `skipped`)
+- `error` (object|null)
+- `dry_run` (bool)
+
+**รูปแบบ error (คงที่เมื่อไม่เป็น null):**
+- `code` (string, one of: `worker_disabled`, `pipeline_disabled`, `queue_empty`, `job_invalid`, `orchestrator_failed`)
+- `message` (string)
+
 ## รายการอ้างอิงที่รวมไว้ (samples/reference)
 
 โฟลเดอร์ `samples/reference/` มี baseline artifacts สำหรับตรวจจับ drift:
@@ -160,6 +201,14 @@
 ### 7. `samples/reference/youtube/youtube_upload_summary_v1_example.json`
 - **แทนอะไร:** สัญญา YouTube upload summary เวอร์ชัน 1 (ไฟล์อ้างอิงสำหรับ `youtube_upload_summary.json`)
 - **จุดที่ต้องคงที่:** ฟิลด์สำคัญ + พาธแบบ relative เท่านั้น + โครงสร้าง `error` และ `metadata` ต้องไม่ drift
+
+### 8. `samples/reference/scheduler/schedule_summary_v1_example.json`
+- **แทนอะไร:** สัญญา schedule summary เวอร์ชัน 1 (ไฟล์อ้างอิงสำหรับ `schedule_summary.json`)
+- **จุดที่ต้องคงที่:** ฟิลด์สำคัญ + พาธแบบ relative เท่านั้น + โค้ดการข้ามต้องคงที่
+
+### 9. `samples/reference/scheduler/worker_summary_v1_example.json`
+- **แทนอะไร:** สัญญา worker summary เวอร์ชัน 1 (ไฟล์อ้างอิงสำหรับ `worker_summary.json`)
+- **จุดที่ต้องคงที่:** ฟิลด์สำคัญ + พาธแบบ relative เท่านั้น + โครงสร้าง `error` ต้องไม่ drift
 
 ## ขั้นตอนเปรียบเทียบ (Comparison Procedure)
 

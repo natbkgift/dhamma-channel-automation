@@ -1,0 +1,10 @@
+schema_version: "v1"
+timezone: "Asia/Bangkok"
+entries:
+  - publish_at: "2026-01-05T09:00"
+    pipeline_path: "pipeline.web.yml"
+    run_id_prefix: "morning"
+    params:
+      topic_seed: "mindfulness"
+  - publish_at: "2026-01-05T18:00+07:00"
+    pipeline_path: "pipeline.web.yml"
