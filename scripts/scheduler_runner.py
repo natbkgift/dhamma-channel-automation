@@ -11,7 +11,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC_ROOT = ROOT / "src"
@@ -71,7 +71,11 @@ def _relative_path(base_dir: Path, path: Path) -> str:
 def _schedule_summary_path(
     base_dir: Path, now_utc: datetime, tz_name: str
 ) -> Path:
-    local_dt = now_utc.astimezone(ZoneInfo(tz_name))
+    try:
+        local_dt = now_utc.astimezone(ZoneInfo(tz_name))
+    except ZoneInfoNotFoundError:
+        # ถ้า timezone ไม่ถูกต้อง ใช้ timezone เริ่มต้น
+        local_dt = now_utc.astimezone(ZoneInfo(DEFAULT_TIMEZONE))
     date_stamp = local_dt.strftime("%Y%m%d")
     return base_dir / "output" / "scheduler" / "artifacts" / (
         f"schedule_summary_{date_stamp}.json"
@@ -238,7 +242,7 @@ def run_worker(
     queue_dir = _resolve_path(base_dir, queue_dir)
     queue = FileQueue(queue_dir)
 
-    if not worker_enabled and not dry_run:
+    if not worker_enabled:
         peek = queue.peek_next()
         job_id, run_id, pipeline_path = _extract_job_fields(peek)
         summary = _build_worker_summary(

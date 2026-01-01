@@ -183,7 +183,11 @@ class FileQueue:
         item = pending[0]
         self._ensure_dirs()
         dest_path = self.running_dir / item.filename
-        os.replace(item.path, dest_path)
+        try:
+            os.replace(item.path, dest_path)
+        except FileNotFoundError:
+            # งานถูก dequeue โดย worker ตัวอื่นไปแล้ว
+            return None
         job = item.job
         if job is not None:
             job = job.model_copy(
