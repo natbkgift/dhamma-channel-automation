@@ -1,5 +1,6 @@
 schema_version: "v1"
 timezone: "Asia/Bangkok"
+# ตัวอย่างแผนเวลา - วันที่เป็นตัวอย่างสำหรับการทดสอบ
 entries:
   - publish_at: "2026-01-05T09:00"
     pipeline_path: "pipeline.web.yml"

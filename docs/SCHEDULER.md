@@ -10,6 +10,23 @@
 - **Worker**: ดึงงานถัดไปทีละงาน แล้วเรียก `orchestrator.run_pipeline(...)` หนึ่งครั้ง
 - **Kill switch**: ถ้า `PIPELINE_ENABLED=false` จะไม่ทำอะไรเลย (no-op) และไม่เขียนไฟล์ใดๆ
 
+## การรันพร้อมกัน (Concurrency)
+
+### Scheduler
+- **ปลอดภัย**: สามารถรัน scheduler หลาย instance พร้อมกัน (ไม่แนะนำ)
+- การ enqueue ใช้ `os.O_CREAT | os.O_EXCL` เพื่อป้องกัน race condition
+- Job ID เป็น deterministic ทำให้ไม่มีการ enqueue ซ้ำ
+
+### Worker
+- **ไม่แนะนำให้รันพร้อมกัน**: Worker ใช้ `os.replace()` ซึ่งอาจมี race condition เล็กน้อย
+- ถ้างานถูก dequeue โดย worker อื่นแล้ว จะ return None และไม่ทำงาน
+- **แนะนำ**: รัน worker ทีละตัว หรือใช้ระบบ lock ภายนอก (เช่น `flock`)
+
+### ข้อจำกัด
+- ไม่มี built-in locking mechanism ระหว่าง process
+- การรัน worker หลายตัวพร้อมกันอาจเกิด race condition ได้ (แม้จะมีการจัดการแล้วก็ตาม)
+- ออกแบบสำหรับ single-worker execution ผ่าน cron/Task Scheduler
+
 ## โครงสร้างคิว
 
 ```

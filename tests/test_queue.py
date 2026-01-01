@@ -1,4 +1,12 @@
-"""ทดสอบการทำงานของคิวไฟล์"""
+"""ทดสอบการทำงานของคิวไฟล์
+
+หมายเหตุ: การทดสอบ concurrency
+- คิวใช้ os.O_CREAT | os.O_EXCL สำหรับ enqueue (ป้องกัน race condition)
+- dequeue_next มีการจัดการ FileNotFoundError (สำหรับ race condition)
+- ออกแบบสำหรับ single-worker execution
+- การรัน worker หลายตัวพร้อมกันไม่แนะนำ แต่จะไม่ทำให้เกิด data corruption
+- ถ้าต้องการ parallel processing ให้ใช้ external locking (เช่น flock)
+"""
 
 from datetime import datetime, timedelta, timezone
 
