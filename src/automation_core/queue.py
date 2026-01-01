@@ -136,14 +136,20 @@ class FileQueue:
     def enqueue(self, job: JobSpec) -> bool:
         """เพิ่มงานลงคิวแบบ idempotent"""
 
-        if self.exists(job.job_id):
-            return False
         self._ensure_dirs()
         pending_job = job.model_copy(update={"status": "pending", "last_error": None})
         target_path = self.pending_dir / self._build_filename(pending_job)
-        self._write_job(target_path, pending_job)
-        return True
 
+        try:
+            # ใช้การสร้างไฟล์แบบ exclusive เพื่อป้องกัน race condition ระหว่าง process
+            fd = os.open(str(target_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError:
+            # มีงานที่ job_id เดียวกันถูก enqueue ไปแล้ว
+            return False
+        else:
+            os.close(fd)
+            self._write_job(target_path, pending_job)
+            return True
     def list_pending(self) -> list[QueueItem]:
         """คืนรายการงานในสถานะ pending ตามลำดับ FIFO"""
 
