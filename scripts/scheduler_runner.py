@@ -8,9 +8,10 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from collections.abc import Callable
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,7 +21,6 @@ if str(SRC_ROOT) not in sys.path:
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from orchestrator import parse_pipeline_enabled  # noqa: E402
 from automation_core.queue import FileQueue, JobError, QueueItem  # noqa: E402
 from automation_core.scheduler import (  # noqa: E402
     DEFAULT_TIMEZONE,
@@ -28,14 +28,15 @@ from automation_core.scheduler import (  # noqa: E402
     parse_iso_datetime,
     schedule_due_jobs,
 )
+from orchestrator import parse_pipeline_enabled  # noqa: E402
 
 
 def _utc_now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def _utc_iso(value: datetime) -> str:
-    return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+    return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
 
 
 def _ensure_dir(path: Path) -> None:
@@ -68,24 +69,30 @@ def _relative_path(base_dir: Path, path: Path) -> str:
         return path.as_posix()
 
 
-def _schedule_summary_path(
-    base_dir: Path, now_utc: datetime, tz_name: str
-) -> Path:
+def _schedule_summary_path(base_dir: Path, now_utc: datetime, tz_name: str) -> Path:
     try:
         local_dt = now_utc.astimezone(ZoneInfo(tz_name))
     except ZoneInfoNotFoundError:
         # ถ้า timezone ไม่ถูกต้อง ใช้ timezone เริ่มต้น
         local_dt = now_utc.astimezone(ZoneInfo(DEFAULT_TIMEZONE))
     date_stamp = local_dt.strftime("%Y%m%d")
-    return base_dir / "output" / "scheduler" / "artifacts" / (
-        f"schedule_summary_{date_stamp}.json"
+    return (
+        base_dir
+        / "output"
+        / "scheduler"
+        / "artifacts"
+        / (f"schedule_summary_{date_stamp}.json")
     )
 
 
 def _worker_summary_path(base_dir: Path, job_id: str) -> Path:
     safe_job_id = job_id or "none"
-    return base_dir / "output" / "worker" / "artifacts" / (
-        f"worker_summary_{safe_job_id}.json"
+    return (
+        base_dir
+        / "output"
+        / "worker"
+        / "artifacts"
+        / (f"worker_summary_{safe_job_id}.json")
     )
 
 
@@ -129,9 +136,9 @@ def run_schedule(
     )
     now_utc = now or _utc_now()
     if now_utc.tzinfo is None:
-        now_utc = now_utc.replace(tzinfo=timezone.utc)
+        now_utc = now_utc.replace(tzinfo=UTC)
     else:
-        now_utc = now_utc.astimezone(timezone.utc)
+        now_utc = now_utc.astimezone(UTC)
 
     plan_path = _resolve_path(base_dir, plan_path)
     queue_dir = _resolve_path(base_dir, queue_dir)
@@ -236,9 +243,7 @@ def run_worker(
         print("Pipeline disabled by PIPELINE_ENABLED=false")
         return None
 
-    worker_enabled = dry_run or _parse_enabled_flag(
-        os.environ.get("WORKER_ENABLED")
-    )
+    worker_enabled = dry_run or _parse_enabled_flag(os.environ.get("WORKER_ENABLED"))
     queue_dir = _resolve_path(base_dir, queue_dir)
     queue = FileQueue(queue_dir)
 
@@ -369,7 +374,7 @@ def _parse_now(now_value: str | None) -> datetime | None:
         return None
     dt = parse_iso_datetime(now_value)
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
+        dt = dt.replace(tzinfo=UTC)
     return dt
 
 

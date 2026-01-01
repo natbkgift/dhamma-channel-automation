@@ -1,7 +1,7 @@
 """ทดสอบการทำงานของ worker runner"""
 
 import importlib.util
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -10,14 +10,14 @@ from automation_core.queue import FileQueue, JobSpec
 
 
 def _utc_iso(value: datetime) -> str:
-    return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+    return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
 
 
 def _build_job(job_id: str, scheduled_for: datetime, run_id: str) -> JobSpec:
     return JobSpec(
         schema_version="v1",
         job_id=job_id,
-        created_at=_utc_iso(datetime.now(timezone.utc)),
+        created_at=_utc_iso(datetime.now(UTC)),
         scheduled_for=_utc_iso(scheduled_for),
         pipeline_path="pipeline.web.yml",
         run_id=run_id,
@@ -66,7 +66,7 @@ def test_worker_dry_run_no_orchestrator(tmp_path, monkeypatch):
     monkeypatch.setenv("WORKER_ENABLED", "false")
 
     queue = FileQueue(tmp_path / "queue")
-    job = _build_job("job-dry", datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc), "run1")
+    job = _build_job("job-dry", datetime(2026, 1, 1, 0, 0, tzinfo=UTC), "run1")
     queue.enqueue(job)
 
     called = {"count": 0}
@@ -96,7 +96,7 @@ def test_worker_runs_once(tmp_path, monkeypatch):
     queue = FileQueue(tmp_path / "queue")
     job = _build_job(
         "job-run",
-        datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc),
+        datetime(2026, 1, 1, 0, 0, tzinfo=UTC),
         "run2",
     )
     queue.enqueue(job)

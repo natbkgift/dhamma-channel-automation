@@ -8,20 +8,20 @@
 - ถ้าต้องการ parallel processing ให้ใช้ external locking (เช่น flock)
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from automation_core.queue import FileQueue, JobError, JobSpec
 
 
 def _utc_iso(value: datetime) -> str:
-    return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+    return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
 
 
 def _build_job(job_id: str, scheduled_for: datetime, run_id: str) -> JobSpec:
     return JobSpec(
         schema_version="v1",
         job_id=job_id,
-        created_at=_utc_iso(datetime.now(timezone.utc)),
+        created_at=_utc_iso(datetime.now(UTC)),
         scheduled_for=_utc_iso(scheduled_for),
         pipeline_path="pipeline.web.yml",
         run_id=run_id,
@@ -34,7 +34,7 @@ def _build_job(job_id: str, scheduled_for: datetime, run_id: str) -> JobSpec:
 
 def test_enqueue_idempotent(tmp_path):
     queue = FileQueue(tmp_path / "queue")
-    now = datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc)
+    now = datetime(2026, 1, 1, 0, 0, tzinfo=UTC)
     job = _build_job("job-001", now, "run_001")
 
     assert queue.enqueue(job) is True
@@ -47,7 +47,7 @@ def test_enqueue_idempotent(tmp_path):
 
 def test_fifo_ordering_by_schedule(tmp_path):
     queue = FileQueue(tmp_path / "queue")
-    now = datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc)
+    now = datetime(2026, 1, 1, 0, 0, tzinfo=UTC)
     job_early = _build_job("job-early", now, "run_early")
     job_late = _build_job("job-late", now + timedelta(minutes=5), "run_late")
 
@@ -60,7 +60,7 @@ def test_fifo_ordering_by_schedule(tmp_path):
 
 def test_state_transitions(tmp_path):
     queue = FileQueue(tmp_path / "queue")
-    now = datetime(2026, 1, 1, 0, 0, tzinfo=timezone.utc)
+    now = datetime(2026, 1, 1, 0, 0, tzinfo=UTC)
     job_done = _build_job("job-done", now, "run_done")
     job_failed = _build_job("job-failed", now + timedelta(minutes=1), "run_fail")
 

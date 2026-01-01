@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -80,7 +80,7 @@ def parse_publish_at(value: str, default_tz: ZoneInfo) -> datetime:
 def format_utc(value: datetime) -> str:
     """จัดรูปแบบเวลาเป็น UTC แบบมี Z"""
 
-    return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+    return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
 
 
 def build_run_id_base(local_dt: datetime, run_id_prefix: str | None) -> str:
@@ -172,9 +172,9 @@ def schedule_due_jobs(
         raise SchedulePlanError(f"timezone ไม่ถูกต้อง: {tz_name}") from exc
 
     if now_utc.tzinfo is None:
-        now_utc = now_utc.replace(tzinfo=timezone.utc)
+        now_utc = now_utc.replace(tzinfo=UTC)
     else:
-        now_utc = now_utc.astimezone(timezone.utc)
+        now_utc = now_utc.astimezone(UTC)
 
     if created_at_utc is None:
         created_at_utc = now_utc
@@ -191,7 +191,7 @@ def schedule_due_jobs(
             publish_at = entry.publish_at
             pipeline_path = entry.pipeline_path
             scheduled_local = parse_publish_at(entry.publish_at, local_tz)
-            scheduled_utc = scheduled_local.astimezone(timezone.utc)
+            scheduled_utc = scheduled_local.astimezone(UTC)
             job = build_job_spec(entry, scheduled_utc, local_tz, created_at_utc)
         except (ValidationError, ValueError, TypeError) as exc:
             skipped_entries.append(
