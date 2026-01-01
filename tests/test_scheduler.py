@@ -236,3 +236,88 @@ def test_scheduler_rejects_pipeline_path_traversal(tmp_path, pipeline_path: str)
     assert result.enqueued_job_ids == []
     assert len(result.skipped_entries) == 1
     assert result.skipped_entries[0].code == "job_invalid"
+
+
+def test_scheduler_dry_run_matches_actual_run(tmp_path):
+    """
+    ทดสอบว่า dry_run ให้ผลลัพธ์ที่ตรงกับ actual run
+
+    ก่อนหน้านี้ dry_run ใช้ exists() แยกจาก enqueue() ทำให้มี race condition
+    ตอนนี้ใช้ enqueue() แบบเดียวกันทั้งสองโหมด
+    """
+
+    plan_path = tmp_path / "schedule_plan.yaml"
+    plan_path.write_text(
+        "\n".join(
+            [
+                'schema_version: "v1"',
+                'timezone: "Asia/Bangkok"',
+                "entries:",
+                '  - publish_at: "2026-01-01T10:00"',
+                '    pipeline_path: "pipeline.web.yml"',
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    queue = FileQueue(tmp_path / "queue")
+    now_utc = datetime(2026, 1, 1, 3, 0, tzinfo=UTC)
+
+    # Run 1: dry_run ครั้งแรก ควรบอกว่าจะ enqueue
+    result1 = schedule_due_jobs(
+        plan_path=plan_path,
+        queue=queue,
+        now_utc=now_utc,
+        window_minutes=10,
+        dry_run=True,
+        scheduler_enabled=True,
+        created_at_utc=now_utc,
+    )
+
+    assert len(result1.enqueued_job_ids) == 1
+    assert len(result1.skipped_entries) == 0
+    job_id = result1.enqueued_job_ids[0]
+
+    # Run 2: actual run ควร enqueue งานจริง
+    result2 = schedule_due_jobs(
+        plan_path=plan_path,
+        queue=queue,
+        now_utc=now_utc,
+        window_minutes=10,
+        dry_run=False,
+        scheduler_enabled=True,
+        created_at_utc=now_utc,
+    )
+
+    assert result2.enqueued_job_ids == [job_id]
+    assert len(result2.skipped_entries) == 0
+
+    # Run 3: dry_run อีกครั้งหลังจาก enqueue แล้ว ควรบอกว่า skip
+    result3 = schedule_due_jobs(
+        plan_path=plan_path,
+        queue=queue,
+        now_utc=now_utc,
+        window_minutes=10,
+        dry_run=True,
+        scheduler_enabled=True,
+        created_at_utc=now_utc,
+    )
+
+    assert len(result3.enqueued_job_ids) == 0
+    assert len(result3.skipped_entries) == 1
+    assert result3.skipped_entries[0].code == "already_enqueued"
+
+    # Run 4: actual run อีกครั้ง ก็ควร skip เหมือนกัน
+    result4 = schedule_due_jobs(
+        plan_path=plan_path,
+        queue=queue,
+        now_utc=now_utc,
+        window_minutes=10,
+        dry_run=False,
+        scheduler_enabled=True,
+        created_at_utc=now_utc,
+    )
+
+    assert len(result4.enqueued_job_ids) == 0
+    assert len(result4.skipped_entries) == 1
+    assert result4.skipped_entries[0].code == "already_enqueued"

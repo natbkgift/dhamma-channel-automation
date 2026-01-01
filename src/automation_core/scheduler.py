@@ -241,22 +241,9 @@ def schedule_due_jobs(
             )
             continue
 
-        if dry_run:
-            if queue.exists(job.job_id):
-                skipped_entries.append(
-                    ScheduleSkip(
-                        publish_at=entry.publish_at,
-                        pipeline_path=entry.pipeline_path,
-                        run_id=job.run_id,
-                        code="already_enqueued",
-                        message="job already exists",
-                    )
-                )
-            else:
-                enqueued_job_ids.append(job.job_id)
-            continue
-
-        if queue.enqueue(job):
+        # ใช้ enqueue() แบบเดียวกันทั้ง dry_run และ actual run
+        # เพื่อให้ dry_run ให้ผลลัพธ์ที่ตรงกับ actual run
+        if queue.enqueue(job, dry_run=dry_run):
             enqueued_job_ids.append(job.job_id)
         else:
             skipped_entries.append(
