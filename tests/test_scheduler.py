@@ -203,9 +203,7 @@ def test_scheduler_malformed_yaml(tmp_path: Path):
         "/abs/pipeline.web.yml",
     ],
 )
-def test_scheduler_rejects_pipeline_path_traversal(
-    tmp_path: Path, pipeline_path: str
-):
+def test_scheduler_rejects_pipeline_path_traversal(tmp_path: Path, pipeline_path: str):
     """ทดสอบว่า ScheduleEntry ปฏิเสธ path traversal/absolute path"""
 
     plan_path = tmp_path / "schedule_plan.yaml"
