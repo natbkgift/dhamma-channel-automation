@@ -143,12 +143,28 @@ class FileQueue:
 
         return bool(self._find_by_job_id(job_id))
 
-    def enqueue(self, job: JobSpec) -> bool:
-        """เพิ่มงานลงคิวแบบ idempotent"""
+    def enqueue(self, job: JobSpec, dry_run: bool = False) -> bool:
+        """
+        เพิ่มงานลงคิวแบบ idempotent
+
+        Args:
+            job: งานที่ต้องการเพิ่มลงคิว
+            dry_run: ถ้าเป็น True จะตรวจสอบเงื่อนไขเหมือนปกติแต่ไม่เขียนไฟล์จริง
+
+        Returns:
+            True ถ้างานถูกเพิ่มลงคิว (หรือจะถูกเพิ่มถ้าไม่ใช่ dry_run)
+            False ถ้างานมีอยู่แล้วในคิว
+        """
 
         self._ensure_dirs()
         if self.exists(job.job_id):
             return False
+
+        if dry_run:
+            # ในโหมด dry_run ให้คืนค่า True เพื่อบอกว่างานจะถูก enqueue
+            # แต่ไม่เขียนไฟล์จริง
+            return True
+
         pending_job = job.model_copy(update={"status": "pending", "last_error": None})
         target_path = self.pending_dir / self._build_filename(pending_job)
         payload = json.dumps(pending_job.model_dump(), ensure_ascii=False, indent=2)

@@ -111,3 +111,39 @@ def test_enqueue_idempotent_across_states(tmp_path):
     # ห้าม enqueue ซ้ำ แม้งานจะอยู่ใน done/failed แล้ว
     assert queue.enqueue(job_done) is False
     assert queue.enqueue(job_failed) is False
+
+
+def test_enqueue_dry_run_mode(tmp_path):
+    """
+    ทดสอบ dry_run mode ของ enqueue
+
+    dry_run=True ควรทำงานเหมือนปกติแต่ไม่เขียนไฟล์
+    """
+
+    queue = FileQueue(tmp_path / "queue")
+    now = datetime(2026, 1, 1, 0, 0, tzinfo=UTC)
+    job = _build_job("job-001", now, "run_001")
+
+    # dry_run ครั้งแรก ควรคืน True (งานยังไม่มี)
+    assert queue.enqueue(job, dry_run=True) is True
+
+    # ตรวจสอบว่าไม่มีไฟล์ถูกสร้าง
+    pending = queue.list_pending()
+    assert len(pending) == 0
+
+    # dry_run อีกครั้ง ควรคืน True เพราะยังไม่มีไฟล์จริง
+    assert queue.enqueue(job, dry_run=True) is True
+
+    # enqueue จริง ควรคืน True
+    assert queue.enqueue(job, dry_run=False) is True
+
+    # ตรวจสอบว่ามีไฟล์ถูกสร้าง
+    pending = queue.list_pending()
+    assert len(pending) == 1
+    assert pending[0].job_id == "job-001"
+
+    # dry_run อีกครั้งหลังจาก enqueue แล้ว ควรคืน False
+    assert queue.enqueue(job, dry_run=True) is False
+
+    # enqueue จริงอีกครั้ง ก็ควรคืน False
+    assert queue.enqueue(job, dry_run=False) is False
