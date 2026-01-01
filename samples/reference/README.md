@@ -70,6 +70,24 @@ The reference samples help detect unintended changes in:
 
 **Why chosen:** This summary is a publishing contract artifact; drift can break safe ops gating and downstream reporting.
 
+### 7. `scheduler/schedule_summary_v1_example.json`
+**What it represents:** Stable contract for the `schedule_summary.json` artifact produced by the scheduler runner.
+**Key attributes to monitor:**
+- Required fields remain present (`plan_path`, `now`, `window_minutes`)
+- Skip codes stay stable and ordered
+- `plan_path` remains relative (no absolute paths)
+
+**Why chosen:** The scheduler summary is a new ops artifact and must stay deterministic for auditability.
+
+### 8. `scheduler/worker_summary_v1_example.json`
+**What it represents:** Stable contract for the `worker_summary.json` artifact produced by the worker runner.
+**Key attributes to monitor:**
+- Required fields remain present (`job_id`, `run_id`, `decision`)
+- `pipeline_path` remains relative (no absolute paths)
+- Error structure remains stable (`error.code`, `error.message`)
+
+**Why chosen:** The worker summary is the execution contract for queue processing and ops safety.
+
 ## What is "Drift"?
 
 **Drift** means unintended changes in output characteristics:
