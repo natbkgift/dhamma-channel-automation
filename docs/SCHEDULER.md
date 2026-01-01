@@ -14,7 +14,7 @@
 
 ### Scheduler
 - **ปลอดภัย**: สามารถรัน scheduler หลาย instance พร้อมกัน (ไม่แนะนำ)
-- การ enqueue ใช้ `os.O_CREAT | os.O_EXCL` เพื่อป้องกัน race condition
+- การ enqueue ใช้โหมดไฟล์พิเศษ `open(..., "x")` เพื่อสร้างไฟล์แบบ exclusive (เทียบเท่า `os.O_CREAT | os.O_EXCL`) ป้องกัน race condition
 - Job ID เป็น deterministic ทำให้ไม่มีการ enqueue ซ้ำ
 
 ### Worker
