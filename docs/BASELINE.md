@@ -151,7 +151,7 @@
 - `job_id` (string)
 - `run_id` (string)
 - `pipeline_path` (string, relative path)
-- `decision` (`started` | `done` | `failed` | `skipped`)
+- `decision` (`done` | `failed` | `skipped`)
 - `error` (object|null)
 - `dry_run` (bool)
 
