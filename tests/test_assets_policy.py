@@ -9,6 +9,7 @@
 - ล็อก assets/fonts/ ให้มีได้เฉพาะ README.md
 """
 
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -16,6 +17,7 @@ from pathlib import Path
 import pytest
 
 MAX_ASSET_BYTES = 1_000_000
+MAX_TOTAL_ASSETS_BYTES = 5_000_000
 MAX_PLACEHOLDER_BYTES = 10_000
 ALLOWED_FONTS_DIR_FILES = {"README.md"}
 FORBIDDEN_FONT_EXTS = {".ttf", ".otf", ".woff", ".woff2", ".eot", ".ttc"}
@@ -73,6 +75,26 @@ def _sorted_files(root: Path) -> list[Path]:
     return sorted(files, key=str)
 
 
+def _fallback_repo_files(repo_root: Path) -> list[Path]:
+    """
+    รวบรวมไฟล์ใน repo แบบ fallback เมื่อใช้ git ls-files ไม่ได้
+
+    หมายเหตุ:
+    - ใช้ os.walk เพื่อ prune ไดเรกทอรีที่ไม่ต้องการตรวจสอบตั้งแต่ต้น
+    - ไม่ follow symlink dirs (ค่า default ของ os.walk)
+    """
+    files: list[Path] = []
+    for dirpath, dirnames, filenames in os.walk(repo_root):
+        dirnames[:] = [d for d in dirnames if d not in IGNORE_DIR_NAMES]
+        for filename in filenames:
+            path = Path(dirpath) / filename
+            if _is_ignored(path, repo_root):
+                continue
+            files.append(path)
+
+    return sorted(files, key=str)
+
+
 def _git_tracked_files(repo_root: Path) -> list[Path] | None:
     """
     ดึงรายการไฟล์ที่ถูก track โดย git ใน repository
@@ -127,7 +149,7 @@ def test_assets_policy() -> None:
         )
 
     tracked = _git_tracked_files(repo_root)
-    repo_files = tracked if tracked is not None else _sorted_files(repo_root)
+    repo_files = tracked if tracked is not None else _fallback_repo_files(repo_root)
 
     for path in repo_files:
         if path.suffix.lower() in FORBIDDEN_FONT_EXTS:
@@ -135,6 +157,17 @@ def test_assets_policy() -> None:
             errors.append((rel_posix, f"Forbidden font binary found: {rel_posix}"))
 
     if assets_dir.exists():
+        for entry in assets_dir.rglob("*"):
+            if entry.is_symlink():
+                rel_posix = entry.relative_to(repo_root).as_posix()
+                errors.append(
+                    (
+                        rel_posix,
+                        f"Symlink is not allowed under assets/: {rel_posix}",
+                    )
+                )
+
+        total_assets_bytes = 0
         required_files = [
             assets_dir / "images" / "placeholders" / "README.md",
             assets_dir / "audio" / "placeholders" / "README.md",
@@ -149,10 +182,7 @@ def test_assets_policy() -> None:
             rel_assets = path.relative_to(assets_dir)
             rel_repo = path.relative_to(repo_root)
             rel_posix = rel_repo.as_posix()
-            if ".." in rel_assets.parts:
-                errors.append(
-                    (rel_posix, f"Asset path traversal detected: {rel_posix}")
-                )
+            total_assets_bytes += path.stat().st_size
             if (
                 "placeholders" in rel_assets.parts
                 and path.stat().st_size > MAX_PLACEHOLDER_BYTES
@@ -170,6 +200,33 @@ def test_assets_policy() -> None:
                         f"Asset file exceeds {MAX_ASSET_BYTES} bytes: {rel_posix}",
                     )
                 )
+
+            if "placeholders" in rel_assets.parts and path.name == "README.md":
+                data = path.read_bytes()
+                if b"\x00" in data:
+                    errors.append(
+                        (
+                            rel_posix,
+                            f"Placeholder README must be text-only (null byte found): {rel_posix}",
+                        )
+                    )
+                try:
+                    data.decode("utf-8")
+                except UnicodeDecodeError:
+                    errors.append(
+                        (
+                            rel_posix,
+                            f"Placeholder README must be valid UTF-8 text: {rel_posix}",
+                        )
+                    )
+
+        if total_assets_bytes > MAX_TOTAL_ASSETS_BYTES:
+            errors.append(
+                (
+                    "assets/",
+                    f"Total assets/ size exceeds {MAX_TOTAL_ASSETS_BYTES} bytes: {total_assets_bytes}",
+                )
+            )
 
         fonts_dir = assets_dir / "fonts"
         if not fonts_dir.exists():

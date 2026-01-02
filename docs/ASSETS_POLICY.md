@@ -14,7 +14,9 @@ risk. This policy defines strict guardrails for assets and placeholders.
 
 - `assets/` must exist with the baseline skeleton.
 - Max per-file size under `assets/`: 1MB (hard fail).
-- Placeholder README guidance: keep `README.md` files <= 10KB and text only.
+- Max total size under `assets/`: 5MB (hard fail).
+- No symlinks under `assets/` (hard fail).
+- Placeholder README guidance: keep `README.md` files <= 10KB and text only (UTF-8; no null bytes).
 
 ## Deterministic Paths Only
 
