@@ -157,76 +157,98 @@ def test_assets_policy() -> None:
             errors.append((rel_posix, f"Forbidden font binary found: {rel_posix}"))
 
     if assets_dir.exists():
+        # ตรวจสอบ symlinks ก่อน (ทั้งไฟล์และไดเรกทอรี)
         for entry in assets_dir.rglob("*"):
             if entry.is_symlink():
                 rel_posix = entry.relative_to(repo_root).as_posix()
+                # ระบุชัดเจนว่าเป็นไฟล์หรือไดเรกทอรี
+                entry_type = "directory" if entry.is_dir() else "file"
                 errors.append(
                     (
                         rel_posix,
-                        f"Symlink is not allowed under assets/: {rel_posix}",
+                        f"Symlink ({entry_type}) is not allowed under assets/: {rel_posix}",
                     )
                 )
 
-        total_assets_bytes = 0
+        # ตรวจสอบไฟล์ที่จำเป็นต้องมีก่อน
         required_files = [
             assets_dir / "images" / "placeholders" / "README.md",
             assets_dir / "audio" / "placeholders" / "README.md",
             assets_dir / "fonts" / "README.md",
         ]
+        missing_required = False
         for required_file in required_files:
             rel_posix = required_file.relative_to(repo_root).as_posix()
             if not required_file.is_file():
                 errors.append((rel_posix, f"Required asset file missing: {rel_posix}"))
+                missing_required = True
 
-        for path in _sorted_files(assets_dir):
-            rel_assets = path.relative_to(assets_dir)
-            rel_repo = path.relative_to(repo_root)
-            rel_posix = rel_repo.as_posix()
-            total_assets_bytes += path.stat().st_size
-            if (
-                "placeholders" in rel_assets.parts
-                and path.stat().st_size > MAX_PLACEHOLDER_BYTES
-            ):
-                errors.append(
-                    (
-                        rel_posix,
-                        f"Placeholder file exceeds {MAX_PLACEHOLDER_BYTES} bytes: {rel_posix}",
-                    )
-                )
-            if path.stat().st_size > MAX_ASSET_BYTES:
-                errors.append(
-                    (
-                        rel_posix,
-                        f"Asset file exceeds {MAX_ASSET_BYTES} bytes: {rel_posix}",
-                    )
-                )
+        # ถ้าไม่มีไฟล์ที่จำเป็นหาย ให้ตรวจสอบไฟล์ทั้งหมดต่อ
+        if not missing_required:
+            total_assets_bytes = 0
+            for path in _sorted_files(assets_dir):
+                rel_assets = path.relative_to(assets_dir)
+                rel_repo = path.relative_to(repo_root)
+                rel_posix = rel_repo.as_posix()
 
-            if "placeholders" in rel_assets.parts and path.name == "README.md":
-                data = path.read_bytes()
-                if b"\x00" in data:
-                    errors.append(
-                        (
-                            rel_posix,
-                            f"Placeholder README must be text-only (null byte found): {rel_posix}",
-                        )
-                    )
+                # ตรวจสอบขนาดไฟล์โดยจัดการกับ symlinks ที่เสีย
                 try:
-                    data.decode("utf-8")
-                except UnicodeDecodeError:
+                    file_size = path.stat().st_size
+                    total_assets_bytes += file_size
+                except (OSError, FileNotFoundError):
+                    # Symlink ที่ชี้ไปยัง target ที่ไม่มีจริง
                     errors.append(
                         (
                             rel_posix,
-                            f"Placeholder README must be valid UTF-8 text: {rel_posix}",
+                            f"Cannot stat file (broken symlink?): {rel_posix}",
+                        )
+                    )
+                    continue
+
+                if (
+                    "placeholders" in rel_assets.parts
+                    and file_size > MAX_PLACEHOLDER_BYTES
+                ):
+                    errors.append(
+                        (
+                            rel_posix,
+                            f"Placeholder file exceeds {MAX_PLACEHOLDER_BYTES} bytes: {rel_posix}",
+                        )
+                    )
+                if file_size > MAX_ASSET_BYTES:
+                    errors.append(
+                        (
+                            rel_posix,
+                            f"Asset file exceeds {MAX_ASSET_BYTES} bytes: {rel_posix}",
                         )
                     )
 
-        if total_assets_bytes > MAX_TOTAL_ASSETS_BYTES:
-            errors.append(
-                (
-                    "assets/",
-                    f"Total assets/ size exceeds {MAX_TOTAL_ASSETS_BYTES} bytes: {total_assets_bytes}",
+                if "placeholders" in rel_assets.parts and path.name == "README.md":
+                    data = path.read_bytes()
+                    if b"\x00" in data:
+                        errors.append(
+                            (
+                                rel_posix,
+                                f"Placeholder README must be text-only (null byte found): {rel_posix}",
+                            )
+                        )
+                    try:
+                        data.decode("utf-8")
+                    except UnicodeDecodeError:
+                        errors.append(
+                            (
+                                rel_posix,
+                                f"Placeholder README must be valid UTF-8 text: {rel_posix}",
+                            )
+                        )
+
+            if total_assets_bytes > MAX_TOTAL_ASSETS_BYTES:
+                errors.append(
+                    (
+                        "assets/",
+                        f"Total assets/ size exceeds {MAX_TOTAL_ASSETS_BYTES} bytes: {total_assets_bytes}",
+                    )
                 )
-            )
 
         fonts_dir = assets_dir / "fonts"
         if not fonts_dir.exists():
