@@ -169,6 +169,18 @@
 - `code` (string, one of: `worker_disabled`, `queue_empty`, `job_invalid`, `orchestrator_failed`)
 - `message` (string)
 
+## Assets Baseline v1
+
+นโยบาย assets เป็น baseline ที่ต้องคงที่สำหรับ repo สาธารณะ เพื่อความปลอดภัย
+ด้านลิขสิทธิ์ ขนาดไฟล์ และความ deterministic ของพาธ
+
+Policy source-of-truth: `docs/ASSETS_POLICY.md`
+
+- ไบนารีฟอนต์ (font binaries) ถูกตั้งใจไม่ให้รวมอยู่ใน baseline
+- การมีไฟล์ฟอนต์ที่ใช้นามสกุลต้องห้ามถือเป็นการละเมิดนโยบาย และต้องทำให้เทสต์ล้ม
+- โฟลเดอร์ `assets/fonts/` ถูกล็อกให้มีได้เฉพาะไฟล์ `README.md` เท่านั้น
+- โครงสร้าง assets/ ต้องตรงตาม skeleton ที่กำหนดใน policy และไฟล์ภายในต้องมีขนาดเล็ก
+
 ## รายการอ้างอิงที่รวมไว้ (samples/reference)
 
 โฟลเดอร์ `samples/reference/` มี baseline artifacts สำหรับตรวจจับ drift:
