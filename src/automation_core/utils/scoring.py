@@ -6,6 +6,13 @@ from typing import Any
 
 import numpy as np
 
+__all__ = [
+    "calculate_composite_score",
+    "normalize_scores",
+    "rank_items_by_score",
+    "validate_score_range",
+]
+
 
 def calculate_composite_score(
     scores: dict[str, float], weights: dict[str, float]

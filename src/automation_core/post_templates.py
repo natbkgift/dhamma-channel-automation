@@ -245,7 +245,17 @@ def _extract_env_params(payload: str) -> tuple[dict[str, str], set[str]]:
 
 
 def _extract_hashtags_value(data: Mapping[str, Any]) -> str | None:
-    """ดึงค่า hashtags จาก key 'hashtags' หรือ fallback จาก 'tags' แบบ deterministic"""
+    """
+    ดึงค่า hashtags จาก key 'hashtags' หรือ fallback จาก 'tags' แบบ deterministic
+
+    Args:
+        data: ข้อมูลแบบ mapping ที่อาจมีฟิลด์ 'hashtags' หรือ 'tags'
+            สำหรับใช้เป็นแหล่งข้อมูล hashtags
+
+    Returns:
+        str | None: สตริง hashtags ที่ถูก normalize แล้ว ถ้าพบ 'hashtags' หรือ 'tags'
+            มิฉะนั้นคืนค่า None
+    """
     if "hashtags" in data:
         return _normalize_hashtags(data["hashtags"])
     if "tags" in data:

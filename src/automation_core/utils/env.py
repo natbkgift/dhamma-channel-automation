@@ -2,6 +2,8 @@
 ฟังก์ชันสำหรับการจัดการค่าจากตัวแปรสภาพแวดล้อม
 """
 
+__all__ = ["parse_pipeline_enabled"]
+
 
 def parse_pipeline_enabled(env_value: str | None) -> bool:
     """
