@@ -161,10 +161,11 @@ def test_assets_policy() -> None:
         for entry in assets_dir.rglob("*"):
             if entry.is_symlink():
                 rel_posix = entry.relative_to(repo_root).as_posix()
-                # ระบุชัดเจนว่าเป็นไฟล์หรือไดเรกทอรี โดยจัดการกับ broken symlinks
+                # ระบุชัดเจนว่าเป็นไฟล์หรือไดเรกทอรี (หากเข้าถึงได้)
                 try:
                     entry_type = "directory" if entry.is_dir() else "file"
-                except (OSError, FileNotFoundError):
+                except OSError:
+                    # ไม่สามารถกำหนดประเภทได้ (เช่น broken symlink, permission error)
                     entry_type = "unknown"
                 errors.append(
                     (
@@ -194,16 +195,16 @@ def test_assets_policy() -> None:
                 rel_repo = path.relative_to(repo_root)
                 rel_posix = rel_repo.as_posix()
 
-                # ตรวจสอบขนาดไฟล์โดยจัดการกับ symlinks ที่เสีย
+                # ตรวจสอบขนาดไฟล์ (อาจล้มเหลวเนื่องจาก I/O error, permission, หรือ broken symlink)
                 try:
                     file_size = path.stat().st_size
                     total_assets_bytes += file_size
-                except (OSError, FileNotFoundError):
-                    # Symlink ที่ชี้ไปยัง target ที่ไม่มีจริง
+                except OSError:
+                    # ไม่สามารถ stat ไฟล์ได้
                     errors.append(
                         (
                             rel_posix,
-                            f"Cannot stat file (broken symlink?): {rel_posix}",
+                            f"Cannot stat file (broken symlink or permission error?): {rel_posix}",
                         )
                     )
                     continue
@@ -229,11 +230,12 @@ def test_assets_policy() -> None:
                 if "placeholders" in rel_assets.parts and path.name == "README.md":
                     try:
                         data = path.read_bytes()
-                    except (OSError, FileNotFoundError, PermissionError):
+                    except OSError:
+                        # ไม่สามารถอ่านไฟล์ได้
                         errors.append(
                             (
                                 rel_posix,
-                                f"Cannot read placeholder README (broken symlink or permission denied?): {rel_posix}",
+                                f"Cannot read placeholder README (broken symlink or permission error?): {rel_posix}",
                             )
                         )
                         continue
