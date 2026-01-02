@@ -174,9 +174,9 @@
 นโยบาย assets เป็น baseline ที่ต้องคงที่สำหรับ repo สาธารณะ เพื่อความปลอดภัย
 ด้านลิขสิทธิ์ ขนาดไฟล์ และความ deterministic ของพาธ
 
-- "Font binaries are intentionally excluded from baseline."
-- "Any presence of forbidden font extensions is a policy violation and must fail tests."
-- "assets/fonts/ is locked to README.md only."
+- ไบนารีฟอนต์ (font binaries) ถูกตั้งใจไม่ให้รวมอยู่ใน baseline
+- การมีไฟล์ฟอนต์ที่ใช้นามสกุลต้องห้ามถือเป็นการละเมิดนโยบาย และต้องทำให้เทสต์ล้ม
+- โฟลเดอร์ `assets/fonts/` ถูกล็อกให้มีได้เฉพาะไฟล์ `README.md` เท่านั้น
 - โครงสร้าง assets/ ต้องตรงตาม skeleton ที่กำหนดใน policy และไฟล์ภายในต้องมีขนาดเล็ก
 
 ## รายการอ้างอิงที่รวมไว้ (samples/reference)
