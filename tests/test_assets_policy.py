@@ -161,8 +161,11 @@ def test_assets_policy() -> None:
         for entry in assets_dir.rglob("*"):
             if entry.is_symlink():
                 rel_posix = entry.relative_to(repo_root).as_posix()
-                # ระบุชัดเจนว่าเป็นไฟล์หรือไดเรกทอรี
-                entry_type = "directory" if entry.is_dir() else "file"
+                # ระบุชัดเจนว่าเป็นไฟล์หรือไดเรกทอรี โดยจัดการกับ broken symlinks
+                try:
+                    entry_type = "directory" if entry.is_dir() else "file"
+                except (OSError, FileNotFoundError):
+                    entry_type = "unknown"
                 errors.append(
                     (
                         rel_posix,
@@ -224,7 +227,17 @@ def test_assets_policy() -> None:
                     )
 
                 if "placeholders" in rel_assets.parts and path.name == "README.md":
-                    data = path.read_bytes()
+                    try:
+                        data = path.read_bytes()
+                    except (OSError, FileNotFoundError, PermissionError):
+                        errors.append(
+                            (
+                                rel_posix,
+                                f"Cannot read placeholder README (broken symlink or permission denied?): {rel_posix}",
+                            )
+                        )
+                        continue
+
                     if b"\x00" in data:
                         errors.append(
                             (
