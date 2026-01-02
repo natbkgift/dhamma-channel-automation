@@ -184,14 +184,15 @@
   - `platform` (string)
   - `template_short` (string, relative path)
   - `template_long` (string, relative path)
-<<<<<<< HEAD
   - `sources` (list[string], relative paths และ/หรือ `env:PIPELINE_PARAMS_JSON`)
 - `outputs` (object)
   - `short` (string, เนื้อหาโพสต์แบบสั้น)
   - `long` (string, เนื้อหาโพสต์แบบยาว)
 
 **หมายเหตุสำคัญ:**
-- ทุกพาธต้องเป็น relative path เท่านั้น (ห้าม absolute paths)
+- ทุกพาธใน `inputs.template_*` และ `inputs.sources` ต้องเป็น relative เท่านั้น (ห้าม absolute paths)
+- `checked_at` ยอมให้ไม่ deterministic (audit time)
+- `inputs.sources` หมายถึง "แหล่งที่ถูกใช้เติมค่า (used)" เท่านั้น ไม่ใช่แหล่งที่ถูกอ่านเฉย ๆ
 - แฮชแท็กใน outputs ต้องเรียงลำดับตัวอักษร (sorted) เพื่อความ deterministic
 - sources อาจมีค่าพิเศษ `env:PIPELINE_PARAMS_JSON` ที่แทนการอ่านค่าจาก environment variable
 - ตัวอย่างอ้างอิง: `samples/reference/post/post_content_summary_v1_example.json`
@@ -200,17 +201,6 @@
 - การเปลี่ยนแปลงที่ **breaking** ต้อง bump `schema_version` และใส่ migration note
 - การเพิ่มฟิลด์แบบ **additive** ทำได้ ถ้าคง backward compatibility
 - การเปลี่ยนชื่อ/ลบฟิลด์แบบเงียบๆ **ห้ามทำ**
-=======
-  - `sources` (list[string], relative paths หรือ `env:PIPELINE_PARAMS_JSON`)
-- `outputs` (object)
-  - `short` (string)
-  - `long` (string)
-
-**หมายเหตุสำคัญ:**
-- ทุกพาธใน `inputs.template_*` และ `inputs.sources` ต้องเป็น relative เท่านั้น (ห้าม absolute)
-- `checked_at` ยอมให้ไม่ deterministic (audit time)
-- `inputs.sources` หมายถึง “แหล่งที่ถูกใช้เติมค่า (used)” เท่านั้น ไม่ใช่แหล่งที่ถูกอ่านเฉย ๆ
->>>>>>> 7aaa096 (PR10: align post summary baseline samples)
 
 ## Assets Baseline v1
 
