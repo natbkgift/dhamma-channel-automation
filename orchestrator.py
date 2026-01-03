@@ -21,7 +21,7 @@ SRC_ROOT = ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from automation_core import post_templates, youtube_upload  # noqa: E402
+from automation_core import dispatch_v0, post_templates, youtube_upload  # noqa: E402
 from automation_core.utils.env import parse_pipeline_enabled  # noqa: E402
 
 POST_TEMPLATES_ALIASES = {"post_templates", "post.templates"}
@@ -71,6 +71,13 @@ def _post_templates_output_rel(run_id: str) -> str:
     ).as_posix()
 
 
+def _dispatch_audit_output_rel(run_id: str) -> str:
+    """
+    สร้าง path แบบ relative สำหรับไฟล์ dispatch_audit.json
+    """
+    return (Path("output") / run_id / "artifacts" / "dispatch_audit.json").as_posix()
+
+
 def _run_post_templates_step(run_id: str, root_dir: Path) -> str:
     """
     รัน post_templates เพื่อสร้าง post_content_summary.json
@@ -104,6 +111,16 @@ def _run_post_templates_step(run_id: str, root_dir: Path) -> str:
 
     log(f"Post templates: completed -> {output_rel}")
     return output_rel
+
+
+def _run_dispatch_v0_step(run_id: str, root_dir: Path) -> str:
+    """
+    รัน dispatch_v0 เพื่อสร้าง dispatch_audit.json
+    """
+    _, audit_path = dispatch_v0.generate_dispatch_audit(run_id, base_dir=root_dir)
+    if audit_path is None:
+        return _dispatch_audit_output_rel(run_id)
+    return audit_path.relative_to(root_dir).as_posix()
 
 
 def _resolve_script_path(script_path: str | Path, root_dir: Path) -> Path:
@@ -2545,6 +2562,13 @@ def agent_post_templates(_step, run_dir: Path):
     return _run_post_templates_step(run_id, root_dir)
 
 
+def agent_dispatch_v0(_step, run_dir: Path):
+    """รันเอเจนต์ dispatch_v0 เพื่อสร้าง dispatch_audit.json"""
+    run_id = run_dir.name
+    root_dir = ROOT.resolve()
+    return _run_dispatch_v0_step(run_id, root_dir)
+
+
 def _youtube_upload_parse_int_env(name: str, default: int) -> int:
     raw = os.environ.get(name)
     if raw is None or not raw.strip():
@@ -3594,6 +3618,7 @@ AGENTS = {
     "quality.gate": agent_quality_gate,
     "post_templates": agent_post_templates,
     "post.templates": agent_post_templates,
+    "dispatch.v0": agent_dispatch_v0,
     "youtube.upload": agent_youtube_upload,
     "Localization": agent_localization,
     "ThumbnailGenerator": agent_thumbnail_generator,
@@ -3645,6 +3670,7 @@ def run_pipeline(pipeline_path: Path, run_id: str):
     has_post_templates = _pipeline_has_step(
         "post_templates", aliases=POST_TEMPLATES_ALIASES
     )
+    has_dispatch_v0 = _pipeline_has_step("dispatch.v0")
 
     log(f"Pipeline: {pipeline_name} ({len(steps)} steps)")
 
@@ -3665,6 +3691,18 @@ def run_pipeline(pipeline_path: Path, run_id: str):
     results = {}
     root_dir = ROOT.resolve()
     post_templates_ran = False
+    dispatch_ran = False
+
+    def _trigger_dispatch_v0_if_needed() -> None:
+        nonlocal dispatch_ran
+        if dispatch_ran or has_dispatch_v0 or not post_templates_ran:
+            return
+        try:
+            _run_dispatch_v0_step(run_id, root_dir)
+            dispatch_ran = True
+        except Exception as e:
+            log(f"ERROR in auto-invoked dispatch.v0: {e}", "ERROR")
+            raise
 
     def _maybe_run_post_templates(step_uses: str, step_result: object) -> None:
         """
@@ -3691,6 +3729,7 @@ def run_pipeline(pipeline_path: Path, run_id: str):
             try:
                 _run_post_templates_step(run_id, root_dir)
                 post_templates_ran = True
+                _trigger_dispatch_v0_if_needed()
             except Exception as e:
                 log(
                     f"ERROR in auto-invoked post_templates (after {step_uses}): {e}",
@@ -3721,6 +3760,11 @@ def run_pipeline(pipeline_path: Path, run_id: str):
             if planned_paths is not None:
                 entry["planned_paths"] = planned_paths
             results[step_id] = entry
+            if uses in POST_TEMPLATES_ALIASES:
+                post_templates_ran = True
+                _trigger_dispatch_v0_if_needed()
+            if uses == "dispatch.v0":
+                dispatch_ran = True
             log(f"[{i}/{len(steps)}] ✓ {step_id} completed", "SUCCESS")
             _maybe_run_post_templates(uses, result)
         except Exception as e:
