@@ -19,6 +19,8 @@ def _write_video_render_summary(root: Path, run_id: str, output_mp4_rel: str) ->
         "schema_version": "v1",
         "run_id": run_id,
         "output_mp4_path": output_mp4_rel,
+        "hook": "Test hook line",
+        "cta": "Test call to action",
     }
     summary_path = artifacts_dir / "video_render_summary.json"
     summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
@@ -57,6 +59,20 @@ def test_orchestrator_quality_gate_pass(tmp_path, monkeypatch):
     _write_video_render_summary(tmp_path, run_id, output_mp4_rel)
     write_post_templates(tmp_path)
 
+    # Write metadata.json for post_templates auto-invocation
+    metadata_path = tmp_path / "output" / run_id / "metadata.json"
+    metadata_path.parent.mkdir(parents=True, exist_ok=True)
+    metadata = {
+        "title": "Quality Gate Test",
+        "description": "Testing quality gate with post templates",
+        "tags": ["#quality", "#test"],
+        "language": "en",
+        "platform": "youtube",
+    }
+    metadata_path.write_text(
+        json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
     pipeline_path = tmp_path / "pipeline.yml"
     pipeline_path.write_text(
         """pipeline: quality_gate_pass
@@ -90,6 +106,18 @@ steps:
     _assert_summary_contract(summary, run_id, output_mp4_rel)
     assert summary["decision"] == "pass"
     assert summary["reasons"] == []
+
+    # Verify post_templates was auto-invoked after quality_gate
+    post_content_path = (
+        tmp_path / "output" / run_id / "artifacts" / "post_content_summary.json"
+    )
+    assert post_content_path.exists(), (
+        "post_content_summary.json should be created by auto-invocation "
+        "of post_templates after quality_gate completes"
+    )
+    post_summary = json.loads(post_content_path.read_text(encoding="utf-8"))
+    assert post_summary["schema_version"] == "v1"
+    assert post_summary["run_id"] == run_id
 
 
 def test_orchestrator_quality_gate_missing_mp4_fails(tmp_path, monkeypatch):

@@ -147,6 +147,20 @@ def test_orchestrator_video_render_real_run_writes_summary(tmp_path, monkeypatch
     _, wav_rel = _write_voiceover_summary(tmp_path, run_id, slug, sha12)
     write_post_templates(tmp_path)
 
+    # Write metadata.json for post_templates auto-invocation
+    metadata_path = tmp_path / "output" / run_id / "metadata.json"
+    metadata_path.parent.mkdir(parents=True, exist_ok=True)
+    metadata = {
+        "title": "Test Video Title",
+        "description": "Test video description",
+        "tags": ["#test", "#video"],
+        "language": "en",
+        "platform": "youtube",
+    }
+    metadata_path.write_text(
+        json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
     pipeline_path = tmp_path / "pipeline.yml"
     pipeline_path.write_text(
         f"""pipeline: video_render_real_run
@@ -196,6 +210,18 @@ steps:
 
     assert wav_rel in summary["ffmpeg_cmd"]
     assert summary["output_mp4_path"] in summary["ffmpeg_cmd"]
+
+    # Verify post_templates was auto-invoked after video_render
+    post_content_path = (
+        tmp_path / "output" / run_id / "artifacts" / "post_content_summary.json"
+    )
+    assert post_content_path.exists(), (
+        "post_content_summary.json should be created by auto-invocation "
+        "of post_templates after video_render completes"
+    )
+    post_summary = json.loads(post_content_path.read_text(encoding="utf-8"))
+    assert post_summary["schema_version"] == "v1"
+    assert post_summary["run_id"] == run_id
 
 
 def test_orchestrator_video_render_voiceover_summary_traversal_blocked(
