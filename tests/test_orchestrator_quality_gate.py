@@ -351,7 +351,10 @@ steps:
 
 
 def test_orchestrator_both_video_render_and_quality_gate(tmp_path, monkeypatch):
-    """ทดสอบว่า post_templates ถูกเรียกครั้งเดียวหลัง quality.gate เมื่อมีทั้ง video.render และ quality.gate"""
+    """
+    ทดสอบว่า post_templates ถูกเรียกครั้งเดียวหลัง quality.gate
+    เมื่อมีทั้ง video.render และ quality.gate
+    """
     from automation_core.voiceover_tts import compute_input_sha256
 
     run_id = "run_both_steps"

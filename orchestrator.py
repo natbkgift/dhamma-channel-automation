@@ -3651,7 +3651,10 @@ def run_pipeline(pipeline_path: Path, run_id: str):
                 _run_post_templates_step(run_id, root_dir)
                 post_templates_ran = True
             except Exception as e:
-                log(f"ERROR in auto-invoked post_templates: {e}", "ERROR")
+                log(
+                    f"ERROR in auto-invoked post_templates (after {step_uses}): {e}",
+                    "ERROR",
+                )
                 # ไม่ throw exception ต่อเพื่อไม่ให้ pipeline หยุดทำงาน
                 # เพราะ post_templates เป็น step เสริมที่ไม่ใช่ core requirement
 
