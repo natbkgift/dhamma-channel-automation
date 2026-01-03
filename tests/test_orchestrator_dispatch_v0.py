@@ -89,3 +89,40 @@ steps:
     assert not (tmp_path / "output" / run_id).exists()
     captured = capsys.readouterr()
     assert "Pipeline disabled" in captured.out
+
+
+def test_orchestrator_explicit_dispatch_runs_once(tmp_path, monkeypatch):
+    run_id = "run_dispatch_explicit"
+    write_post_templates(tmp_path)
+    write_metadata(tmp_path, run_id, platform="youtube")
+    _write_video_render_summary(tmp_path, run_id)
+
+    pipeline_path = tmp_path / "pipeline.yml"
+    pipeline_path.write_text(
+        """pipeline: dispatch_explicit
+steps:
+  - id: post_templates
+    uses: post_templates
+  - id: dispatch
+    uses: dispatch.v0
+""",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(orchestrator, "ROOT", tmp_path)
+    monkeypatch.setenv("PIPELINE_ENABLED", "true")
+
+    calls: list[str] = []
+    original = orchestrator.agent_dispatch_v0
+
+    def wrapped(step, run_dir: Path):
+        calls.append(run_dir.name)
+        return original(step, run_dir)
+
+    monkeypatch.setitem(orchestrator.AGENTS, "dispatch.v0", wrapped)
+
+    orchestrator.run_pipeline(pipeline_path, run_id)
+
+    assert calls == [run_id]
+    audit_path = tmp_path / "output" / run_id / "artifacts" / "dispatch_audit.json"
+    assert audit_path.exists()

@@ -3694,17 +3694,6 @@ def run_pipeline(pipeline_path: Path, run_id: str):
     post_templates_ran = False
     dispatch_ran = False
 
-    def _trigger_dispatch_v0_if_needed() -> None:
-        nonlocal dispatch_ran
-        if dispatch_ran or has_dispatch_v0 or not post_templates_ran:
-            return
-        try:
-            _run_dispatch_v0_step(run_id, root_dir)
-            dispatch_ran = True
-        except Exception as e:
-            log(f"ERROR in auto-invoked dispatch.v0: {e}", "ERROR")
-            raise
-
     def _maybe_run_post_templates(step_uses: str, step_result: object) -> None:
         """
         ตรวจสอบเงื่อนไขและเรียก post_templates แบบอัตโนมัติเมื่อเหมาะสม
@@ -3720,6 +3709,22 @@ def run_pipeline(pipeline_path: Path, run_id: str):
         nonlocal post_templates_ran
         if post_templates_ran or has_post_templates:
             return
+        nonlocal dispatch_ran
+        if (
+            step_uses in POST_TEMPLATES_ALIASES
+            and not dispatch_ran
+            and not has_dispatch_v0
+        ):
+            try:
+                _run_dispatch_v0_step(run_id, root_dir)
+                dispatch_ran = True
+            except Exception as e:
+                log(
+                    f"ERROR in auto-invoked dispatch_v0 (after post_templates): {e}",
+                    "ERROR",
+                )
+                raise
+
         if isinstance(step_result, PlannedArtifacts) and step_result.dry_run:
             return
         if step_uses == "quality.gate" or (
@@ -3730,7 +3735,9 @@ def run_pipeline(pipeline_path: Path, run_id: str):
             try:
                 _run_post_templates_step(run_id, root_dir)
                 post_templates_ran = True
-                _trigger_dispatch_v0_if_needed()
+                if not dispatch_ran and not has_dispatch_v0:
+                    _run_dispatch_v0_step(run_id, root_dir)
+                    dispatch_ran = True
             except Exception as e:
                 log(
                     f"ERROR in auto-invoked post_templates (after {step_uses}): {e}",
@@ -3763,7 +3770,9 @@ def run_pipeline(pipeline_path: Path, run_id: str):
             results[step_id] = entry
             if uses in POST_TEMPLATES_ALIASES:
                 post_templates_ran = True
-                _trigger_dispatch_v0_if_needed()
+                if not dispatch_ran and not has_dispatch_v0:
+                    _run_dispatch_v0_step(run_id, root_dir)
+                    dispatch_ran = True
             if uses == "dispatch.v0":
                 dispatch_ran = True
             log(f"[{i}/{len(steps)}] ✓ {step_id} completed", "SUCCESS")
