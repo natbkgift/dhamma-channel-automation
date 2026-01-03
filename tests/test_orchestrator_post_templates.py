@@ -127,3 +127,66 @@ steps:
 
     captured = capsys.readouterr()
     assert "Pipeline disabled by PIPELINE_ENABLED=false" in captured.out
+
+
+def test_explicit_post_templates_step_disables_fallback(tmp_path, monkeypatch):
+    """
+    เมื่อระบุขั้นตอน post_templates อย่างชัดเจนต้องไม่เรียกซ้ำแบบอัตโนมัติ
+    และต้องไม่เขียนไฟล์เมื่อปิด PIPELINE_ENABLED
+    """
+    run_id = "explicit_post_templates_once"
+    write_post_templates(tmp_path)
+    write_metadata(
+        tmp_path,
+        run_id,
+        title="Explicit step",
+        description="Ensure single execution",
+        tags=["#explicit"],
+    )
+    _write_video_render_summary(tmp_path, run_id)
+
+    pipeline_path = tmp_path / "pipeline.yml"
+    pipeline_path.write_text(
+        """pipeline: explicit_post_templates
+steps:
+  - id: quality_gate
+    uses: quality.gate
+  - id: post_templates
+    uses: post.templates
+""",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(orchestrator, "ROOT", tmp_path)
+    monkeypatch.setenv("PIPELINE_ENABLED", "true")
+
+    calls: list[str] = []
+    original = orchestrator._run_post_templates_step
+
+    def wrapped(run_id_arg: str, root_dir: Path) -> str:
+        calls.append(run_id_arg)
+        return original(run_id_arg, root_dir)
+
+    monkeypatch.setattr(orchestrator, "_run_post_templates_step", wrapped)
+
+    def fake_quality_gate(_step, run_dir: Path) -> str:
+        return "artifacts/quality_gate_summary.json"
+
+    monkeypatch.setitem(orchestrator.AGENTS, "quality.gate", fake_quality_gate)
+
+    orchestrator.run_pipeline(pipeline_path, run_id)
+
+    post_summary_path = (
+        tmp_path / "output" / run_id / "artifacts" / "post_content_summary.json"
+    )
+    assert post_summary_path.exists()
+    assert calls == [run_id]
+
+    monkeypatch.setenv("PIPELINE_ENABLED", "false")
+    calls.clear()
+    disabled_run = "explicit_post_templates_disabled"
+
+    orchestrator.run_pipeline(pipeline_path, disabled_run)
+
+    assert calls == []
+    assert not (tmp_path / "output" / disabled_run).exists()

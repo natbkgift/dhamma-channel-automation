@@ -697,12 +697,13 @@ def generate_post_content_summary(
     return summary, output_path
 
 
-def cli_main(argv: list[str] | None = None) -> int:
+def cli_main(argv: list[str] | None = None, base_dir: Path | None = None) -> int:
     """
     CLI interface สำหรับเรนเดอร์เทมเพลตโพสต์
 
     Args:
         argv: command-line arguments (ถ้าไม่ระบุจะใช้ sys.argv)
+        base_dir: โฟลเดอร์ฐานของ repository (ค่าเริ่มต้นคือ REPO_ROOT)
 
     Returns:
         int: exit code (0 = success, 1 = error)
@@ -724,11 +725,13 @@ def cli_main(argv: list[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
 
+    base_dir = base_dir or REPO_ROOT
+
     try:
         if not parse_pipeline_enabled(os.environ.get("PIPELINE_ENABLED")):
             print(PIPELINE_DISABLED_MESSAGE)
             return 0
-        _, output_path = generate_post_content_summary(args.run_id, base_dir=REPO_ROOT)
+        _, output_path = generate_post_content_summary(args.run_id, base_dir=base_dir)
     except Exception as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
