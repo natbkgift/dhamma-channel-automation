@@ -21,6 +21,7 @@ ALLOWED_MODES = {"dry_run", "print_only"}
 def parse_dispatch_enabled(value: str | None) -> bool:
     """
     แปลงค่าจากตัวแปรสภาพแวดล้อม DISPATCH_ENABLED ให้เป็น boolean
+    ค่าเริ่มต้นเป็น False (ปิด) เมื่อไม่กำหนด เพื่อความปลอดภัยแบบ dry-run
 
     Args:
         value: ค่าจากตัวแปรสภาพแวดล้อมหรือ None
