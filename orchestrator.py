@@ -89,12 +89,12 @@ def _run_post_templates_step(run_id: str, root_dir: Path) -> str:
     log(f"Post templates: start run_id={run_id}")
     output_rel = _post_templates_output_rel(run_id)
     cli_args = ["render", "--run-id", run_id]
-    log(f"Post templates: invoking post_templates CLI with args: {cli_args}")
     if not parse_pipeline_enabled(os.environ.get("PIPELINE_ENABLED")):
         log("Post templates: disabled (PIPELINE_ENABLED=false)")
         log(f"Post templates: complete (skipped) -> {output_rel}")
         return output_rel
 
+    log(f"Post templates: invoking post_templates CLI with args: {cli_args}")
     exit_code = post_templates.cli_main(cli_args, base_dir=root_dir)
     if exit_code != 0:
         raise RuntimeError(

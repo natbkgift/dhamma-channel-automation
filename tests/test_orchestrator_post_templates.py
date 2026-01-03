@@ -185,6 +185,14 @@ steps:
     monkeypatch.setenv("PIPELINE_ENABLED", "false")
     calls.clear()
     disabled_run = "explicit_post_templates_disabled"
+    write_metadata(
+        tmp_path,
+        disabled_run,
+        title="Explicit step disabled",
+        description="Ensure disabled setup",
+        tags=["#disabled"],
+    )
+    _write_video_render_summary(tmp_path, disabled_run)
 
     orchestrator.run_pipeline(pipeline_path, disabled_run)
 
