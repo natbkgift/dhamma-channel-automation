@@ -60,11 +60,11 @@ def _post_templates_output_rel(run_id: str) -> str:
 
 
 def _run_post_templates_step(run_id: str, root_dir: Path) -> str:
-    print(f"Post templates: start run_id={run_id}")
+    log(f"Post templates: start run_id={run_id}")
     if not parse_pipeline_enabled(os.environ.get("PIPELINE_ENABLED")):
-        print("Post templates: disabled (PIPELINE_ENABLED=false)")
+        log("Post templates: disabled (PIPELINE_ENABLED=false)")
         output_rel = _post_templates_output_rel(run_id)
-        print(f"Post templates: would write {output_rel}")
+        log(f"Post templates: would write {output_rel}")
         return output_rel
 
     _, output_path = post_templates.generate_post_content_summary(
@@ -76,7 +76,7 @@ def _run_post_templates_step(run_id: str, root_dir: Path) -> str:
         raise ValueError(
             f"Output path {output_path} is not within the root directory {root_dir}"
         ) from exc
-    print(f"Post templates: wrote {output_rel}")
+    log(f"Post templates: wrote {output_rel}")
     return output_rel
 
 
@@ -2495,7 +2495,25 @@ def agent_quality_gate(step, run_dir: Path):
 
 
 def agent_post_templates(step, run_dir: Path):
-    """Post templates - deterministic post content summary."""
+    """
+    รันเอเจนต์ post templates เพื่อสร้างสรุปเนื้อหาโพสต์แบบ deterministic
+
+    Args:
+        step: ข้อมูลการตั้งค่าของสเต็ปจากไฟล์ pipeline YAML
+            (ไม่ได้ถูกใช้งานโดยตรงในฟังก์ชันนี้ แต่คงพารามิเตอร์ไว้ให้มีรูปแบบ
+            สอดคล้องกับเอเจนต์ตัวอื่นใน orchestrator)
+        run_dir: โฟลเดอร์รันของ pipeline สำหรับ run_id นั้น ๆ
+            ใช้สำหรับอ่านค่า run_id จากชื่อโฟลเดอร์
+
+    Returns:
+        เส้นทางไฟล์แบบ relative (POSIX string) จาก root ของโปรเจ็กต์
+        ไปยังไฟล์ post_content_summary.json ที่ถูกสร้างภายใต้
+        output/<run_id>/artifacts/
+
+    Side effects:
+        สร้างไฟล์ post_content_summary.json ภายใต้โฟลเดอร์ artifacts
+        ของ run_id โดยอาศัยการทำงานของ _run_post_templates_step()
+    """
     run_id = run_dir.name
     root_dir = ROOT.resolve()
     return _run_post_templates_step(run_id, root_dir)
@@ -3589,7 +3607,7 @@ def run_pipeline(pipeline_path: Path, run_id: str):
     steps = cfg.get("steps", [])
 
     def _pipeline_has_step(step_name: str) -> bool:
-        """Check if a step with the given uses name exists in the pipeline."""
+        """ตรวจสอบว่า step ที่มี uses name ที่กำหนดมีอยู่ใน pipeline หรือไม่"""
         return any(
             isinstance(step_cfg, dict) and step_cfg.get("uses") == step_name
             for step_cfg in steps
@@ -3627,10 +3645,15 @@ def run_pipeline(pipeline_path: Path, run_id: str):
         if step_uses == "quality.gate" or (
             step_uses == "video.render" and not has_quality_gate
         ):
-            # If no explicit post_templates step exists, run it implicitly after
-            # quality gate (preferred) or after video render as a fallback.
-            _run_post_templates_step(run_id, root_dir)
-            post_templates_ran = True
+            # ถ้าไม่มี step post_templates ที่ชัดเจน ให้รันแบบโดยอัตโนมัติหลังจาก
+            # quality gate (แนะนำ) หรือหลัง video render เป็น fallback
+            try:
+                _run_post_templates_step(run_id, root_dir)
+                post_templates_ran = True
+            except Exception as e:
+                log(f"ERROR in auto-invoked post_templates: {e}", "ERROR")
+                # ไม่ throw exception ต่อเพื่อไม่ให้ pipeline หยุดทำงาน
+                # เพราะ post_templates เป็น step เสริมที่ไม่ใช่ core requirement
 
     for i, step in enumerate(steps, 1):
         step_id = step["id"]

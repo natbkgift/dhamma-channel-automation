@@ -11,6 +11,7 @@ import orchestrator
 
 
 def _write_video_render_summary(base_dir: Path, run_id: str) -> None:
+    """เขียน video_render_summary.json สำหรับการทดสอบ"""
     summary_path = (
         base_dir / "output" / run_id / "artifacts" / "video_render_summary.json"
     )
@@ -22,6 +23,15 @@ def _write_video_render_summary(base_dir: Path, run_id: str) -> None:
 
 
 def _assert_relative(value: str) -> None:
+    """
+    ตรวจสอบว่า path เป็น relative path และไม่มี path traversal
+
+    Args:
+        value: ค่า path ในรูปแบบสตริงที่ต้องการตรวจสอบ
+
+    Returns:
+        None
+    """
     path = Path(value)
     assert not path.is_absolute()
     assert ".." not in path.parts

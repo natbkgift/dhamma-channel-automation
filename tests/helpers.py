@@ -5,6 +5,7 @@ from pathlib import Path
 
 
 def write_post_templates(base_dir: Path) -> None:
+    """เขียนไฟล์ template สำหรับ post content (short.md และ long.md) เพื่อใช้ในการทดสอบ"""
     templates_dir = base_dir / "templates" / "post"
     templates_dir.mkdir(parents=True, exist_ok=True)
     (templates_dir / "short.md").write_text(
@@ -27,19 +28,19 @@ def write_metadata(
     platform: str = "youtube",
 ) -> Path:
     """
-    Write metadata.json for testing purposes.
+    เขียนไฟล์ metadata.json สำหรับใช้ในการทดสอบ
 
     Args:
-        base_dir: Base directory (usually tmp_path in tests)
-        run_id: Run identifier
-        title: Video title
-        description: Video description
-        tags: List of tags (default: ["#test"])
-        language: Language code (default: "en")
-        platform: Platform name (default: "youtube")
+        base_dir: โฟลเดอร์หลัก (มักจะเป็น tmp_path ในเทส)
+        run_id: รหัสการรัน เพื่อใช้เป็นชื่อโฟลเดอร์ย่อย
+        title: ชื่อวิดีโอ
+        description: คำอธิบายวิดีโอ
+        tags: รายการแท็ก (ค่าเริ่มต้น: ["#test"])
+        language: รหัสภาษาของเนื้อหา (ค่าเริ่มต้น: "en")
+        platform: ชื่อแพลตฟอร์ม (ค่าเริ่มต้น: "youtube")
 
     Returns:
-        Path to the created metadata.json file
+        Path ไปยังไฟล์ metadata.json ที่ถูกสร้างขึ้น
     """
     if tags is None:
         tags = ["#test"]
