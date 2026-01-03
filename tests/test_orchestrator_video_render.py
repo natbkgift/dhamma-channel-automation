@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import Mock
 
 from automation_core.voiceover_tts import compute_input_sha256
-from tests.helpers import write_post_templates
+from tests.helpers import write_post_templates, write_metadata
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 import orchestrator
@@ -146,19 +146,12 @@ def test_orchestrator_video_render_real_run_writes_summary(tmp_path, monkeypatch
     sha12 = compute_input_sha256("Hello real run")[:12]
     _, wav_rel = _write_voiceover_summary(tmp_path, run_id, slug, sha12)
     write_post_templates(tmp_path)
-
-    # Write metadata.json for post_templates auto-invocation
-    metadata_path = tmp_path / "output" / run_id / "metadata.json"
-    metadata_path.parent.mkdir(parents=True, exist_ok=True)
-    metadata = {
-        "title": "Test Video Title",
-        "description": "Test video description",
-        "tags": ["#test", "#video"],
-        "language": "en",
-        "platform": "youtube",
-    }
-    metadata_path.write_text(
-        json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8"
+    write_metadata(
+        tmp_path,
+        run_id,
+        title="Test Video Title",
+        description="Test video description",
+        tags=["#test", "#video"],
     )
 
     pipeline_path = tmp_path / "pipeline.yml"

@@ -4,25 +4,10 @@ import json
 import sys
 from pathlib import Path
 
-from tests.helpers import write_post_templates
+from tests.helpers import write_post_templates, write_metadata
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 import orchestrator
-
-
-def _write_metadata(base_dir: Path, run_id: str) -> None:
-    metadata_path = base_dir / "output" / run_id / "metadata.json"
-    metadata_path.parent.mkdir(parents=True, exist_ok=True)
-    metadata = {
-        "title": "Sample title",
-        "description": "Sample summary",
-        "tags": ["#alpha", "#beta"],
-        "language": "en",
-        "platform": "youtube",
-    }
-    metadata_path.write_text(
-        json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
 
 
 def _write_video_render_summary(base_dir: Path, run_id: str) -> None:
@@ -45,7 +30,13 @@ def _assert_relative(value: str) -> None:
 def test_orchestrator_post_templates_enabled(tmp_path, monkeypatch):
     run_id = "run_post_templates"
     write_post_templates(tmp_path)
-    _write_metadata(tmp_path, run_id)
+    write_metadata(
+        tmp_path,
+        run_id,
+        title="Sample title",
+        description="Sample summary",
+        tags=["#alpha", "#beta"],
+    )
     _write_video_render_summary(tmp_path, run_id)
 
     pipeline_path = tmp_path / "pipeline.yml"
