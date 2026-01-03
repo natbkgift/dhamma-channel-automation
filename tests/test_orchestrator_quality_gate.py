@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from unittest.mock import Mock
 
-from tests.helpers import write_post_templates
+from tests.helpers import write_post_templates, write_metadata
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 import orchestrator
@@ -19,6 +19,8 @@ def _write_video_render_summary(root: Path, run_id: str, output_mp4_rel: str) ->
         "schema_version": "v1",
         "run_id": run_id,
         "output_mp4_path": output_mp4_rel,
+        "hook": "Test hook line",
+        "cta": "Test call to action",
     }
     summary_path = artifacts_dir / "video_render_summary.json"
     summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
@@ -56,6 +58,13 @@ def test_orchestrator_quality_gate_pass(tmp_path, monkeypatch):
 
     _write_video_render_summary(tmp_path, run_id, output_mp4_rel)
     write_post_templates(tmp_path)
+    write_metadata(
+        tmp_path,
+        run_id,
+        title="Quality Gate Test",
+        description="Testing quality gate with post templates",
+        tags=["#quality", "#test"],
+    )
 
     pipeline_path = tmp_path / "pipeline.yml"
     pipeline_path.write_text(
@@ -90,6 +99,18 @@ steps:
     _assert_summary_contract(summary, run_id, output_mp4_rel)
     assert summary["decision"] == "pass"
     assert summary["reasons"] == []
+
+    # Verify post_templates was auto-invoked after quality_gate
+    post_content_path = (
+        tmp_path / "output" / run_id / "artifacts" / "post_content_summary.json"
+    )
+    assert post_content_path.exists(), (
+        "post_content_summary.json should be created by auto-invocation "
+        "of post_templates after quality_gate completes"
+    )
+    post_summary = json.loads(post_content_path.read_text(encoding="utf-8"))
+    assert post_summary["schema_version"] == "v1"
+    assert post_summary["run_id"] == run_id
 
 
 def test_orchestrator_quality_gate_missing_mp4_fails(tmp_path, monkeypatch):
