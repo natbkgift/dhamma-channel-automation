@@ -3721,7 +3721,13 @@ def run_pipeline(pipeline_path: Path, run_id: str):
         dispatch_ran = True
 
     def _mark_post_templates_complete() -> None:
-        """บันทึกว่ารัน post_templates แล้ว พร้อมเรียก dispatch_v0 เมื่อจำเป็น"""
+        """
+        บันทึกสถานะว่าได้รัน post_templates แล้ว และ (ผ่าน _run_dispatch_once)
+        จะเรียก dispatch_v0 เพิ่มเติมเฉพาะกรณีที่:
+
+        - dispatch_v0 ยังไม่เคยถูกเรียกมาก่อนในการรันครั้งนี้ และ
+        - ไม่มีการระบุ step ที่ uses == "dispatch.v0" ไว้ใน pipeline โดยตรง
+        """
         nonlocal post_templates_ran
         post_templates_ran = True
         _run_dispatch_once()
