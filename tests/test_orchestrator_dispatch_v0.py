@@ -10,32 +10,23 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 import orchestrator  # noqa: E402
 
 
-def _write_video_render_summary(base_dir: Path, run_id: str) -> None:
-    summary_path = (
-        base_dir / "output" / run_id / "artifacts" / "video_render_summary.json"
-    )
-    summary_path.parent.mkdir(parents=True, exist_ok=True)
-    summary = {"hook": "Hook line", "cta": "Call to action"}
-    summary_path.write_text(
-        json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-
-
-def _write_quality_gate_render_summary(
-    base_dir: Path, run_id: str, output_mp4_path: str
+def _write_video_render_summary(
+    base_dir: Path, run_id: str, *, output_mp4_path: str | None = None
 ) -> None:
     summary_path = (
         base_dir / "output" / run_id / "artifacts" / "video_render_summary.json"
     )
     summary_path.parent.mkdir(parents=True, exist_ok=True)
-    summary = {
-        "schema_version": "v1",
-        "run_id": run_id,
-        "output_mp4_path": output_mp4_path,
-        "hook": "Hook line",
-        "cta": "Call to action",
-        "platform": "youtube_community",
-    }
+    summary: dict[str, object] = {"hook": "Hook line", "cta": "Call to action"}
+    if output_mp4_path:
+        summary.update(
+            {
+                "schema_version": "v1",
+                "run_id": run_id,
+                "output_mp4_path": output_mp4_path,
+                "platform": "youtube_community",
+            }
+        )
     summary_path.write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
     )
@@ -88,7 +79,7 @@ def test_orchestrator_auto_dispatch_after_quality_gate(tmp_path, monkeypatch):
     output_mp4_path.parent.mkdir(parents=True, exist_ok=True)
     output_mp4_path.write_bytes(b"fake mp4 data")
 
-    _write_quality_gate_render_summary(tmp_path, run_id, output_mp4_rel)
+    _write_video_render_summary(tmp_path, run_id, output_mp4_path=output_mp4_rel)
 
     pipeline_path = tmp_path / "pipeline.yml"
     pipeline_path.write_text(
