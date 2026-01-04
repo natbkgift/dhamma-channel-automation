@@ -3717,8 +3717,12 @@ def run_pipeline(pipeline_path: Path, run_id: str):
         nonlocal dispatch_ran
         if dispatch_ran or has_dispatch_v0:
             return
-        _run_dispatch_v0_step(run_id, root_dir)
-        dispatch_ran = True
+        try:
+            _run_dispatch_v0_step(run_id, root_dir)
+            dispatch_ran = True
+        except Exception as e:
+            log(f"ERROR in dispatch_v0: {e}", "ERROR")
+            raise
 
     def _mark_post_templates_complete() -> None:
         """
