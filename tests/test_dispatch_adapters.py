@@ -64,5 +64,6 @@ def test_youtube_adapter_build_actions_contract():
     assert actions[1]["bytes"] == 7
     assert actions[2]["reason"] == "dry_run default"
 
-    assert actions[0]["adapter"] == "youtube"
-    assert actions[0]["target"] == "youtube"
+    for action in actions:
+        assert action["adapter"] == "youtube"
+        assert action["target"] == "youtube"
