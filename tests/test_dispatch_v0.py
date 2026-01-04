@@ -75,7 +75,8 @@ def test_validate_dispatch_audit_happy_path(tmp_path, monkeypatch):
     actions = validated["result"]["actions"]
     assert [a["label"] for a in actions] == ["short", "long", "publish"]
     assert actions[0]["bytes"] == len(b"short content")
-    assert actions[0]["adapter"] == "youtube"
+    assert actions[1]["bytes"] == len(b"long content")
+    assert all(a["adapter"] == "youtube" for a in actions)
     assert actions[2]["type"] == "noop"
 
 
