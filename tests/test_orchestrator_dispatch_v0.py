@@ -21,6 +21,26 @@ def _write_video_render_summary(base_dir: Path, run_id: str) -> None:
     )
 
 
+def _write_quality_gate_render_summary(
+    base_dir: Path, run_id: str, output_mp4_path: str
+) -> None:
+    summary_path = (
+        base_dir / "output" / run_id / "artifacts" / "video_render_summary.json"
+    )
+    summary_path.parent.mkdir(parents=True, exist_ok=True)
+    summary = {
+        "schema_version": "v1",
+        "run_id": run_id,
+        "output_mp4_path": output_mp4_path,
+        "hook": "Hook line",
+        "cta": "Call to action",
+        "platform": "youtube_community",
+    }
+    summary_path.write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+
 def test_orchestrator_runs_dispatch_after_post_templates(tmp_path, monkeypatch):
     run_id = "run_dispatch"
     write_post_templates(tmp_path)
@@ -56,6 +76,65 @@ steps:
     assert audit["schema_version"] == "v1"
     assert audit["engine"] == "dispatch_v0"
     assert audit["inputs"]["post_content_summary"].startswith(f"output/{run_id}/")
+
+
+def test_orchestrator_auto_dispatch_after_quality_gate(tmp_path, monkeypatch):
+    run_id = "run_quality_gate"
+    write_post_templates(tmp_path)
+    write_metadata(tmp_path, run_id, platform="youtube_community")
+
+    output_mp4_rel = f"output/{run_id}/video.mp4"
+    output_mp4_path = tmp_path / output_mp4_rel
+    output_mp4_path.parent.mkdir(parents=True, exist_ok=True)
+    output_mp4_path.write_bytes(b"fake mp4 data")
+
+    _write_quality_gate_render_summary(tmp_path, run_id, output_mp4_rel)
+
+    pipeline_path = tmp_path / "pipeline.yml"
+    pipeline_path.write_text(
+        """pipeline: dispatch_auto_quality_gate
+steps:
+  - id: quality_gate
+    uses: quality.gate
+""",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(orchestrator, "ROOT", tmp_path)
+    monkeypatch.setenv("PIPELINE_ENABLED", "true")
+
+    calls = {"count": 0}
+    original_generate = orchestrator.dispatch_v0.generate_dispatch_audit
+
+    def wrapped_generate(*args, **kwargs):
+        calls["count"] += 1
+        return original_generate(*args, **kwargs)
+
+    monkeypatch.setattr(
+        orchestrator.dispatch_v0, "generate_dispatch_audit", wrapped_generate
+    )
+
+    class _FakeCompleted:
+        def __init__(self):
+            self.returncode = 0
+            self.stdout = json.dumps(
+                {"format": {"duration": "1.0"}, "streams": [{"codec_type": "audio"}]}
+            )
+
+    def fake_run(*_args, **_kwargs):
+        return _FakeCompleted()
+
+    monkeypatch.setattr(orchestrator.subprocess, "run", fake_run)
+
+    orchestrator.run_pipeline(pipeline_path, run_id)
+
+    post_summary = (
+        tmp_path / "output" / run_id / "artifacts" / "post_content_summary.json"
+    )
+    audit_path = tmp_path / "output" / run_id / "artifacts" / "dispatch_audit.json"
+    assert post_summary.exists()
+    assert audit_path.exists()
+    assert calls["count"] == 1
 
 
 def test_orchestrator_dispatch_respects_kill_switch(tmp_path, monkeypatch, capsys):

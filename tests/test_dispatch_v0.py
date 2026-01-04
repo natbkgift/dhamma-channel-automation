@@ -152,6 +152,14 @@ def test_dispatch_print_only_mode(tmp_path, monkeypatch):
     assert audit["result"]["message"].startswith("Printed content only")
 
 
+def test_dispatch_missing_post_summary_raises(tmp_path, monkeypatch):
+    run_id = "run_missing"
+    monkeypatch.setenv("PIPELINE_ENABLED", "true")
+
+    with pytest.raises(FileNotFoundError):
+        generate_dispatch_audit(run_id, base_dir=tmp_path)
+
+
 def test_validate_dispatch_mode_invalid(tmp_path, monkeypatch):
     run_id = "run_invalid_mode"
     _write_post_summary(tmp_path, run_id)
