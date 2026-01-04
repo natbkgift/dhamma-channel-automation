@@ -75,6 +75,7 @@ def test_validate_dispatch_audit_happy_path(tmp_path, monkeypatch):
     actions = validated["result"]["actions"]
     assert [a["label"] for a in actions] == ["short", "long", "publish"]
     assert actions[0]["bytes"] == len(b"short content")
+    assert actions[0]["adapter"] == "youtube"
     assert actions[2]["type"] == "noop"
 
 
@@ -200,6 +201,7 @@ def test_dispatch_mode_invalid_fails_and_writes_failed_audit(tmp_path, monkeypat
     assert audit_path.exists()
     audit = json.loads(audit_path.read_text(encoding="utf-8"))
     assert audit["result"]["status"] == "failed"
+    # Invalid modes fall back to dry_run in the failure audit for consistency.
     assert audit["inputs"]["dispatch_mode"] == "dry_run"
     assert audit["errors"][0]["code"] == "publish_not_supported"
     assert audit["errors"][0]["detail"]["requested_mode"] == "publish"
@@ -215,6 +217,7 @@ def test_dispatch_mode_other_invalid_maps_to_invalid_argument(tmp_path, monkeypa
     with pytest.raises(ValueError, match="DISPATCH_MODE"):
         generate_dispatch_audit(run_id, base_dir=tmp_path)
     audit_path = tmp_path / "output" / run_id / "artifacts" / "dispatch_audit.json"
+    assert audit_path.exists()
     audit = json.loads(audit_path.read_text(encoding="utf-8"))
     assert audit["result"]["status"] == "failed"
     assert audit["inputs"]["dispatch_mode"] == "dry_run"
