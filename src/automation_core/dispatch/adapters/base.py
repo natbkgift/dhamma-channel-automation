@@ -22,8 +22,8 @@ class DispatchAdapter(Protocol):
         """สร้างรายการ actions ตามสัญญาเดียวกันทุก adapter.
 
         ต้องคืน list ของ dict โดยมีโครงสร้างตามนี้:
-        - action print short/long: {"type": "print", "label": ..., "bytes": int}
-        - action publish: {"type": "noop", "label": "publish", "reason": str}
+        - action print short/long: {"type": "print", "label": ..., "bytes": int, "adapter": str, "target": str}
+        - action publish: {"type": "noop", "label": "publish", "reason": str, "adapter": str, "target": str}
 
         ค่า bytes ที่ติดลบต้องถูก clamp เป็น 0.
         """
