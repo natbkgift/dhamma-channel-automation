@@ -58,6 +58,7 @@ steps:
     monkeypatch.setattr(orchestrator, "ROOT", tmp_path)
     monkeypatch.setenv("PIPELINE_ENABLED", "true")
     monkeypatch.delenv("DISPATCH_ENABLED", raising=False)
+    monkeypatch.delenv("DISPATCH_ENABLED", raising=False)
 
     orchestrator.run_pipeline(pipeline_path, run_id)
 
@@ -126,6 +127,10 @@ steps:
     assert post_summary.exists()
     assert audit_path.exists()
     assert calls["count"] == 1
+    audit = json.loads(audit_path.read_text(encoding="utf-8"))
+    assert audit["schema_version"] == "v1"
+    assert audit["engine"] == "dispatch_v0"
+    assert audit["inputs"]["post_content_summary"].startswith(f"output/{run_id}/")
 
 
 def test_orchestrator_dispatch_respects_kill_switch(tmp_path, monkeypatch, capsys):
