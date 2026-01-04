@@ -263,7 +263,13 @@ def generate_dispatch_audit(
 
 def cli_main(argv: list[str] | None = None, base_dir: Path | None = None) -> int:
     """
-    CLI สำหรับรัน dispatch_v0
+    CLI สำหรับรัน dispatch_v0 (audit mode)
+
+    หมายเหตุ:
+        - CLI นี้เรียกใช้ generate_dispatch_audit ซึ่งตรวจสอบค่า PIPELINE_ENABLED
+          ตาม kill switch ของระบบ จึงไม่รัน pipeline เมื่อถูกปิดใช้งาน
+        - สำหรับการใช้งานจริงใน production แนะนำให้เรียกผ่าน orchestrator.py
+          หรือ web runner เพื่อให้ได้การตรวจสอบ operational guards ครบถ้วน
     """
     parser = argparse.ArgumentParser(
         description="Dispatch v0 - audit-only (dry-run default)"
