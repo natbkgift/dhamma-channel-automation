@@ -291,14 +291,37 @@ def build_dispatch_audit(
 
 
 def _build_actions(
-    short_bytes: int, long_bytes: int, publish_reason: str
+    short_bytes: int,
+    long_bytes: int,
+    publish_reason: str,
+    *,
+    target: str,
+    adapter: str,
 ) -> list[dict[str, Any]]:
     short_b = short_bytes if short_bytes >= 0 else 0
     long_b = long_bytes if long_bytes >= 0 else 0
     return [
-        {"type": "print", "label": "short", "bytes": short_b},
-        {"type": "print", "label": "long", "bytes": long_b},
-        {"type": "noop", "label": "publish", "reason": publish_reason},
+        {
+            "type": "print",
+            "label": "short",
+            "bytes": short_b,
+            "adapter": adapter,
+            "target": target,
+        },
+        {
+            "type": "print",
+            "label": "long",
+            "bytes": long_b,
+            "adapter": adapter,
+            "target": target,
+        },
+        {
+            "type": "noop",
+            "label": "publish",
+            "reason": publish_reason,
+            "adapter": adapter,
+            "target": target,
+        },
     ]
 
 
@@ -345,6 +368,7 @@ def generate_dispatch_audit(
     platform = ""
     short_bytes = 0
     long_bytes = 0
+    adapter = None
     # defaults above are reused for failure audit paths
     try:
         post_summary_rel, post_summary = load_post_content_summary(run_id, base_dir)
@@ -440,16 +464,34 @@ def generate_dispatch_audit(
                 "detail": detail,
             }
         ]
+        adapter_name = adapter.name if adapter is not None else "unknown"
+        failure_target = target or "unknown"
+        failure_actions = (
+            adapter.build_actions(
+                short_bytes=short_bytes,
+                long_bytes=long_bytes,
+                publish_reason="failure",
+                target=failure_target,
+            )
+            if adapter is not None
+            else _build_actions(
+                short_bytes,
+                long_bytes,
+                "failure",
+                target=failure_target,
+                adapter=adapter_name,
+            )
+        )
         failure_audit = build_dispatch_audit(
             run_id=run_id,
             post_content_summary=post_summary_rel,
             dispatch_enabled=enabled,
             dispatch_mode="dry_run",
-            target=target or "unknown",
+            target=failure_target,
             platform=platform or "unknown",
             status="failed",
             message="Dispatch failed - see errors",
-            actions=_build_actions(short_bytes, long_bytes, "failure"),
+            actions=failure_actions,
             errors=errors,
             checked_at=checked_at,
         )

@@ -3,7 +3,6 @@ from __future__ import annotations
 import pytest
 
 from automation_core.dispatch.adapters.base import PrintPublishAdapter
-
 from automation_core.dispatch.adapters.registry import DispatchAdapterError, get_adapter
 from automation_core.dispatch.adapters.youtube import YoutubeAdapter
 from automation_core.dispatch.adapters.youtube_community import YoutubeCommunityAdapter
