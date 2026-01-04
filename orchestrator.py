@@ -3723,15 +3723,6 @@ def run_pipeline(pipeline_path: Path, run_id: str):
         nonlocal post_templates_ran
         if post_templates_ran or has_post_templates:
             return
-        if step_uses in POST_TEMPLATES_ALIASES and not has_dispatch_v0:
-            try:
-                _run_dispatch_once()
-            except Exception as e:
-                log(
-                    f"ERROR in auto-invoked dispatch_v0 (after post_templates): {e}",
-                    "ERROR",
-                )
-                raise
 
         if isinstance(step_result, PlannedArtifacts) and step_result.dry_run:
             return
