@@ -55,6 +55,20 @@ def log(msg: str, level="INFO"):
     print(f"[{timestamp}] [{level}] {msg}")
 
 
+def _artifact_output_rel(run_id: str, filename: str) -> str:
+    """
+    สร้าง path แบบ relative (รูปแบบ POSIX) สำหรับไฟล์ใน output/{run_id}/artifacts
+
+    Args:
+        run_id: รหัสรันของ pipeline ที่ใช้เป็นชื่อโฟลเดอร์ย่อยใน output
+        filename: ชื่อไฟล์ที่อยู่ในโฟลเดอร์ artifacts
+
+    Returns:
+        path ของไฟล์ใน output/{run_id}/artifacts ในรูปแบบสตริง POSIX
+    """
+    return (Path("output") / run_id / "artifacts" / filename).as_posix()
+
+
 def _post_templates_output_rel(run_id: str) -> str:
     """
     สร้าง path แบบ relative (รูปแบบ POSIX) สำหรับไฟล์สรุปเนื้อหาโพสต์
@@ -66,9 +80,7 @@ def _post_templates_output_rel(run_id: str) -> str:
         path ของไฟล์ post_content_summary.json ภายใต้
         output/{run_id}/artifacts ในรูปแบบสตริง POSIX
     """
-    return (
-        Path("output") / run_id / "artifacts" / "post_content_summary.json"
-    ).as_posix()
+    return _artifact_output_rel(run_id, "post_content_summary.json")
 
 
 def _dispatch_audit_output_rel(run_id: str) -> str:
@@ -81,7 +93,7 @@ def _dispatch_audit_output_rel(run_id: str) -> str:
     Returns:
         path แบบ relative ของไฟล์ dispatch_audit.json
     """
-    return (Path("output") / run_id / "artifacts" / "dispatch_audit.json").as_posix()
+    return _artifact_output_rel(run_id, "dispatch_audit.json")
 
 
 def _run_post_templates_step(run_id: str, root_dir: Path) -> str:
@@ -3708,6 +3720,12 @@ def run_pipeline(pipeline_path: Path, run_id: str):
         _run_dispatch_v0_step(run_id, root_dir)
         dispatch_ran = True
 
+    def _mark_post_templates_complete() -> None:
+        """บันทึกว่ารัน post_templates แล้ว พร้อมเรียก dispatch_v0 เมื่อจำเป็น"""
+        nonlocal post_templates_ran
+        post_templates_ran = True
+        _run_dispatch_once()
+
     def _maybe_run_post_templates(step_uses: str, step_result: object) -> None:
         """
         ตรวจสอบเงื่อนไขและเรียก post_templates แบบอัตโนมัติเมื่อเหมาะสม
@@ -3723,7 +3741,6 @@ def run_pipeline(pipeline_path: Path, run_id: str):
         nonlocal post_templates_ran
         if post_templates_ran or has_post_templates:
             return
-
         if isinstance(step_result, PlannedArtifacts) and step_result.dry_run:
             return
         if step_uses == "quality.gate" or (
@@ -3733,8 +3750,7 @@ def run_pipeline(pipeline_path: Path, run_id: str):
             # quality gate (แนะนำ) หรือหลัง video render เป็น fallback
             try:
                 _run_post_templates_step(run_id, root_dir)
-                post_templates_ran = True
-                _run_dispatch_once()
+                _mark_post_templates_complete()
             except Exception as e:
                 log(
                     f"ERROR in auto-invoked post_templates (after {step_uses}): {e}",
@@ -3766,8 +3782,7 @@ def run_pipeline(pipeline_path: Path, run_id: str):
                 entry["planned_paths"] = planned_paths
             results[step_id] = entry
             if uses in POST_TEMPLATES_ALIASES:
-                post_templates_ran = True
-                _run_dispatch_once()
+                _mark_post_templates_complete()
             if uses == "dispatch.v0":
                 dispatch_ran = True
             log(f"[{i}/{len(steps)}] ✓ {step_id} completed", "SUCCESS")
