@@ -74,6 +74,12 @@ def _post_templates_output_rel(run_id: str) -> str:
 def _dispatch_audit_output_rel(run_id: str) -> str:
     """
     สร้าง path แบบ relative สำหรับไฟล์ dispatch_audit.json
+
+    Args:
+        run_id: รหัสการรัน pipeline ที่ใช้ในการสร้างโฟลเดอร์ย่อยใน output
+
+    Returns:
+        path แบบ relative ของไฟล์ dispatch_audit.json
     """
     return (Path("output") / run_id / "artifacts" / "dispatch_audit.json").as_posix()
 
