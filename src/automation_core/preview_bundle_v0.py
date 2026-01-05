@@ -99,10 +99,14 @@ def _extract_preview_components(
             actions = result["actions"]
     summary = preview_summary.get("summary")
     if isinstance(summary, dict):
+        if status is None and isinstance(summary.get("mode"), str):
+            status = summary["mode"]
         if actions is None and isinstance(summary.get("actions"), list):
             actions = summary["actions"]
-    if status is None:
-        status = "error" if errors else "ok"
+    if errors:
+        status = "error"
+    elif status is None:
+        status = "ok"
     if actions is None:
         actions = []
     return status, _copy_dict_list(actions), _copy_dict_list(errors)
@@ -367,11 +371,7 @@ def cli_main(argv: list[str] | None = None, base_dir: Path | None = None) -> int
     try:
         if args.command == "bundle":
             generate_preview_bundle(args.run_id, base_dir=base_dir)
-    except (
-        FileNotFoundError,
-        ValueError,
-        json.JSONDecodeError,
-    ) as exc:  # pragma: no cover - CLI error handling
+    except Exception as exc:  # pragma: no cover - surfaces CLI errors
         print(f"Error: {exc}")
         return 1
     return 0
