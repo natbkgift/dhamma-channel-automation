@@ -29,6 +29,7 @@ def write_publish_request_v1(
     short: str = "short content",
     long: str = "long content",
 ) -> dict[str, Any]:
+    # TODO: Consider extracting shared test helpers if more duplication appears.
     payload = {
         "schema_version": "v1",
         "engine": "publish_request_v0",
