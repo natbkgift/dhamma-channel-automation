@@ -230,6 +230,19 @@ def test_preview_bundle_validate_relative_paths(tmp_path: Path) -> None:
         preview_bundle_v0.validate_preview_bundle(payload, run_id)
 
 
+@pytest.fixture
+def validation_test_payload(
+    request: pytest.FixtureRequest, tmp_path: Path
+) -> tuple[dict[str, Any], str]:
+    run_id = f"run_{request.node.name}"
+    write_publish_request_v1(tmp_path, run_id)
+    write_preview_summary_v1(
+        tmp_path, run_id, target="youtube_community", platform="youtube"
+    )
+    payload, _ = preview_bundle_v0.generate_preview_bundle(run_id, base_dir=tmp_path)
+    return payload, run_id
+
+
 def test_extract_preview_components_prefers_result_over_summary() -> None:
     summary_actions = [
         {"type": "print", "label": "short", "bytes": 1, "preview": "a"},
@@ -272,13 +285,10 @@ def test_extract_preview_components_falls_back_without_result() -> None:
     assert errors == []
 
 
-def test_preview_bundle_rejects_uppercase_idempotency_key(tmp_path: Path) -> None:
-    run_id = "run_preview_bundle_uppercase_key"
-    write_publish_request_v1(tmp_path, run_id)
-    write_preview_summary_v1(
-        tmp_path, run_id, target="youtube_community", platform="youtube"
-    )
-    payload, _ = preview_bundle_v0.generate_preview_bundle(run_id, base_dir=tmp_path)
+def test_preview_bundle_rejects_uppercase_idempotency_key(
+    validation_test_payload: tuple[dict[str, Any], str],
+) -> None:
+    payload, run_id = validation_test_payload
 
     payload["bundle"]["idempotency_key"] = payload["bundle"]["idempotency_key"].upper()
 
@@ -286,13 +296,10 @@ def test_preview_bundle_rejects_uppercase_idempotency_key(tmp_path: Path) -> Non
         preview_bundle_v0.validate_preview_bundle(payload, run_id)
 
 
-def test_preview_bundle_rejects_invalid_action_order(tmp_path: Path) -> None:
-    run_id = "run_preview_bundle_bad_action_order"
-    write_publish_request_v1(tmp_path, run_id)
-    write_preview_summary_v1(
-        tmp_path, run_id, target="youtube_community", platform="youtube"
-    )
-    payload, _ = preview_bundle_v0.generate_preview_bundle(run_id, base_dir=tmp_path)
+def test_preview_bundle_rejects_invalid_action_order(
+    validation_test_payload: tuple[dict[str, Any], str],
+) -> None:
+    payload, run_id = validation_test_payload
     actions = payload["bundle"]["preview"]["actions"]
     actions[0], actions[1] = actions[1], actions[0]
 
@@ -303,26 +310,20 @@ def test_preview_bundle_rejects_invalid_action_order(tmp_path: Path) -> None:
         preview_bundle_v0.validate_preview_bundle(payload, run_id)
 
 
-def test_preview_bundle_rejects_invalid_publish_reason(tmp_path: Path) -> None:
-    run_id = "run_preview_bundle_bad_publish_reason"
-    write_publish_request_v1(tmp_path, run_id)
-    write_preview_summary_v1(
-        tmp_path, run_id, target="youtube_community", platform="youtube"
-    )
-    payload, _ = preview_bundle_v0.generate_preview_bundle(run_id, base_dir=tmp_path)
+def test_preview_bundle_rejects_invalid_publish_reason(
+    validation_test_payload: tuple[dict[str, Any], str],
+) -> None:
+    payload, run_id = validation_test_payload
     payload["bundle"]["preview"]["actions"][2]["reason"] = "publish"
 
     with pytest.raises(ValueError, match="bundle.preview.actions publish reason"):
         preview_bundle_v0.validate_preview_bundle(payload, run_id)
 
 
-def test_preview_bundle_rejects_invalid_error_step(tmp_path: Path) -> None:
-    run_id = "run_preview_bundle_bad_error_step"
-    write_publish_request_v1(tmp_path, run_id)
-    write_preview_summary_v1(
-        tmp_path, run_id, target="youtube_community", platform="youtube"
-    )
-    payload, _ = preview_bundle_v0.generate_preview_bundle(run_id, base_dir=tmp_path)
+def test_preview_bundle_rejects_invalid_error_step(
+    validation_test_payload: tuple[dict[str, Any], str],
+) -> None:
+    payload, run_id = validation_test_payload
     payload["bundle"]["preview"]["errors"] = [
         {
             "code": "preview_error",
