@@ -165,11 +165,13 @@ def build_preview_bundle(
 def _validate_hex_key(value: str) -> None:
     if not isinstance(value, str) or not value.strip():
         raise ValueError("bundle.idempotency_key is required")
-    if len(value) != IDEMPOTENCY_HEX_LEN or any(
-        ch not in HEX_CHARS for ch in value
+    if (
+        len(value) != IDEMPOTENCY_HEX_LEN
+        or value != value.lower()
+        or any(ch not in HEX_CHARS for ch in value)
     ):
         raise ValueError(
-            f"bundle.idempotency_key must be {IDEMPOTENCY_HEX_LEN} hex chars"
+            f"bundle.idempotency_key must be {IDEMPOTENCY_HEX_LEN} lowercase hex chars"
         )
 
 
