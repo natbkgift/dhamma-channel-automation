@@ -29,6 +29,7 @@ def write_publish_request_v1(
     short: str = "short content",
     long: str = "long content",
 ) -> dict[str, Any]:
+    # TODO: Consider extracting shared test helpers if more duplication appears.
     payload = {
         "schema_version": "v1",
         "engine": "publish_request_v0",
@@ -305,6 +306,44 @@ def test_extract_preview_components_falls_back_without_summary() -> None:
     assert errors == []
 
 
+def test_extract_preview_components_falls_back_to_summary_actions() -> None:
+    summary_actions = [
+        {"type": "print", "label": "short", "bytes": 1, "preview": "a"},
+        {"type": "print", "label": "long", "bytes": 2, "preview": "bb"},
+        {"type": "noop", "label": "publish", "reason": "no_publish_in_v0"},
+    ]
+    status, actions, errors = preview_bundle_v0._extract_preview_components(
+        {
+            "summary": {"actions": summary_actions},
+            "result": {"status": "ok"},
+            "errors": [],
+        }
+    )
+
+    assert status == "ok"
+    assert actions == summary_actions
+    assert errors == []
+
+
+def test_extract_preview_components_falls_back_to_summary_status() -> None:
+    result_actions = [
+        {"type": "print", "label": "short", "bytes": 3, "preview": "ccc"},
+        {"type": "print", "label": "long", "bytes": 4, "preview": "dddd"},
+        {"type": "noop", "label": "publish", "reason": "no_publish_in_v0"},
+    ]
+    status, actions, errors = preview_bundle_v0._extract_preview_components(
+        {
+            "summary": {"mode": "dry_run"},
+            "result": {"actions": result_actions},
+            "errors": [],
+        }
+    )
+
+    assert status == "dry_run"
+    assert actions == result_actions
+    assert errors == []
+
+
 def test_extract_preview_components_marks_error_when_errors_present() -> None:
     status, actions, errors = preview_bundle_v0._extract_preview_components(
         {
@@ -350,6 +389,19 @@ def test_preview_bundle_rejects_invalid_publish_reason(
     payload["bundle"]["preview"]["actions"][2]["reason"] = "publish"
 
     with pytest.raises(ValueError, match="bundle.preview.actions publish reason"):
+        preview_bundle_v0.validate_preview_bundle(payload, run_id)
+
+
+def test_preview_bundle_rejects_invalid_action_type(
+    validation_test_payload: tuple[dict[str, Any], str],
+) -> None:
+    payload, run_id = validation_test_payload
+    payload["bundle"]["preview"]["actions"][0]["type"] = "noop"
+
+    with pytest.raises(
+        ValueError,
+        match="bundle.preview.actions short must be print/short",
+    ):
         preview_bundle_v0.validate_preview_bundle(payload, run_id)
 
 
