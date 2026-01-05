@@ -138,15 +138,17 @@ def test_preview_bundle_happy_path_writes_file(tmp_path: Path) -> None:
 
     assert output_path is not None
     assert output_path.is_file()
-    saved = json.loads(output_path.read_text(encoding="utf-8"))
+    output_text = output_path.read_text(encoding="utf-8")
+    saved = json.loads(output_text)
     assert saved == payload
+    assert output_text == json.dumps(payload, ensure_ascii=False, indent=2)
     assert payload["schema_version"] == "v1"
     assert payload["engine"] == "preview_bundle_v0"
     assert payload["run_id"] == run_id
     assert payload["bundle"]["platform"] == publish_request["inputs"]["platform"]
     assert payload["bundle"]["target"] == publish_request["inputs"]["target"]
     assert payload["bundle"]["controls"] == {"dry_run": True, "allow_publish": False}
-    assert payload["bundle"]["preview"]["status"] == "ok"
+    assert payload["bundle"]["preview"]["status"] == "dry_run"
     assert (
         payload["bundle"]["preview"]["actions"] == preview_summary["summary"]["actions"]
     )
@@ -275,14 +277,45 @@ def test_extract_preview_components_falls_back_without_result() -> None:
     ]
     status, actions, errors = preview_bundle_v0._extract_preview_components(
         {
-            "summary": {"actions": summary_actions},
+            "summary": {"mode": "dry_run", "actions": summary_actions},
+            "errors": [],
+        }
+    )
+
+    assert status == "dry_run"
+    assert actions == summary_actions
+    assert errors == []
+
+
+def test_extract_preview_components_falls_back_without_summary() -> None:
+    result_actions = [
+        {"type": "print", "label": "short", "bytes": 3, "preview": "ccc"},
+        {"type": "print", "label": "long", "bytes": 4, "preview": "dddd"},
+        {"type": "noop", "label": "publish", "reason": "no_publish_in_v0"},
+    ]
+    status, actions, errors = preview_bundle_v0._extract_preview_components(
+        {
+            "result": {"status": "ok", "actions": result_actions},
             "errors": [],
         }
     )
 
     assert status == "ok"
-    assert actions == summary_actions
+    assert actions == result_actions
     assert errors == []
+
+
+def test_extract_preview_components_marks_error_when_errors_present() -> None:
+    status, actions, errors = preview_bundle_v0._extract_preview_components(
+        {
+            "summary": {"mode": "dry_run", "actions": []},
+            "errors": [{"code": "preview_error"}],
+        }
+    )
+
+    assert status == "error"
+    assert actions == []
+    assert errors == [{"code": "preview_error"}]
 
 
 def test_preview_bundle_rejects_uppercase_idempotency_key(
