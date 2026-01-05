@@ -3,11 +3,15 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import pytest
 
 from automation_core import preview_bundle_v0
 from automation_core.contracts import publish_request_v1
+
+TEST_CHECKED_AT_STR = "2026-01-01T00:00:00Z"
+TEST_CHECKED_AT = datetime(2026, 1, 1, tzinfo=UTC)
 
 
 def _idempotency_key(run_id: str, target: str, platform: str, content_long: str) -> str:
@@ -24,12 +28,12 @@ def write_publish_request_v1(
     platform: str = "youtube",
     short: str = "short content",
     long: str = "long content",
-) -> dict[str, object]:
+) -> dict[str, Any]:
     payload = {
         "schema_version": "v1",
         "engine": "publish_request_v0",
         "run_id": run_id,
-        "checked_at": "2026-01-01T00:00:00Z",
+        "checked_at": TEST_CHECKED_AT_STR,
         "inputs": {
             "post_content_summary": f"output/{run_id}/artifacts/post_content_summary.json",
             "dispatch_audit": f"output/{run_id}/artifacts/dispatch_audit.json",
@@ -65,9 +69,9 @@ def write_preview_summary_v1(
     platform: str,
     short: str = "preview short",
     long: str = "preview long",
-    errors: list[dict[str, object]] | None = None,
+    errors: list[dict[str, Any]] | None = None,
     status: str = "ok",
-) -> dict[str, object]:
+) -> dict[str, Any]:
     actions = [
         {
             "type": "print",
@@ -82,7 +86,7 @@ def write_preview_summary_v1(
         "schema_version": "v1",
         "engine": "preview_summary_v0",
         "run_id": run_id,
-        "checked_at": "2026-01-01T00:00:00Z",
+        "checked_at": TEST_CHECKED_AT_STR,
         "inputs": {
             "publish_request": f"output/{run_id}/artifacts/publish_request.json",
             "post_content_summary": f"output/{run_id}/artifacts/post_content_summary.json",
@@ -109,7 +113,7 @@ def write_preview_summary_v1(
     return payload
 
 
-def _strip_checked_at(payload: dict[str, object]) -> dict[str, object]:
+def _strip_checked_at(payload: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in payload.items() if k != "checked_at"}
 
 
@@ -126,7 +130,7 @@ def test_preview_bundle_happy_path_writes_file(tmp_path: Path) -> None:
         status="ok",
     )
 
-    checked_at = datetime(2026, 1, 1, tzinfo=UTC)
+    checked_at = TEST_CHECKED_AT
     payload, output_path = preview_bundle_v0.generate_preview_bundle(
         run_id, base_dir=tmp_path, checked_at=checked_at
     )
@@ -214,8 +218,9 @@ def test_preview_bundle_validate_relative_paths(tmp_path: Path) -> None:
     )
 
     payload, _ = preview_bundle_v0.generate_preview_bundle(
-        run_id, base_dir=tmp_path, checked_at=datetime(2026, 1, 1, tzinfo=UTC)
+        run_id, base_dir=tmp_path, checked_at=TEST_CHECKED_AT
     )
+    # Start from a valid payload and flip the path to ensure validator rejects absolute inputs
     payload["inputs"]["publish_request"] = (
         f"/abs/{run_id}/artifacts/publish_request.json"
     )

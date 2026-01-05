@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import traceback
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -15,6 +16,8 @@ from automation_core.contracts.common import (
 from automation_core.contracts.publish_request_v1 import validate_publish_request
 from automation_core.preview_summary_v0 import (
     MAX_PREVIEW_CHARS,
+    PUBLISH_REASON,
+    parse_pipeline_enabled,
     validate_preview_summary,
 )
 
@@ -23,13 +26,11 @@ ENGINE_NAME = "preview_bundle_v0"
 BUNDLE_NAME = "preview_bundle.json"
 PUBLISH_REQUEST_NAME = "publish_request.json"
 PREVIEW_SUMMARY_NAME = "preview_summary.json"
-PUBLISH_REASON = "no_publish_in_v0"
-
-
-def parse_pipeline_enabled(env_value: str | None) -> bool:
-    if env_value is None:
-        return True
-    return env_value.strip().lower() not in ("false", "0", "no", "off", "disabled")
+EXPECTED_ACTIONS = 3
+IDEMPOTENCY_HEX_LEN = 64
+HEX_CHARS = "0123456789abcdef"
+DEFAULT_DRY_RUN = True
+DEFAULT_ALLOW_PUBLISH = False
 
 
 def _publish_request_rel_path(run_id: str, *, validate: bool = True) -> str:
@@ -48,7 +49,7 @@ def _load_json(path: Path) -> dict[str, Any]:
     raw = path.read_text(encoding="utf-8")
     try:
         data = json.loads(raw)
-    except json.JSONDecodeError as exc:  # pragma: no cover - surfaced as ValueError
+    except json.JSONDecodeError as exc:
         raise ValueError(f"Invalid JSON in {path}") from exc
     if not isinstance(data, dict):
         raise ValueError("payload must be a JSON object")
@@ -81,12 +82,8 @@ def load_preview_summary(
     return relative, data
 
 
-def _copy_actions(actions: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    return [dict(action) for action in actions]
-
-
-def _copy_errors(errors: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    return [dict(error) for error in errors]
+def _copy_dict_list(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [dict(item) for item in items]
 
 
 def _extract_preview_components(
@@ -111,7 +108,7 @@ def _extract_preview_components(
         status = "error" if errors else "ok"
     if actions is None:
         actions = []
-    return status, _copy_actions(actions), _copy_errors(errors)
+    return status, _copy_dict_list(actions), _copy_dict_list(errors)
 
 
 def build_preview_bundle(
@@ -142,8 +139,8 @@ def build_preview_bundle(
             "target": inputs["target"],
             "idempotency_key": controls["idempotency_key"],
             "controls": {
-                "dry_run": True,
-                "allow_publish": False,
+                "dry_run": controls["dry_run"],
+                "allow_publish": controls["allow_publish"],
             },
             "content": {
                 "short": request["content_short"],
@@ -167,13 +164,17 @@ def build_preview_bundle(
 def _validate_hex_key(value: str) -> None:
     if not isinstance(value, str) or not value.strip():
         raise ValueError("bundle.idempotency_key is required")
-    if len(value) != 64 or any(ch not in "0123456789abcdef" for ch in value.lower()):
-        raise ValueError("bundle.idempotency_key must be 64 hex chars")
+    if len(value) != IDEMPOTENCY_HEX_LEN or any(
+        ch not in HEX_CHARS for ch in value.lower()
+    ):
+        raise ValueError(
+            f"bundle.idempotency_key must be {IDEMPOTENCY_HEX_LEN} hex chars"
+        )
 
 
 def _validate_preview_actions(actions: list[dict[str, Any]]) -> None:
-    if len(actions) != 3:
-        raise ValueError("bundle.preview.actions must have 3 items")
+    if len(actions) != EXPECTED_ACTIONS:
+        raise ValueError(f"bundle.preview.actions must have {EXPECTED_ACTIONS} items")
 
     def require_print(action: dict[str, Any], label: str) -> None:
         if action.get("type") != "print" or action.get("label") != label:
@@ -273,9 +274,9 @@ def validate_preview_bundle(payload: dict[str, Any], run_id: str) -> dict[str, A
     controls = bundle.get("controls")
     if not isinstance(controls, dict):
         raise ValueError("bundle.controls must be an object")
-    if controls.get("dry_run") is not True:
+    if controls.get("dry_run") is not DEFAULT_DRY_RUN:
         raise ValueError("bundle.controls.dry_run must be true")
-    if controls.get("allow_publish") is not False:
+    if controls.get("allow_publish") is not DEFAULT_ALLOW_PUBLISH:
         raise ValueError("bundle.controls.allow_publish must be false")
 
     content = bundle.get("content")
@@ -364,7 +365,12 @@ def cli_main(argv: list[str] | None = None, base_dir: Path | None = None) -> int
     try:
         if args.command == "bundle":
             generate_preview_bundle(args.run_id, base_dir=base_dir)
-    except Exception as exc:  # pragma: no cover - surfaces CLI errors
+    except (
+        FileNotFoundError,
+        ValueError,
+        json.JSONDecodeError,
+    ) as exc:  # pragma: no cover - CLI error handling
+        traceback.print_exc()
         print(f"Error: {exc}")
         return 1
     return 0
