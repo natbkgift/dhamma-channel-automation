@@ -103,10 +103,10 @@ def _extract_preview_components(
             status = summary["mode"]
         if actions is None and isinstance(summary.get("actions"), list):
             actions = summary["actions"]
-    if status is None:
-        status = "error" if errors else "ok"
-    elif errors:
+    if errors:
         status = "error"
+    elif status is None:
+        status = "ok"
     if actions is None:
         actions = []
     return status, _copy_dict_list(actions), _copy_dict_list(errors)
