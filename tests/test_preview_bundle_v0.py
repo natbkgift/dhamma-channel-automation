@@ -353,6 +353,19 @@ def test_preview_bundle_rejects_invalid_publish_reason(
         preview_bundle_v0.validate_preview_bundle(payload, run_id)
 
 
+def test_preview_bundle_rejects_invalid_action_type(
+    validation_test_payload: tuple[dict[str, Any], str],
+) -> None:
+    payload, run_id = validation_test_payload
+    payload["bundle"]["preview"]["actions"][0]["type"] = "noop"
+
+    with pytest.raises(
+        ValueError,
+        match="bundle.preview.actions short must be print/short",
+    ):
+        preview_bundle_v0.validate_preview_bundle(payload, run_id)
+
+
 def test_preview_bundle_rejects_invalid_error_step(
     validation_test_payload: tuple[dict[str, Any], str],
 ) -> None:
