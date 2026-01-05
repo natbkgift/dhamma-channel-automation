@@ -1,0 +1,224 @@
+from __future__ import annotations
+
+import json
+from datetime import UTC, datetime
+from pathlib import Path
+
+import pytest
+
+from automation_core import preview_bundle_v0
+from automation_core.contracts import publish_request_v1
+
+
+def _idempotency_key(run_id: str, target: str, platform: str, content_long: str) -> str:
+    return publish_request_v1._compute_idempotency_key(
+        run_id=run_id, target=target, platform=platform, content_long=content_long
+    )
+
+
+def write_publish_request_v1(
+    base_dir: Path,
+    run_id: str,
+    *,
+    target: str = "youtube_community",
+    platform: str = "youtube",
+    short: str = "short content",
+    long: str = "long content",
+) -> dict[str, object]:
+    payload = {
+        "schema_version": "v1",
+        "engine": "publish_request_v0",
+        "run_id": run_id,
+        "checked_at": "2026-01-01T00:00:00Z",
+        "inputs": {
+            "post_content_summary": f"output/{run_id}/artifacts/post_content_summary.json",
+            "dispatch_audit": f"output/{run_id}/artifacts/dispatch_audit.json",
+            "platform": platform,
+            "target": target,
+        },
+        "request": {
+            "content_short": short,
+            "content_long": long,
+            "attachments": [],
+        },
+        "controls": {
+            "dry_run": True,
+            "allow_publish": False,
+            "idempotency_key": _idempotency_key(
+                run_id=run_id, target=target, platform=platform, content_long=long
+            ),
+        },
+        "policy": {"status": "pending", "reasons": []},
+        "errors": [],
+    }
+    path = base_dir / "output" / run_id / "artifacts" / "publish_request.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return payload
+
+
+def write_preview_summary_v1(
+    base_dir: Path,
+    run_id: str,
+    *,
+    target: str,
+    platform: str,
+    short: str = "preview short",
+    long: str = "preview long",
+    errors: list[dict[str, object]] | None = None,
+    status: str = "ok",
+) -> dict[str, object]:
+    actions = [
+        {
+            "type": "print",
+            "label": "short",
+            "bytes": len(short),
+            "preview": short[:500],
+        },
+        {"type": "print", "label": "long", "bytes": len(long), "preview": long[:500]},
+        {"type": "noop", "label": "publish", "reason": "no_publish_in_v0"},
+    ]
+    payload = {
+        "schema_version": "v1",
+        "engine": "preview_summary_v0",
+        "run_id": run_id,
+        "checked_at": "2026-01-01T00:00:00Z",
+        "inputs": {
+            "publish_request": f"output/{run_id}/artifacts/publish_request.json",
+            "post_content_summary": f"output/{run_id}/artifacts/post_content_summary.json",
+            "dispatch_audit": f"output/{run_id}/artifacts/dispatch_audit.json",
+            "platform": platform,
+            "target": target,
+        },
+        "summary": {
+            "target": target,
+            "platform": platform,
+            "mode": "dry_run",
+            "actions": actions,
+        },
+        "policy": {"status": "preview_only", "reasons": []},
+        "errors": errors or [],
+        "result": {
+            "status": status,
+            "actions": actions,
+        },
+    }
+    path = base_dir / "output" / run_id / "artifacts" / "preview_summary.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return payload
+
+
+def _strip_checked_at(payload: dict[str, object]) -> dict[str, object]:
+    return {k: v for k, v in payload.items() if k != "checked_at"}
+
+
+def test_preview_bundle_happy_path_writes_file(tmp_path: Path) -> None:
+    run_id = "run_preview_bundle"
+    publish_request = write_publish_request_v1(tmp_path, run_id)
+    preview_summary = write_preview_summary_v1(
+        tmp_path,
+        run_id,
+        target="youtube_community",
+        platform="youtube",
+        short="short sample",
+        long="long sample preview",
+        status="ok",
+    )
+
+    checked_at = datetime(2026, 1, 1, tzinfo=UTC)
+    payload, output_path = preview_bundle_v0.generate_preview_bundle(
+        run_id, base_dir=tmp_path, checked_at=checked_at
+    )
+
+    assert output_path is not None
+    assert output_path.is_file()
+    saved = json.loads(output_path.read_text(encoding="utf-8"))
+    assert saved == payload
+    assert payload["schema_version"] == "v1"
+    assert payload["engine"] == "preview_bundle_v0"
+    assert payload["run_id"] == run_id
+    assert payload["bundle"]["platform"] == publish_request["inputs"]["platform"]
+    assert payload["bundle"]["target"] == publish_request["inputs"]["target"]
+    assert payload["bundle"]["controls"] == {"dry_run": True, "allow_publish": False}
+    assert payload["bundle"]["preview"]["status"] == "ok"
+    assert (
+        payload["bundle"]["preview"]["actions"] == preview_summary["summary"]["actions"]
+    )
+    assert payload["bundle"]["preview"]["errors"] == preview_summary["errors"]
+    assert payload["bundle"]["policy"]["status"] == "pending"
+
+
+def test_preview_bundle_kill_switch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    run_id = "run_preview_bundle_disabled"
+    write_publish_request_v1(tmp_path, run_id)
+    write_preview_summary_v1(
+        tmp_path, run_id, target="youtube_community", platform="youtube"
+    )
+    monkeypatch.setenv("PIPELINE_ENABLED", "false")
+
+    payload, output_path = preview_bundle_v0.generate_preview_bundle(
+        run_id, base_dir=tmp_path
+    )
+
+    assert payload == {}
+    assert output_path is None
+    assert not (
+        tmp_path / "output" / run_id / "artifacts" / "preview_bundle.json"
+    ).exists()
+
+
+def test_preview_bundle_deterministic_output(tmp_path: Path) -> None:
+    run_id = "run_preview_bundle_deterministic"
+    write_publish_request_v1(tmp_path, run_id, long="deterministic long content")
+    write_preview_summary_v1(
+        tmp_path,
+        run_id,
+        target="youtube_community",
+        platform="youtube",
+        short="short deterministic",
+        long="long deterministic",
+    )
+
+    first, _ = preview_bundle_v0.generate_preview_bundle(run_id, base_dir=tmp_path)
+    second, _ = preview_bundle_v0.generate_preview_bundle(run_id, base_dir=tmp_path)
+
+    assert _strip_checked_at(first) == _strip_checked_at(second)
+
+
+def test_preview_bundle_missing_publish_request(tmp_path: Path) -> None:
+    run_id = "run_preview_bundle_missing_publish"
+    write_preview_summary_v1(
+        tmp_path, run_id, target="youtube_community", platform="youtube"
+    )
+
+    with pytest.raises(FileNotFoundError, match="Publish request not found"):
+        preview_bundle_v0.generate_preview_bundle(run_id, base_dir=tmp_path)
+
+
+def test_preview_bundle_missing_preview_summary(tmp_path: Path) -> None:
+    run_id = "run_preview_bundle_missing_summary"
+    write_publish_request_v1(tmp_path, run_id)
+
+    with pytest.raises(FileNotFoundError, match="Preview summary not found"):
+        preview_bundle_v0.generate_preview_bundle(run_id, base_dir=tmp_path)
+
+
+def test_preview_bundle_validate_relative_paths(tmp_path: Path) -> None:
+    run_id = "run_preview_bundle_invalid_path"
+    write_publish_request_v1(tmp_path, run_id)
+    write_preview_summary_v1(
+        tmp_path, run_id, target="youtube_community", platform="youtube"
+    )
+
+    payload, _ = preview_bundle_v0.generate_preview_bundle(
+        run_id, base_dir=tmp_path, checked_at=datetime(2026, 1, 1, tzinfo=UTC)
+    )
+    payload["inputs"]["publish_request"] = (
+        f"/abs/{run_id}/artifacts/publish_request.json"
+    )
+
+    with pytest.raises(ValueError, match="inputs.publish_request"):
+        preview_bundle_v0.validate_preview_bundle(payload, run_id)

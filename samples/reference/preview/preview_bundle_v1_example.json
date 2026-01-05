@@ -1,0 +1,51 @@
+{
+  "schema_version": "v1",
+  "engine": "preview_bundle_v0",
+  "run_id": "run_preview_bundle_sample",
+  "checked_at": "2026-01-01T00:00:00Z",
+  "inputs": {
+    "publish_request": "output/run_preview_bundle_sample/artifacts/publish_request.json",
+    "preview_summary": "output/run_preview_bundle_sample/artifacts/preview_summary.json"
+  },
+  "bundle": {
+    "platform": "youtube",
+    "target": "youtube_community",
+    "idempotency_key": "93ad31cd06801ff3347bd7f0a12ef8055d2b17256993883b1aaa0c1baa964665",
+    "controls": {
+      "dry_run": true,
+      "allow_publish": false
+    },
+    "content": {
+      "short": "Short bundle content.",
+      "long": "Long sample content for preview bundle."
+    },
+    "preview": {
+      "status": "ok",
+      "actions": [
+        {
+          "type": "print",
+          "label": "short",
+          "bytes": 21,
+          "preview": "Short bundle content."
+        },
+        {
+          "type": "print",
+          "label": "long",
+          "bytes": 39,
+          "preview": "Long sample content for preview bundle."
+        },
+        {
+          "type": "noop",
+          "label": "publish",
+          "reason": "no_publish_in_v0"
+        }
+      ],
+      "errors": []
+    },
+    "policy": {
+      "status": "pending",
+      "reasons": []
+    }
+  },
+  "errors": []
+}
