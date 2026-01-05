@@ -305,6 +305,44 @@ def test_extract_preview_components_falls_back_without_summary() -> None:
     assert errors == []
 
 
+def test_extract_preview_components_falls_back_to_summary_actions() -> None:
+    summary_actions = [
+        {"type": "print", "label": "short", "bytes": 1, "preview": "a"},
+        {"type": "print", "label": "long", "bytes": 2, "preview": "bb"},
+        {"type": "noop", "label": "publish", "reason": "no_publish_in_v0"},
+    ]
+    status, actions, errors = preview_bundle_v0._extract_preview_components(
+        {
+            "summary": {"actions": summary_actions},
+            "result": {"status": "ok"},
+            "errors": [],
+        }
+    )
+
+    assert status == "ok"
+    assert actions == summary_actions
+    assert errors == []
+
+
+def test_extract_preview_components_falls_back_to_summary_status() -> None:
+    result_actions = [
+        {"type": "print", "label": "short", "bytes": 3, "preview": "ccc"},
+        {"type": "print", "label": "long", "bytes": 4, "preview": "dddd"},
+        {"type": "noop", "label": "publish", "reason": "no_publish_in_v0"},
+    ]
+    status, actions, errors = preview_bundle_v0._extract_preview_components(
+        {
+            "summary": {"mode": "dry_run"},
+            "result": {"actions": result_actions},
+            "errors": [],
+        }
+    )
+
+    assert status == "dry_run"
+    assert actions == result_actions
+    assert errors == []
+
+
 def test_extract_preview_components_marks_error_when_errors_present() -> None:
     status, actions, errors = preview_bundle_v0._extract_preview_components(
         {
