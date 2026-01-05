@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import traceback
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -100,8 +99,6 @@ def _extract_preview_components(
             actions = result["actions"]
     summary = preview_summary.get("summary")
     if isinstance(summary, dict):
-        if status is None and isinstance(summary.get("mode"), str):
-            status = summary["mode"]
         if actions is None and isinstance(summary.get("actions"), list):
             actions = summary["actions"]
     if status is None:
@@ -139,8 +136,8 @@ def build_preview_bundle(
             "target": inputs["target"],
             "idempotency_key": controls["idempotency_key"],
             "controls": {
-                "dry_run": controls["dry_run"],
-                "allow_publish": controls["allow_publish"],
+                "dry_run": DEFAULT_DRY_RUN,
+                "allow_publish": DEFAULT_ALLOW_PUBLISH,
             },
             "content": {
                 "short": request["content_short"],
@@ -165,7 +162,7 @@ def _validate_hex_key(value: str) -> None:
     if not isinstance(value, str) or not value.strip():
         raise ValueError("bundle.idempotency_key is required")
     if len(value) != IDEMPOTENCY_HEX_LEN or any(
-        ch not in HEX_CHARS for ch in value.lower()
+        ch not in HEX_CHARS for ch in value
     ):
         raise ValueError(
             f"bundle.idempotency_key must be {IDEMPOTENCY_HEX_LEN} hex chars"
@@ -274,9 +271,11 @@ def validate_preview_bundle(payload: dict[str, Any], run_id: str) -> dict[str, A
     controls = bundle.get("controls")
     if not isinstance(controls, dict):
         raise ValueError("bundle.controls must be an object")
-    if controls.get("dry_run") is not DEFAULT_DRY_RUN:
+    dry_run = controls.get("dry_run")
+    if not isinstance(dry_run, bool) or dry_run is not DEFAULT_DRY_RUN:
         raise ValueError("bundle.controls.dry_run must be true")
-    if controls.get("allow_publish") is not DEFAULT_ALLOW_PUBLISH:
+    allow_publish = controls.get("allow_publish")
+    if not isinstance(allow_publish, bool) or allow_publish is not DEFAULT_ALLOW_PUBLISH:
         raise ValueError("bundle.controls.allow_publish must be false")
 
     content = bundle.get("content")
@@ -345,7 +344,10 @@ def generate_preview_bundle(
 
     output_path = base_dir / "output" / run_id / "artifacts" / BUNDLE_NAME
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), "utf-8")
+    output_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
     output_rel = output_path.relative_to(base_dir).as_posix()
     print(f"Preview bundle v0: wrote {output_rel}")
     return payload, output_path
@@ -370,7 +372,6 @@ def cli_main(argv: list[str] | None = None, base_dir: Path | None = None) -> int
         ValueError,
         json.JSONDecodeError,
     ) as exc:  # pragma: no cover - CLI error handling
-        traceback.print_exc()
         print(f"Error: {exc}")
         return 1
     return 0

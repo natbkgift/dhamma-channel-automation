@@ -70,6 +70,7 @@ def write_preview_summary_v1(
     short: str = "preview short",
     long: str = "preview long",
     errors: list[dict[str, Any]] | None = None,
+    include_result: bool = False,
     status: str = "ok",
 ) -> dict[str, Any]:
     actions = [
@@ -102,11 +103,12 @@ def write_preview_summary_v1(
         },
         "policy": {"status": "preview_only", "reasons": []},
         "errors": errors or [],
-        "result": {
+    }
+    if include_result:
+        payload["result"] = {
             "status": status,
             "actions": actions,
-        },
-    }
+        }
     path = base_dir / "output" / run_id / "artifacts" / "preview_summary.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -127,7 +129,6 @@ def test_preview_bundle_happy_path_writes_file(tmp_path: Path) -> None:
         platform="youtube",
         short="short sample",
         long="long sample preview",
-        status="ok",
     )
 
     checked_at = TEST_CHECKED_AT
@@ -226,4 +227,110 @@ def test_preview_bundle_validate_relative_paths(tmp_path: Path) -> None:
     )
 
     with pytest.raises(ValueError, match="inputs.publish_request"):
+        preview_bundle_v0.validate_preview_bundle(payload, run_id)
+
+
+def test_extract_preview_components_prefers_result_over_summary() -> None:
+    summary_actions = [
+        {"type": "print", "label": "short", "bytes": 1, "preview": "a"},
+        {"type": "print", "label": "long", "bytes": 2, "preview": "bb"},
+        {"type": "noop", "label": "publish", "reason": "no_publish_in_v0"},
+    ]
+    result_actions = [
+        {"type": "print", "label": "short", "bytes": 3, "preview": "ccc"},
+        {"type": "print", "label": "long", "bytes": 4, "preview": "dddd"},
+        {"type": "noop", "label": "publish", "reason": "no_publish_in_v0"},
+    ]
+    status, actions, errors = preview_bundle_v0._extract_preview_components(
+        {
+            "summary": {"actions": summary_actions},
+            "result": {"status": "ok", "actions": result_actions},
+            "errors": [],
+        }
+    )
+
+    assert status == "ok"
+    assert actions == result_actions
+    assert errors == []
+
+
+def test_extract_preview_components_falls_back_without_result() -> None:
+    summary_actions = [
+        {"type": "print", "label": "short", "bytes": 1, "preview": "a"},
+        {"type": "print", "label": "long", "bytes": 2, "preview": "bb"},
+        {"type": "noop", "label": "publish", "reason": "no_publish_in_v0"},
+    ]
+    status, actions, errors = preview_bundle_v0._extract_preview_components(
+        {
+            "summary": {"actions": summary_actions},
+            "errors": [],
+        }
+    )
+
+    assert status == "ok"
+    assert actions == summary_actions
+    assert errors == []
+
+
+def test_preview_bundle_rejects_uppercase_idempotency_key(tmp_path: Path) -> None:
+    run_id = "run_preview_bundle_uppercase_key"
+    write_publish_request_v1(tmp_path, run_id)
+    write_preview_summary_v1(
+        tmp_path, run_id, target="youtube_community", platform="youtube"
+    )
+    payload, _ = preview_bundle_v0.generate_preview_bundle(run_id, base_dir=tmp_path)
+
+    payload["bundle"]["idempotency_key"] = payload["bundle"]["idempotency_key"].upper()
+
+    with pytest.raises(ValueError, match="bundle.idempotency_key"):
+        preview_bundle_v0.validate_preview_bundle(payload, run_id)
+
+
+def test_preview_bundle_rejects_invalid_action_order(tmp_path: Path) -> None:
+    run_id = "run_preview_bundle_bad_action_order"
+    write_publish_request_v1(tmp_path, run_id)
+    write_preview_summary_v1(
+        tmp_path, run_id, target="youtube_community", platform="youtube"
+    )
+    payload, _ = preview_bundle_v0.generate_preview_bundle(run_id, base_dir=tmp_path)
+    actions = payload["bundle"]["preview"]["actions"]
+    actions[0], actions[1] = actions[1], actions[0]
+
+    with pytest.raises(
+        ValueError,
+        match="bundle.preview.actions short must be print/short",
+    ):
+        preview_bundle_v0.validate_preview_bundle(payload, run_id)
+
+
+def test_preview_bundle_rejects_invalid_publish_reason(tmp_path: Path) -> None:
+    run_id = "run_preview_bundle_bad_publish_reason"
+    write_publish_request_v1(tmp_path, run_id)
+    write_preview_summary_v1(
+        tmp_path, run_id, target="youtube_community", platform="youtube"
+    )
+    payload, _ = preview_bundle_v0.generate_preview_bundle(run_id, base_dir=tmp_path)
+    payload["bundle"]["preview"]["actions"][2]["reason"] = "publish"
+
+    with pytest.raises(ValueError, match="bundle.preview.actions publish reason"):
+        preview_bundle_v0.validate_preview_bundle(payload, run_id)
+
+
+def test_preview_bundle_rejects_invalid_error_step(tmp_path: Path) -> None:
+    run_id = "run_preview_bundle_bad_error_step"
+    write_publish_request_v1(tmp_path, run_id)
+    write_preview_summary_v1(
+        tmp_path, run_id, target="youtube_community", platform="youtube"
+    )
+    payload, _ = preview_bundle_v0.generate_preview_bundle(run_id, base_dir=tmp_path)
+    payload["bundle"]["preview"]["errors"] = [
+        {
+            "code": "preview_error",
+            "message": "failed",
+            "step": "adapter.publish",
+            "detail": {},
+        }
+    ]
+
+    with pytest.raises(ValueError, match="error.step must be 'adapter.preview'"):
         preview_bundle_v0.validate_preview_bundle(payload, run_id)

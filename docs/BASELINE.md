@@ -297,7 +297,9 @@
 
 **ตัวอย่างอ้างอิง:** `samples/reference/preview/preview_summary_v1_example.json`
 
-### 15. สัญญา Preview Bundle (ใหม่)
+### 15. สัญญา Preview Bundle
+
+_หมายเหตุเวอร์ชัน:_ เพิ่มสัญญา Preview Bundle ใน baseline ฉบับนี้ (โปรดอัปเดตหมายเลขเวอร์ชันรีลีสเมื่อ lock-in แล้ว)
 
 **สคีมาไฟล์ `output/<run_id>/artifacts/preview_bundle.json` (preview_bundle_v0) ถือว่า STABLE**
 
