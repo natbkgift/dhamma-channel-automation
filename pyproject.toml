@@ -71,6 +71,8 @@ include = ["src*", "cli*", "automation_core*", "agents*"]
 [tool.ruff]
 target-version = "py311"
 line-length = 88
+# DhammaLab production pipeline is kept verbatim from the live pipeline (baseline v1.1)
+extend-exclude = ["pipeline", "smoke"]
 
 [tool.ruff.lint]
 select = [

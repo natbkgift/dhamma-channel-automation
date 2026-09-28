@@ -17,7 +17,7 @@ Pipeline ของช่อง ธรรมะดีดี (DhammaLab) — เ�
 
 ## ตรวจระบบ
 
-ดู [SYSTEM_SMOKE.md](SYSTEM_SMOKE.md) — `python3 smoke/system_smoke.py`
+ดู [SYSTEM_SMOKE.md](https://github.com/natbkgift/dhamma-channel-automation/blob/main/SYSTEM_SMOKE.md) — `python3 smoke/system_smoke.py`
 
 ## Make.com
 
