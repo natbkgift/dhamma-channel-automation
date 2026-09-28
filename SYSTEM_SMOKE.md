@@ -41,3 +41,20 @@ DHAMMALAB_EXP=SMOKE python3 pipeline/costs.py --exp SMOKE
 3. เพิกถอนคีย์ชั่วคราวใน Google Cloud (มีคีย์ชื่อ "DhammaLab TTS Production" 2 อัน ต้องระบุก่อนว่าอันไหนคืออันใน Claude environment)
 4. ตั้ง routine ของ Claude Code (environment Default) แทน scheduled task Cowork "DhammaLab: ตรวจ API credential ใน session ใหม่" แล้วค่อยหยุดอันเดิม
 5. ประกาศ Infrastructure v1.1 freeze
+
+## ผลรัน SYSTEM-SMOKE — baseline migration v1.1 (2026-09-28 UTC, Claude Code cloud session)
+
+`DHAMMALAB_EXP=SYSTEM-SMOKE DHAMMALAB_TTS_ENGINE=direct` · credential: `proxy:cloud-environment API credential` (no key env var, no local key file) · Make calls: **0**
+
+S1–S5 (`smoke/system_smoke.py`): **PASS** (ListModels 200, generateContent 200, TTS Umbriel 200 4.0 s, transcript QA similarity 1.00)
+
+| Path | Pipeline call | Request | HTTP | Output check |
+|---|---|---|---|---|
+| TTS Umbriel | `build_audio.py smoke/smoke_script.txt --limit 1` (STYLE_CHANNEL) | 1 chunk, gemini-3.8-flash-tts | 200 | WAV pcm_s16le 24 kHz, chunk 6.08 s (voice.wav 13.86 s incl. lead) |
+| Transcription QA | `gemini_tts.transcribe` (voice_takes direct flow) on that chunk | gemini-3.8-flash | 200 | similarity 1.00 vs script |
+| Image | `gemini_media.image(size='1K')` | gemini-3-pro-image, 16:9 | 200 | JPEG 1376×768 opens (PIL verify) |
+| Motion / video | `gemini_media.video_start(res='360p')` + `video_get` | gemini-omni-1.1-flash | 200 (start + 3 polls) | MP4 h264 640×360 + aac, 10.0 s (ffprobe) |
+| Music (Lyria) | `gemini_media._post` + ledger `_log` (no Lyria module in pipeline/) | lyria-3-clip-preview | 200 | MP3 44.1 kHz stereo, 30.8 s (ffprobe) |
+
+Cost ledger (`costs.py --exp SYSTEM-SMOKE`): TTS ฿0.12 · QA ฿0.00 · Image ฿4.80 · Video ฿11.58 · Music ฿1.32 → **฿17.82** (S1–S5 raw calls are not in the ledger).
+`secret_check.py --migrate`: persistent path = proxy credential → HTTP 200 OK (no temporary key file existed, nothing removed).
