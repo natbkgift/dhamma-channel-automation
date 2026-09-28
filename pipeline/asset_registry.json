@@ -1,0 +1,41 @@
+{
+ "note": "Anti-sameness registry: check before generating art for a new video; do not reuse stills/clips of the last 3 videos",
+ "videos": [
+  {
+   "exp": "EXP-01 v4",
+   "video": "DC1wpAlvIhY",
+   "scenes": [
+    "art/hero/A1",
+    "A2",
+    "B1a",
+    "B1b",
+    "B2a",
+    "B2b",
+    "C1",
+    "C2",
+    "D1",
+    "D2",
+    "D3"
+   ],
+   "look": "night temple pond, Buddha statue by water, lotus, candles, moon; village path; statue close-up; silhouette skyline at dusk",
+   "thumbnail": {
+    "file": "art/thumb/thumb_brand_exp01.jpg",
+    "layout": "headline left, Buddha right",
+    "headline": "ปล่อยวาง"
+   },
+   "logo": "top-left"
+  },
+  {
+   "exp": "EXP-03 v2",
+   "video": "xBQxreX9HjA",
+   "scenes": "art/exp03 (19 illustrated jataka scenes + motion clips)",
+   "look": "illustrated storybook, moonlit forest, banyan tree, animals (elephant/monkey/partridge, ox, rabbit)",
+   "thumbnail": {
+    "file": "art/exp03/thumb_brand_A.jpg",
+    "layout": "headline left, full moon + rabbit right",
+    "headline": "กระต่ายบนดวงจันทร์"
+   },
+   "logo": "top-right"
+  }
+ ]
+}

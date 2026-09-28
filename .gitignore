@@ -213,3 +213,65 @@ tmp/
 artifacts/
 .env.local
 .env.*.local
+
+# ===== DhammaLab production baseline v1.1 (appended from dhammalab/.gitignore) =====
+# --- secrets: never commit ---
+.env
+*.env
+gemini.env
+**/gemini.env
+secrets/
+*.key
+*.pem
+secret_status.md
+
+# --- runtime data, ledgers, reports ---
+tts_ledger.jsonl
+*.jsonl
+discord_pending/
+cache/
+out/
+output/
+/tmp/
+
+# --- media (keep large/generated files out of git) ---
+*.wav
+*.mp3
+*.m4a
+*.flac
+*.mp4
+*.mov
+*.webm
+*.png
+*.jpg
+*.jpeg
+*.webp
+
+# --- python ---
+__pycache__/
+*.pyc
+.venv/
+
+# --- DhammaLab v1.1 extra secret/runtime guards ---
+.env*
+gemini.env
+.tts_key
+.tts_hook
+secret_status.md
+*credentials*.json
+# browser / session / cookie files
+*cookies*
+*cookie*.txt
+*cookie*.json
+*.session
+*session*.json
+browser_profile/
+browser_data/
+user_data_dir/
+.playwright/
+# cache / output / media
+cache/
+.cache/
+output/
+out/
+media/

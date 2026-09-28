@@ -1,0 +1,174 @@
+{
+ "name": "DhammaLab Brand Production Standard",
+ "version": "1.1-frozen",
+ "frozen_on": "2026-09-28",
+ "baseline_videos": {
+  "EXP-01 v4": "DC1wpAlvIhY",
+  "EXP-03 v2": "xBQxreX9HjA"
+ },
+ "voice": {
+  "engine": "direct Gemini API (pipeline/gemini_tts.py)",
+  "model": "gemini-3.8-flash-tts",
+  "voice": "Umbriel",
+  "speakers": 1,
+  "delivery_notes": "build_audio.STYLE_CHANNEL (sha1 8eb838d7d365)",
+  "narration": "one narrator for the whole video; quoted speech in the narrator's own voice; no character voices, no pitch lifts or timbre change; only weight, pace, pause, emphasis and warmth may vary",
+  "take_gates": {
+   "register_target_hz": 95,
+   "register_tol_st": 1.5,
+   "phrase_vs_take_st": 3.0,
+   "phrase_vs_target_st": 4.0,
+   "pace_s_per_char": [
+    0.063,
+    0.17
+   ],
+   "max_gap_s": 3.0,
+   "timbre_centroid_min": 0.78,
+   "continuity_adjacent_st": 2.0,
+   "continuity_timbre_min": 0.6,
+   "words": "transcript diff (flash + transcribe) incl. Pali terms"
+  },
+  "chunk_level_lufs": -20,
+  "narration_bus_lufs_mono": -19,
+  "policy": {
+   "primary_voice": "Umbriel",
+   "profile": "STYLE_CHANNEL only (STYLE / STYLE_SLOW / STYLE_STORY deprecated and blocked in code)",
+   "rule": "one narrator, one voice for the whole video; Jataka/character lines vary only emphasis, pause, warmth, firmness, slight pace",
+   "target": "calm adult storyteller, not voice actor; smoothness, comfort and continuity over drama",
+   "override": "DHAMMALAB_VOICE_POLICY_OVERRIDE=1, manual only, documented reason"
+  }
+ },
+ "music": {
+  "sources": "YouTube Audio Library or another licensed source with verifiable terms; log every track in music_used.json and credit it in the description",
+  "style": "ambient/sleep, no prominent melody, bass or percussion",
+  "gap_under_narration_db": [
+   18,
+   22
+  ],
+  "default_gap_db": 20,
+  "duck_key_lines_db": 3,
+  "intro_lufs": -32,
+  "outro_lufs": -30,
+  "rise_only_where_no_narration": true,
+  "bed_eq": "highpass 70 Hz, lowshelf -4 dB @160 Hz, -4 dB @1.8 kHz, -2 dB @3.5 kHz",
+  "priority": [
+   "voice clarity",
+   "smoothness",
+   "comfort",
+   "atmosphere"
+  ]
+ },
+ "logo": {
+  "asset": "brand/official/dhammadeedee_logo_icon.png (official design 2, never redesigned; never logo.jpg 2019)",
+  "position": "top-right by default; top-left when the right side holds a Buddha, face, character or text",
+  "opacity": [
+   0.7,
+   0.85
+  ],
+  "fade_in": "soft, then static",
+  "safe_margin": true
+ },
+ "typography": {
+  "headline": "Pridi SemiBold/Bold",
+  "info_subtitle": "Anuphan",
+  "fallback": "Noto Sans Thai",
+  "max_families_per_artwork": 2
+ },
+ "thumbnail": {
+  "dna": "gold/ivory + navy, 2-6 word headline, subtle official logo, mobile-first CTR",
+  "renderer": "brand/thumb_brand.html"
+ },
+ "visual": {
+  "standard": "premium look, multiple scenes and motion that follow the content, gentle darkening in sleep sections",
+  "anti_sameness": [
+   "every video gets its own scene set built from its own script; never reuse the hero stills or motion clips of the previous 3 videos",
+   "vary at least 3 of: setting/location, time of day, main subject, camera motion, colour grade within the brand palette, thumbnail layout",
+   "thumbnail layouts rotate (subject left/right/centre, headline top/side); keep only the brand DNA constant",
+   "record scene/thumbnail choices per video in asset_registry.json and check it before generating new art"
+  ]
+ },
+ "qa": [
+  "transcript per chunk (two models agree before a diff counts)",
+  "voice consistency (pitch gate + ECAPA continuity)",
+  "click/pop/transient scan (qc_scan.py, 0 errors)",
+  "visual single-frame flash scan",
+  "final audio == mix (corr >= 0.98)",
+  "copyright / Content ID check in Studio before publish",
+  "human-ear spot check: start, middle, story change/relaxation, end",
+  "provenance manifest (sha256 of every source and the final)"
+ ],
+ "make_policy": "Normal production = 0 Make operations. Make only via pipeline/legacy with a manual make_guard rollback session (reason + max ops + expiry) and DHAMMALAB_MAKE_ROLLBACK=1; never automatic.",
+ "change_control": "Production candidates are frozen: no re-render or asset swap without a real QC issue; this preset changes only by Nat's decision or when retention/comment data shows a problem",
+ "updated_on": "2026-09-28",
+ "principle": "quality baseline, not a visual template: brand identity fixed, creative direction per video",
+ "budget": {
+  "gemini_project": "DhammaLab gen-lang-client-0945598805",
+  "spend_cap_thb_month": 1500,
+  "alerts": [
+   0.5,
+   0.8,
+   1.0
+  ],
+  "rule": "Experiment -> Measure -> Prove Value -> Increase Budget",
+  "cost_ledger": "costs.py (category + DHAMMALAB_EXP)",
+  "alerts_thb": [
+   750,
+   1200,
+   1500
+  ],
+  "watch": "video/motion is the main cost, not TTS: never auto-generate paid AI motion for every scene; paid motion only where it adds real value"
+ },
+ "youtube_upload_defaults": {
+  "visibility": "private",
+  "category": "Education",
+  "tags": [
+   "ธรรมะ",
+   "ฟังธรรมะ",
+   "ธรรมะออนไลน์"
+  ]
+ },
+ "secrets": "runtime only: cloud-environment API credential (proxy) or env DHAMMALAB_GEMINI_API_KEY; never in chat/log/doc/code/Discord/repo",
+ "tool_choice": {
+  "principle": "best output quality for reasonable cost; score = quality x cost x scene importance x production speed",
+  "routing": {
+   "google_flow": "preferred creative video tool: hero cinematic / Buddhist cinematic scenes, image-to-video, frame-to-video, scene extension; hero image as first frame; fast/cheap model for iteration, high quality only for worthwhile hero scenes; extend only when needed",
+   "gemini_video_api": "batch automation, large volume, when API cost beats Flow and no interactive creative workflow is needed",
+   "local_ffmpeg": "slow push-in, pan, zoom, crossfade, brightness automation, simple parallax (free, default for supporting motion)",
+   "canva_pro": "graphic design, typography, thumbnails, simple motion, branded artwork",
+   "chatgpt_image": "hero visuals, premium Buddhist artwork, thumbnail artwork, scene concepts, when better than alternatives",
+   "capcut_pro": "Shorts production station only (not in long-form pipeline unless it clearly adds quality); spend credits on AI visual/video, smart captions, caption styling, motion text, subject/background processing, smart effects; never on trim/resize/fade/zoom/export"
+  },
+  "before_motion": "compare Flow credits vs Gemini API cost vs local motion, pick best quality per cost"
+ },
+ "infrastructure_freeze": {
+  "status": "Infrastructure v1.1 frozen after secret migration + SYSTEM-SMOKE",
+  "rule": "no refactor/optimisation for completeness; change only on a real production failure"
+ },
+ "long_form": {
+  "pipeline": "Research -> Script -> Gemini Voice -> Images -> Flow/API Hero Motion -> Local Visual Assembly -> Music -> QA -> YouTube",
+  "rule": "premium key scenes + smart reuse/loop/crossfade/local motion; never low-effort or an obvious loop; hero motion beautiful, supporting motion soft"
+ },
+ "shorts": {
+  "tool": "CapCut Pro",
+  "format": "9:16, mobile-first, ~20-60 s",
+  "structure": "Hook (0-2 s) -> Insight/Story -> Emotional payoff -> CTA to full video",
+  "rules": [
+   "short-native, not a straight cut of the long-form",
+   "readable subtitles, mobile-friendly movement",
+   "Official Logo, Pridi + Anuphan",
+   "Umbriel when narrated",
+   "Related Video link to parent when suitable"
+  ],
+  "role": "discovery -> new audience -> funnel to long-form (not main revenue)",
+  "metrics": [
+   "viewed vs swiped away",
+   "average percentage viewed",
+   "retention",
+   "rewatch",
+   "likes",
+   "comments",
+   "subscribers",
+   "related-video clicks to full video"
+  ]
+ }
+}
