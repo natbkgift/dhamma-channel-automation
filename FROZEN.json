@@ -1,0 +1,3 @@
+{"note": "Production candidates — do not re-render or swap assets without a real QC issue (Nat, 28 Sep 2026)",
+ "EXP-01 v4": {"video": "DC1wpAlvIhY", "final_sha256": "be412cb28e7628cc428e34897e40a19782fd48939ed08a7d2b9acfb9b00ac571"},
+ "EXP-03 v2": {"video": "xBQxreX9HjA", "final_sha256": "3a9a270fae8ad92ef83f4dc9938d033036d331c1fa131741f824f96b958ed22e"}}

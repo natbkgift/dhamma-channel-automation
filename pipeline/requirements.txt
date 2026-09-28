@@ -1,0 +1,17 @@
+# DhammaLab pipeline dependencies (third-party imports used in pipeline/ and pipeline/legacy/)
+# versions = those installed in the Cowork build environment on 29 Sep 2026
+# system tools also required: ffmpeg/ffprobe; Playwright + Chromium only for thumbnail/channel-art rendering (not part of pipeline/)
+# heavy QC extras: torch/torchaudio/speechbrain (ECAPA), resemblyzer, faster-whisper - not needed for build_audio.py --engine direct smoke
+Pillow==12.2.0
+opencv-python-headless==4.13.0.92
+faster-whisper==1.2.1
+librosa==0.11.0
+numpy==1.26.4
+pyloudnorm==0.2.0
+requests==2.33.1
+Resemblyzer==0.1.4
+scipy==1.17.1
+soundfile==0.14.0
+speechbrain==1.1.1
+torch==2.14.0
+torchaudio==2.11.0
