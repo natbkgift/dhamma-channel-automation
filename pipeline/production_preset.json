@@ -48,7 +48,7 @@
   "default_gap_db": 20,
   "duck_key_lines_db": 3,
   "intro_lufs": -32,
-  "outro_lufs": -30,
+  "outro_lufs": -25,
   "rise_only_where_no_narration": true,
   "bed_eq": "highpass 70 Hz, lowshelf -4 dB @160 Hz, -4 dB @1.8 kHz, -2 dB @3.5 kHz",
   "priority": [
@@ -170,5 +170,16 @@
    "subscribers",
    "related-video clicks to full video"
   ]
+ },
+ "audio_structure": {
+  "policy_date": "2026-09-29",
+  "intro": "music from 0:00 with a soft fade-in (~1 s); narration starts at 0.8-1.5 s (build_audio --lead 1.2); no dead air",
+  "during_narration": "voice dominant, music 18-22 dB below (bed ~-36 LUFS stereo)",
+  "after_narration": "pause 1.5-2.5 s after the last word, raised-cosine rise 10-20 s, +6..+10 dB over the bed, music-only target -23..-25 LUFS stereo (default -25), speech-band carve removed; tune by ear",
+  "outro_track": "may crossfade to a dedicated fuller sleep track: no prominent percussion, no hits, no attention-grabbing melody",
+  "outro_length": "by content: general Dhamma 1-3 min, bedtime 3-10 min, guided meditation longer; measure end retention",
+  "end": "gentle fade-out",
+  "qc": "pipeline/structure_qc.py: 0:00-0:10 dead air, 10 s before narration end, narration->music, +30 s, middle of music-only, last 30 s; loudness, smoothness, clicks, jumps, too quiet/loud; true peak <= -1.5 dBTP",
+  "retrofit": "pipeline/audio_structure_fix.py applies this to an approved render locally (API cost 0)"
  }
 }

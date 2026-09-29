@@ -1,0 +1,10 @@
+# DhammaLab Audio Structure v1.2 — preserved 2026-09-29 from the production session (exact bytes, not reconstructed)
+# code (pipeline/)
+a8eca4068020ac4625de3090c1ba2cb4f033e2f09014aa77c8492232bd1e4850  build_audio.py
+2c0e6faa39d6fceaf0dd5fc3a877368508aab39ea38e6a03ddadfecda2c80a92  music_bed.py
+4f6872797f3466bfc0834242efbc5e87f0b9c10d595263835fae156cd1a99c34  production_preset.json
+719dc8c48ac3c03aa09d4da93be74c83005656cbfed3c88b58295a358bc525d5  audio_structure_fix.py
+be6c2bd4a7ebf290b8c46a04e1cba28ae9cb3657866f5efb832b206dc7d4f0f8  structure_qc.py
+# final masters (media not in git)
+40c41cfd708d6a816f141e3ff58060904ef76a43b900e8858d52adc1847d258d  EXP-01_v5_rHWIQF3REf8_final.mp4 (627271152 bytes)
+6d9988519c5a77f02f3813d45026be8e2e9ec6e90591a99387b328d0c7a9e24d  EXP-03_v3_JgSiPfIrxiY_final.mp4 (548241496 bytes)

@@ -204,7 +204,7 @@ def main():
     ap.add_argument('script'); ap.add_argument('outdir')
     ap.add_argument('--engine', default='gemini'); ap.add_argument('--voice', default='Umbriel')
     ap.add_argument('--model', default='gemini-3.8-flash-tts'); ap.add_argument('--limit', type=int, default=0)
-    ap.add_argument('--lead', type=float, default=6.0)
+    ap.add_argument('--lead', type=float, default=1.2)   # Audio Structure Policy: narration starts 0.8-1.5 s in, no dead air
     ap.add_argument('--profile', default='channel', choices=['channel'])
     ap.add_argument('--slow_tempo', type=float, default=0.94, help='channel profile: tempo for relaxation/sleep chapters (same voice)')
     a = ap.parse_args()

@@ -27,7 +27,9 @@ def trim_quiet(x, rel_db=-28):
 ap = argparse.ArgumentParser()
 ap.add_argument('outdir'); ap.add_argument('tracks', nargs='+')
 ap.add_argument('--talk', type=float, default=-34.0, help='bed LUFS under narration')
-ap.add_argument('--outro', type=float, default=-28.0, help='bed LUFS after narration ends')
+ap.add_argument('--outro', type=float, default=-25.0, help='music-only LUFS after narration ends (Audio Structure Policy: -23..-25, +6..+10 dB over the bed)')
+ap.add_argument('--outro_pause', type=float, default=2.0, help='natural pause after the last word before the music rises (1.5-2.5 s)')
+ap.add_argument('--outro_ramp', type=float, default=20.0, help='raised-cosine rise into music-only mode (10-20 s)')
 ap.add_argument('--voice', type=float, default=-17.0)
 ap.add_argument('--xf', type=float, default=6.0)
 ap.add_argument('--end_fade', type=float, default=25.0)
@@ -54,6 +56,10 @@ subprocess.run(f"ffmpeg -y -v error -i {d}/voice48g.wav -af alimiter=limit=0.79:
                f"-c:a pcm_f32le {d}/voice48l.wav", shell=True, check=True)
 v, _ = sf.read(f'{d}/voice48l.wav', dtype='float32')
 voice_end = json.load(open(f'{d}/meta.json'))['duration']
+# Audio Structure Policy (29 Sep 2026): the outro rise starts from the LAST SPOKEN WORD, not from the end of voice.wav
+_w = SR // 20; _n = len(v) // _w
+_db = 20 * np.log10(np.sqrt((v[:_n * _w].reshape(_n, _w) ** 2).mean(1)) + 1e-9)
+last_word = (np.where(_db > -45)[0][-1] + 1) * 0.05
 
 # music: loudness-match every track to 0 dB reference (-23 LUFS), trim silent tails, equal-power crossfades
 bed = None; used = []; xf = int(a.xf * SR)
@@ -64,20 +70,28 @@ def carve(x):
                   'highpass=f=70,lowshelf=f=160:g=-4,equalizer=f=1800:t=q:w=1.2:g=-4,equalizer=f=3500:t=q:w=1.5:g=-2',
                   '-f', 'f32le', '-'], input=x.astype(np.float32).tobytes(), capture_output=True, check=True).stdout
     return np.frombuffer(raw, np.float32).reshape(-1, 2).copy()
+full = None
 for fn in a.tracks:
-    x = carve(trim_quiet(decode(fn)))
-    x *= 10 ** ((-23 - meter.integrated_loudness(x)) / 20)
+    x0 = trim_quiet(decode(fn)); x = carve(x0)
+    gref = 10 ** ((-23 - meter.integrated_loudness(x)) / 20); x *= gref; x0 = x0 * gref
     start = 0.0 if bed is None else (len(bed) - xf) / SR
     used.append({'file': os.path.basename(fn), 'start_s': round(start, 1), 'dur_s': round(len(x) / SR, 1)})
     if bed is None:
-        bed = x
+        bed = x; full = x0
     else:
         t = np.linspace(0, np.pi / 2, xf)[:, None]
         mid = bed[-xf:] * np.cos(t) + x[:xf] * np.sin(t)
         bed = np.concatenate([bed[:-xf], mid, x[xf:]])
+        midf = full[-xf:] * np.cos(t) + x0[:xf] * np.sin(t)
+        full = np.concatenate([full[:-xf], midf, x0[xf:]])
 if a.total:
     assert len(bed) >= int(a.total * SR), f'bed too short: {len(bed)/SR:.1f}s < {a.total}s'
-    bed = bed[:int(a.total * SR)]
+    bed = bed[:int(a.total * SR)]; full = full[:int(a.total * SR)]
+if a.eq:   # after the last word the bed is no longer carved around speech
+    rb = np.interp(np.arange(len(bed)) / SR, tc_ := np.arange(0, len(bed) / SR, 0.01),
+                   0.5 - 0.5 * np.cos(np.pi * np.clip((tc_ - last_word - a.outro_pause) / a.outro_ramp, 0, 1))).astype(np.float32)[:, None]
+    bed = bed * (1 - rb) + full[:len(bed)] * rb
+del full
 total = len(bed) / SR
 print('bed length', round(total, 1), 's; voice ends', round(voice_end, 1))
 
@@ -87,14 +101,16 @@ g_talk, g_out = a.talk + 23, a.outro + 23
 g_talk = (a.voice + 3.0 - a.gap) + 23          # mono narration at a.voice LUFS plays at a.voice+3 in stereo
 g_intro = a.intro + 23
 first_word = json.load(open(f'{d}/meta.json'))['chunks'][0][0]
-env_db = np.where(tc < voice_end + 4, g_talk, g_talk + (g_out - g_talk) * np.clip((tc - voice_end - 4) / 40, 0, 1))
+t_rise = last_word + a.outro_pause
+r_out = 0.5 - 0.5 * np.cos(np.pi * np.clip((tc - t_rise) / a.outro_ramp, 0, 1))
+env_db = g_talk + (g_out - g_talk) * r_out
 env_db = np.where(tc < first_word, g_talk + (g_intro - g_talk) * np.clip((first_word - 0.5 - tc) / 2.5, 0, 1), env_db)
 for rng in [r for r in a.duck.split(',') if r]:
     t0, t1 = [float(v) for v in rng.split('-')]
     w = np.clip(np.minimum(tc - (t0 - 2.5), (t1 + 2.5) - tc) / 2.5, 0, 1)
     env_db = env_db - a.duck_db * w
-print('bed levels (stereo LUFS): intro %.1f, under narration %.1f (duck -%.1f), outro %.1f' % (g_intro - 23, g_talk - 23, a.duck_db, g_out - 23))
-envc = 10 ** (env_db / 20) * np.sin(np.clip(tc / 4.0, 0, 1) * np.pi / 2) * np.sin(np.clip((total - tc) / a.end_fade, 0, 1) * np.pi / 2)
+print('bed levels (stereo LUFS): intro %.1f, under narration %.1f (duck -%.1f), music-only outro %.1f from %.1f s' % (g_intro - 23, g_talk - 23, a.duck_db, g_out - 23, last_word + a.outro_pause))
+envc = 10 ** (env_db / 20) * np.sin(np.clip(tc / 1.0, 0, 1) * np.pi / 2) * np.sin(np.clip((total - tc) / a.end_fade, 0, 1) * np.pi / 2)
 B = SR * 10
 for i in range(0, len(bed), B):
     tb = (np.arange(i, min(i + B, len(bed))) / SR)
@@ -105,11 +121,11 @@ n = min(len(v), len(mix))
 mix[:n] += v[:n, None] * 0.98
 pk = np.abs(mix).max()
 print('peak dBFS', round(20 * np.log10(pk), 2))
-if pk > 0.89:  # keep true-peak headroom without a limiter (no pumping)
-    mix *= 0.89 / pk
+if pk > 0.80:  # true-peak headroom (policy: final <= -1.5 dBTP) without a limiter (no pumping)
+    mix *= 0.80 / pk
 sf.write(f'{d}/mix.wav', mix, SR, subtype='PCM_24')
 del bed, mix
 print(subprocess.run(f"ffmpeg -hide_banner -nostats -i {d}/mix.wav -af ebur128=peak=true -f null - 2>&1 | grep -E 'I:|Peak:' | tail -2", shell=True, capture_output=True, text=True).stdout)
-json.dump({'tracks': used, 'bed_total_s': round(total, 1), 'talk_lufs': round(g_talk - 23, 1), 'gap_db': a.gap, 'duck': a.duck,
+json.dump({'last_word_s': round(float(last_word), 2), 'outro_rise_s': [round(float(t_rise), 2), a.outro_ramp], 'tracks': used, 'bed_total_s': round(total, 1), 'talk_lufs': round(g_talk - 23, 1), 'gap_db': a.gap, 'duck': a.duck,
            'intro_lufs': a.intro, 'outro_lufs': a.outro, 'eq': bool(a.eq)},
           open(f'{d}/music_used.json', 'w'), indent=1)
