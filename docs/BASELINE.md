@@ -28,6 +28,7 @@
 - **Dispatch Audit Artifacts:** ไฟล์ audit ของขั้น dispatch.v0 เก็บที่ `output/<run_id>/artifacts/dispatch_audit.json`
 - **Publish Request Artifacts:** ไฟล์คำขอเผยแพร่แบบ deterministic เก็บที่ `output/<run_id>/artifacts/publish_request.json`
 - **Preview Summary Artifacts:** ไฟล์สรุป preview เก็บที่ `output/<run_id>/artifacts/preview_summary.json`
+- **Preview Bundle Artifacts:** ไฟล์ bundle รวม publish_request + preview_summary เก็บที่ `output/<run_id>/artifacts/preview_bundle.json`
 
 ### 2. รูปแบบเนื้อหา
 - **Metadata Format:** เมทาดาทา YouTube ต้องมีโครงสร้างเดิม (title, description, tags, SEO keywords)
@@ -296,6 +297,48 @@
 
 **ตัวอย่างอ้างอิง:** `samples/reference/preview/preview_summary_v1_example.json`
 
+### 15. สัญญา Preview Bundle
+
+_หมายเหตุเวอร์ชัน:_ เพิ่มสัญญา Preview Bundle ใน baseline ฉบับนี้ (โปรดอัปเดตหมายเลขเวอร์ชันรีลีสเมื่อ lock-in แล้ว)
+
+**สคีมาไฟล์ `output/<run_id>/artifacts/preview_bundle.json` (preview_bundle_v0) ถือว่า STABLE**
+
+**ฟิลด์ที่ต้องมี (required):**
+- `schema_version` (string, ปัจจุบัน `v1`)
+- `engine` (string, ต้องเป็น `preview_bundle_v0`)
+- `run_id` (string)
+- `checked_at` (string, ISO8601 UTC) — ไม่ deterministic
+- `inputs` (object)
+  - `publish_request` (string, relative path)
+  - `preview_summary` (string, relative path)
+- `bundle` (object)
+  - `platform` (string)
+  - `target` (string)
+  - `idempotency_key` (string, 64 hex)
+  - `controls` (object)
+    - `dry_run` (`true`)
+    - `allow_publish` (`false`)
+  - `content` (object)
+    - `short` (string)
+    - `long` (string)
+  - `preview` (object)
+    - `status` (string)
+    - `actions` (list[object], ลำดับต้องคงที่: print/short, print/long, noop/publish)
+    - `errors` (list[object], ยอมให้ว่าง)
+  - `policy` (object)
+    - `status` (`pending`)
+    - `reasons` (list[string], อาจว่าง)
+- `errors` (list[object], ยอมให้ว่าง)
+
+**กติกาสำคัญ:**
+- ทุก path ต้องเป็น relative เท่านั้น (ห้าม absolute หรือมี `..`)
+- `bundle.controls.dry_run` ต้องเป็น `true` และ `allow_publish` ต้องเป็น `false`
+- `bundle.preview.actions[*].preview` ต้องไม่เกิน 500 ตัวอักษร และต้องรักษาลำดับจาก preview_summary
+- `bundle.policy.status` ต้องเป็น `pending` เสมอ
+- `checked_at` เป็นค่าเวลา runtime จึงไม่ deterministic
+
+**ตัวอย่างอ้างอิง:** `samples/reference/preview/preview_bundle_v1_example.json`
+
 ## Assets Baseline v1
 
 นโยบาย assets เป็น baseline ที่ต้องคงที่สำหรับ repo สาธารณะ เพื่อความปลอดภัย
@@ -374,6 +417,10 @@ Policy source-of-truth: `docs/ASSETS_POLICY.md`
 ### 24. `samples/reference/preview/preview_summary_v1_example.json`
 - **แทนอะไร:** สัญญา preview summary เวอร์ชัน 1 (ไฟล์อ้างอิงสำหรับ `preview_summary.json`)
 - **จุดที่ต้องคงที่:** ฟิลด์ inputs/summary/policy/errors ตามสัญญา + ทุกพาธเป็น relative + `summary.actions` ต้องคงลำดับ
+
+### 25. `samples/reference/preview/preview_bundle_v1_example.json`
+- **แทนอะไร:** สัญญา preview bundle เวอร์ชัน 1 (ไฟล์อ้างอิงสำหรับ `preview_bundle.json`)
+- **จุดที่ต้องคงที่:** ฟิลด์ bundle/content/preview/policy ตามสัญญา + ทุกพาธเป็น relative + `bundle.preview.actions` ต้องคงลำดับและไม่เกิน 500 ตัวอักษร
 
 ## ขั้นตอนเปรียบเทียบ (Comparison Procedure)
 

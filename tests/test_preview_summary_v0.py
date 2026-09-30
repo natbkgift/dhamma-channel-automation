@@ -152,3 +152,25 @@ def test_preview_summary_schema_validation(tmp_path):
 
     with pytest.raises(ValueError, match="preview_summary.schema_version"):
         preview_summary_v0.validate_preview_summary(summary, run_id)
+
+
+def test_preview_summary_rejects_invalid_error_step(tmp_path):
+    run_id = "run_preview_error_step"
+    payload = _make_publish_request(run_id=run_id, long="error step")
+    _write_publish_request(tmp_path, run_id, payload)
+    checked_at = datetime(2026, 1, 1, tzinfo=UTC)
+
+    summary, _ = preview_summary_v0.generate_preview_summary(
+        run_id, base_dir=tmp_path, checked_at=checked_at
+    )
+    summary["errors"] = [
+        {
+            "code": "preview_error",
+            "message": "failed",
+            "step": "adapter.publish",
+            "detail": {},
+        }
+    ]
+
+    with pytest.raises(ValueError, match="error.step must be 'adapter.preview'"):
+        preview_summary_v0.validate_preview_summary(summary, run_id)
